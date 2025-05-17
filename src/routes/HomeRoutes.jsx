@@ -11,7 +11,7 @@ import CategoryContainer from "../views/Category/CategoryContainer";
 
 const routes = [
   {
-    path: "/fashion-cube",
+    path: "/",
     layout: BaseLayout,
     component: Home, // ✅ Pass reference, not JSX
   },
