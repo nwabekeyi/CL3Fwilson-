@@ -1,12 +1,6 @@
-/*
- ** Author: Santosh Kumar Dash
- ** Author URL: http://santoshdash.epizy.com/
- ** Github URL: https://github.com/quintuslabs/fashion-cube
- */
 
-import React from "react";
 
-function HorizontalFilter(Props) {
+function HorizontalFilter() {
   return (
     <div className="row align-items-center" data-aos="fade-up">
       <div className="col text-center">

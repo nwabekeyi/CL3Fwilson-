@@ -13,8 +13,8 @@
  
    return (
      <div style={{display:'flex', justifyContent:'center', width:'100vw'}}>
-      <p>Welcome to CL3Fwilson</p>
-       {/* <AppRoutes /> */}
+      {/* <p>Welcome to CL3Fwilson</p> */}
+       <AppRoutes />
      </div>
    );
  };
