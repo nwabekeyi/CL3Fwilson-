@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 // Helpers
 const CART_KEY = "cart_local";
@@ -12,87 +12,103 @@ const saveCart = (cart) => {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
 };
 
+// Initial state
 const initialState = {
   items: loadCart(),
   loading: false,
   error: null,
 };
 
+// Async thunks
+export const getCartByUserId = createAsyncThunk(
+  "cart/getCartByUserId",
+  async (_, { rejectWithValue }) => {
+    try {
+      const cart = loadCart();
+      return cart;
+    } catch (error) {
+      return rejectWithValue(error.toString());
+    }
+  }
+);
+
+export const postCart = createAsyncThunk(
+  "cart/postCart",
+  async ({ productId, increase = false, decrease = false, variantDetails = {} }, { getState, rejectWithValue }) => {
+    try {
+      const state = getState();
+      let cart = [...state.cart.items];
+
+      const index = cart.findIndex((item) => item.productId === productId);
+
+      if (index !== -1) {
+        // Update existing item
+        if (increase) {
+          cart[index].quantity += 1;
+        } else if (decrease && cart[index].quantity > 1) {
+          cart[index].quantity -= 1;
+        } else if (!increase && !decrease) {
+          // Add to cart (increment if exists)
+          cart[index].quantity += 1;
+        }
+      } else if (!decrease) {
+        // Add new item (only if not decreasing)
+        cart.push({
+          productId,
+          quantity: 1,
+          ...variantDetails, // Store variant details (size, color, etc.)
+        });
+      }
+
+      saveCart(cart);
+      return cart;
+    } catch (error) {
+      return rejectWithValue(error.toString());
+    }
+  }
+);
+
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    getCartBegin(state) {
-      state.loading = true;
-      state.error = null;
+    clearCart: (state) => {
+      state.items = [];
+      saveCart([]);
     },
-    getCartSuccess(state, action) {
-      state.loading = false;
-      state.items = action.payload;
-    },
-    getCartFail(state, action) {
-      state.loading = false;
-      state.error = action.payload;
-    },
-    postCartBegin(state) {
-      state.loading = true;
-      state.error = null;
-    },
-    postCartSuccess(state, action) {
-      state.loading = false;
-      state.items = action.payload;
-    },
-    postCartFail(state, action) {
-      state.loading = false;
-      state.error = action.payload;
-    },
+  },
+  extraReducers: (builder) => {
+    // getCartByUserId
+    builder
+      .addCase(getCartByUserId.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getCartByUserId.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+      })
+      .addCase(getCartByUserId.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // postCart
+    builder
+      .addCase(postCart.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(postCart.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+      })
+      .addCase(postCart.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
   },
 });
 
-export const {
-  getCartBegin,
-  getCartSuccess,
-  getCartFail,
-  postCartBegin,
-  postCartSuccess,
-  postCartFail,
-} = cartSlice.actions;
-
+export const { clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
-
-// Thunks
-
-export const getCartByUserId = () => (dispatch) => {
-  try {
-    dispatch(getCartBegin());
-    const cart = loadCart();
-    dispatch(getCartSuccess(cart));
-  } catch (err) {
-    dispatch(getCartFail(err.toString()));
-  }
-};
-
-export const postCart = (productId, increase = false, decrease = false) => (dispatch, getState) => {
-  try {
-    dispatch(postCartBegin());
-
-    const state = getState();
-    let cart = [...state.cart.items];
-
-    const index = cart.findIndex((item) => item.productId === productId);
-
-    if (index !== -1) {
-      // Update existing item
-      if (increase) cart[index].quantity += 1;
-      if (decrease && cart[index].quantity > 1) cart[index].quantity -= 1;
-    } else {
-      // Add new item
-      cart.push({ productId, quantity: 1 });
-    }
-
-    saveCart(cart);
-    dispatch(postCartSuccess(cart));
-  } catch (err) {
-    dispatch(postCartFail(err.toString()));
-  }
-};

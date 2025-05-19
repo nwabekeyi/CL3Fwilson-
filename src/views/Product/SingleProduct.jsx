@@ -1,283 +1,291 @@
-/*
- ** Author: Santosh Kumar Dash
- ** Author URL: http://santoshdash.epizy.com/
- ** Github URL: https://github.com/quintuslabs/fashion-cube
- */
-
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import LoginRegister from "../../components/LoginRegisterModal";
 import Auth from "../../modules/Auth";
 
-class SingleProduct extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      color: "",
-      size: "",
-      pic: "",
-      selectedSize: "",
-      id: "",
-      quantity: 1,
-      modalShow: false,
-      login: true,
-    };
-  }
-  componentDidMount() {
-    this.props.getProduct(this.props.location.pathname.split("/").slice(-1)[0]);
-    this.props.getVariantsByProductId(
-      this.props.location.pathname.split("/").slice(-1)[0]
-    );
-  }
+const SingleProduct = ({ product, postCart }) => {
+  const location = useLocation();
+  const [state, setState] = useState({
+    color: "",
+    size: "",
+    pic: "",
+    selectedSize: "",
+    id: "",
+    quantity: 1,
+    modalShow: false,
+    login: true,
+  });
 
-  showHideModal = () => {
-    this.setState({ modalShow: false });
+  // Dummy product for when no product is selected
+  const dummyProduct = {
+    _id: "dummy",
+    title: "Product Not Available",
+    price: 0,
+    imagePath: "https://via.placeholder.com/800x600?text=Product+Not+Found",
+    department: "Men",
+    category: "Unknown",
+    description: "This product is currently unavailable. Please check back later or browse other items.",
+    variants: [
+      {
+        _id: "dummy-v1",
+        size: "M",
+        color: "Grey",
+        price: 0,
+        imagePath: "https://via.placeholder.com/800x600?text=Product+Not+Found",
+      },
+      {
+        _id: "dummy-v2",
+        size: "L",
+        color: "Grey",
+        price: 0,
+        imagePath: "https://via.placeholder.com/800x600?text=Product+Not+Found",
+      },
+    ],
   };
 
-  loginClicked = () => {
-    this.setState({ modalShow: true, login: true });
-  };
-  registerClicked = () => {
-    this.setState({ modalShow: true, login: false });
-  };
+  // Set default variant image when product or dummy product loads
+  useEffect(() => {
+    const currentProduct = product || dummyProduct;
+    if (currentProduct.variants?.length > 0 && !state.pic) {
+      setState((prev) => ({
+        ...prev,
+        pic: currentProduct.variants[0].imagePath,
+        id: currentProduct.variants[0]._id,
+        color: currentProduct.variants[0].color,
+        size: currentProduct.variants[0].size,
+        selectedSize: currentProduct.variants[0].size,
+      }));
+    }
+  }, [product, state.pic]);
 
-  handleThumbnailClick = (item) => {
-    this.setState({
+  const showHideModal = () => setState((prev) => ({ ...prev, modalShow: false }));
+
+  const loginClicked = () => setState((prev) => ({ ...prev, modalShow: true, login: true }));
+
+  const registerClicked = () => setState((prev) => ({ ...prev, modalShow: true, login: false }));
+
+  const handleThumbnailClick = (item) => {
+    setState((prev) => ({
+      ...prev,
       color: item.color,
       size: item.size,
       pic: item.imagePath,
-      selectedSize: "",
+      selectedSize: item.size,
       id: item._id,
-      cartItem: null,
-    });
+    }));
   };
 
-  onAddClicked = () => {
-    this.setState({ quantity: this.state.quantity + 1 });
-    this.props.postCart(
-      this.state.id || this.props.location.pathname.split("/").slice(-1)[0],
-      true,
-      false
-    );
-  };
-  onRemoveClicked = () => {
-    this.props.postCart(
-      this.state.id || this.props.location.pathname.split("/").slice(-1)[0],
-      false,
-      true
-    );
-
-    if (this.state.quantity > 1) {
-      this.setState({ quantity: this.state.quantity - 1 });
+  const onAddClicked = () => {
+    if (product) {
+      const selectedVariant = product.variants.find((v) => v._id === state.id) || product.variants[0];
+      setState((prev) => ({ ...prev, quantity: prev.quantity + 1 }));
+      postCart({
+        productId: state.id || product.variants[0]._id,
+        increase: true,
+        variantDetails: {
+          size: selectedVariant.size,
+          color: selectedVariant.color,
+          imagePath: selectedVariant.imagePath,
+          price: selectedVariant.price,
+          title: product.title,
+        },
+      });
     }
   };
 
-  addToBag = () => {
-    if (
-      Auth.getUserDetails() !== undefined &&
-      Auth.getUserDetails() !== null &&
-      Auth.getToken() !== undefined
-    ) {
-      this.props
-        .postCart(
-          this.state.id || this.props.location.pathname.split("/").slice(-1)[0]
-        )
-        .then((res) => {
-          console.log(res);
+  const onRemoveClicked = () => {
+    if (product && state.quantity > 1) {
+      const selectedVariant = product.variants.find((v) => v._id === state.id) || product.variants[0];
+      setState((prev) => ({ ...prev, quantity: prev.quantity - 1 }));
+      postCart({
+        productId: state.id || product.variants[0]._id,
+        decrease: true,
+        variantDetails: {
+          size: selectedVariant.size,
+          color: selectedVariant.color,
+          imagePath: selectedVariant.imagePath,
+          price: selectedVariant.price,
+          title: product.title,
+        },
+      });
+    }
+  };
+
+  const addToBag = () => {
+    if (product) {
+      if (Auth.getUserDetails() && Auth.getToken()) {
+        const selectedVariant = product.variants.find((v) => v._id === state.id) || product.variants[0];
+        postCart({
+          productId: state.id || product.variants[0]._id,
+          variantDetails: {
+            size: selectedVariant.size,
+            color: selectedVariant.color,
+            imagePath: selectedVariant.imagePath,
+            price: selectedVariant.price,
+            title: product.title,
+          },
+        }).then((res) => {
+          console.log("Cart updated:", res);
         });
-    } else {
-      this.setState({ modalShow: true });
+      } else {
+        setState((prev) => ({ ...prev, modalShow: true }));
+      }
     }
   };
 
-  productInCart = () => {
-    let available = false;
-    // let items = this.props.cart.items;
-    // if (items !== undefined && items !== null) {
-    //   let itemCheck = Object.keys(items).map(
-    //     id => items[id].item.title === this.props.product.title
-    //   );
+  // Use dummy product if no product is selected
+  const displayProduct = product || dummyProduct;
+  const isDummy = displayProduct === dummyProduct;
 
-    //   if (itemCheck !== undefined && itemCheck !== null) {
-    //     this.setState({ cartItem: itemCheck });
-    //     available = true;
-    //   } else {
-    //     available = false;
-    //   }
-    // }
-
-    return available;
-  };
-
-  render() {
-    console.log(this.props);
-    return (
-      <div className="container single_product_container">
-        {this.props.product && (
-          <div>
-            <div className="row">
-              <div className="col">
-                <div className="breadcrumbs d-flex flex-row align-items-center">
-                  <ul>
-                    <li>
-                      <a href="/">Home</a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <i className="fa fa-angle-right" aria-hidden="true"></i>
-                        {this.props.product.department}
-                      </a>
-                    </li>
-                    <li className="active">
-                      <a href="#">
-                        <i className="fa fa-angle-right" aria-hidden="true"></i>
-                        {this.props.product.category}
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+  return (
+    <div className="container single_product_container">
+      <div>
+        <div className="row">
+          <div className="col">
+            <div className="breadcrumbs d-flex flex-row align-items-center">
+              <ul>
+                <li>
+                  <a href="/">Home</a>
+                </li>
+                <li>
+                  <a href="#">
+                    <i className="fa fa-angle-right" aria-hidden="true"></i>
+                    {displayProduct.department}
+                  </a>
+                </li>
+                <li className="active">
+                  <a href="#">
+                    <i className="fa fa-angle-right" aria-hidden="true"></i>
+                    {displayProduct.category}
+                  </a>
+                </li>
+              </ul>
             </div>
+          </div>
+        </div>
 
-            <div className="row">
-              <div className="col-lg-7">
-                <div className="single_product_pics">
-                  <div className="row">
-                    <div className="col-lg-3 thumbnails_col order-lg-1 order-2">
-                      <div className="single_product_thumbnails">
-                        <ul>
-                          {this.props.variants &&
-                            this.props.variants
-                              .slice(0, 4)
-                              .map((item, index) => (
-                                <li
-                                  key={index}
-                                  onClick={() =>
-                                    this.handleThumbnailClick(item)
-                                  }
-                                >
-                                  <img
-                                    src={item.imagePath}
-                                    alt=""
-                                    className="img-fluid"
-                                  />
-                                </li>
-                              ))}
-                        </ul>
-                      </div>
-                    </div>
-                    <div className="col-lg-9 image_col order-lg-2 order-1">
-                      <div className="single_product_image">
-                        <div
-                          className="single_product_image_background"
-                          style={{
-                            backgroundImage: `url(${
-                              this.state.pic || this.props.product.imagePath
-                            })`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-lg-5">
-                <div className="product_details">
-                  <div className="product_details_title">
-                    <h2>{this.props.product.title}</h2>
-                    <p>{this.props.product.description}</p>
-                  </div>
-                  <div className="free_delivery d-flex flex-row align-items-center justify-content-center">
-                    <span>
-                      <i className="fas fa-truck"></i>
-                    </span>
-                    <span>free delivery</span>
-                  </div>
-                  <div className="original_price">
-                    {" "}
-                    ₹ {(parseFloat(this.props.product.price) + 30).toFixed(2)}
-                  </div>
-                  <div className="product_price">
-                    ₹ {this.props.product.price}
-                  </div>
-                  <ul className="star_rating">
-                    <li>
-                      <i className="fa fa-star" aria-hidden="true"></i>
-                    </li>
-                    <li>
-                      <i className="fa fa-star" aria-hidden="true"></i>
-                    </li>
-                    <li>
-                      <i className="fa fa-star" aria-hidden="true"></i>
-                    </li>
-                    <li>
-                      <i className="fa fa-star" aria-hidden="true"></i>
-                    </li>
-                    <li>
-                      <i className="fa fa-star-o" aria-hidden="true"></i>
-                    </li>
-                  </ul>
-                  <div className="product_color">
-                    <span>Select Color:</span>
+        <div className="row">
+          <div className="col-lg-7">
+            <div className="single_product_pics">
+              <div className="row">
+                <div className="col-lg-3 thumbnails_col order-lg-1 order-2">
+                  <div className="single_product_thumbnails">
                     <ul>
-                      <li style={{ background: "#e54e5d" }}></li>
-                      <li style={{ background: "#252525" }}></li>
-                      <li style={{ background: "#60b3f3" }}></li>
+                      {displayProduct.variants && displayProduct.variants.length > 0 ? (
+                        displayProduct.variants.slice(0, 4).map((item, index) => (
+                          <li key={index} onClick={() => handleThumbnailClick(item)}>
+                            <img
+                              src={item.imagePath}
+                              alt={`${item.color} ${item.size}`}
+                              className="img-fluid"
+                            />
+                          </li>
+                        ))
+                      ) : (
+                        <li>
+                          <img
+                            src={displayProduct.imagePath}
+                            alt={displayProduct.title}
+                            className="img-fluid"
+                          />
+                        </li>
+                      )}
                     </ul>
                   </div>
-                  <div className="quantity d-flex flex-column flex-sm-row align-items-sm-center">
-                    <span>Quantity:</span>
-
-                    <div className="quantity_selector">
-                      <span
-                        className={
-                          this.state.quantity > 1 ? "minus" : "minus disabled"
-                        }
-                        onClick={() => this.onRemoveClicked()}
-                      >
-                        <i className="fa fa-minus" aria-hidden="true"></i>
-                      </span>
-                      <span id="quantity_value">{this.state.quantity}</span>
-                      <span
-                        className="plus"
-                        onClick={() => this.onAddClicked()}
-                      >
-                        <i className="fa fa-plus" aria-hidden="true"></i>
-                      </span>
-                    </div>
-
+                </div>
+                <div className="col-lg-9 image_col order-lg-2 order-1">
+                  <div className="single_product_image">
                     <div
-                      className="red_button product-add_to_cart_button"
-                      onClick={this.addToBag}
-                    >
-                      <a href="#">add to cart</a>
-                    </div>
-
-                    {/* <div className="red_cart_button product_add_to_cart_icon">
-                      <a href="#">
-                        <i className="fas fa-cart-arrow-down"></i>
-                      </a>
-                    </div> */}
-
-                    <div className="product_favorite d-flex flex-column align-items-center justify-content-center">
-                      <i className="far fa-heart"></i>
-                    </div>
+                      className="single_product_image_background"
+                      style={{ backgroundImage: `url(${state.pic || displayProduct.imagePath})` }}
+                    />
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        )}
-
-        <LoginRegister
-          show={this.state.modalShow}
-          login={this.state.login}
-          registerClicked={() => this.registerClicked()}
-          loginClicked={() => this.loginClicked()}
-          onHide={() => this.showHideModal()}
-        />
+          <div className="col-lg-5">
+            <div className="product_details">
+              <div className="product_details_title">
+                <h2>{displayProduct.title}</h2>
+                <p>{displayProduct.description}</p>
+              </div>
+              <div className="free_delivery d-flex flex-row align-items-center justify-content-center">
+                <span>
+                  <i className="fas fa-truck"></i>
+                </span>
+                <span>free delivery</span>
+              </div>
+              <div className="original_price">
+                ₹{(parseFloat(displayProduct.price) + 30).toFixed(2)}
+              </div>
+              <div className="product_price">₹{displayProduct.price.toFixed(2)}</div>
+              <ul className="star_rating">
+                <li><i className="fa fa-star" aria-hidden="true"></i></li>
+                <li><i className="fa fa-star" aria-hidden="true"></i></li>
+                <li><i className="fa fa-star" aria-hidden="true"></i></li>
+                <li><i className="fa fa-star" aria-hidden="true"></i></li>
+                <li><i className="fa fa-star-o" aria-hidden="true"></i></li>
+              </ul>
+              <div className="product_color">
+                <span>Select Color:</span>
+                <ul>
+                  {displayProduct.variants && displayProduct.variants.length > 0 ? (
+                    displayProduct.variants.map((item, index) => (
+                      <li
+                        key={index}
+                        style={{ background: item.color.toLowerCase() }}
+                        onClick={() => handleThumbnailClick(item)}
+                      ></li>
+                    ))
+                  ) : (
+                    <li style={{ background: "#e54e5d" }}></li>
+                  )}
+                </ul>
+              </div>
+              <div className="quantity d-flex flex-column flex-sm-row align-items-sm-center">
+                <span>Quantity:</span>
+                <div className="quantity_selector">
+                  <span
+                    className={state.quantity > 1 && !isDummy ? "minus" : "minus disabled"}
+                    onClick={onRemoveClicked}
+                  >
+                    <i className="fa fa-minus" aria-hidden="true"></i>
+                  </span>
+                  <span id="quantity_value">{state.quantity}</span>
+                  <span className={isDummy ? "plus disabled" : "plus"} onClick={onAddClicked}>
+                    <i className="fa fa-plus" aria-hidden="true"></i>
+                  </span>
+                </div>
+                <div
+                  className={`red_button product-add_to_cart_button ${isDummy ? "disabled" : ""}`}
+                  onClick={addToBag}
+                >
+                  <a href="#">{isDummy ? "Unavailable" : "add to cart"}</a>
+                </div>
+                <div className="product_favorite d-flex flex-column align-items-center justify-content-center">
+                  <i className="far fa-heart"></i>
+                </div>
+              </div>
+              {isDummy && (
+                <p className="text-danger mt-3">
+                  This product is not available. Please browse other items.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-    );
-  }
-}
+
+      <LoginRegister
+        show={state.modalShow}
+        login={state.login}
+        registerClicked={registerClicked}
+        loginClicked={loginClicked}
+        onHide={showHideModal}
+      />
+    </div>
+  );
+};
 
 export default SingleProduct;

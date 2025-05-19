@@ -31,7 +31,7 @@ const NavBar = ({ cart = {} }) => {
             </div>
             <nav className="navbar">
               <ul className="navbar_menu">
-                <li><Link to="/home">home</Link></li>
+                <li><Link to="/">home</Link></li>
                 <li className="dropdown">
                   <Link to="/contact" className="dropdown_toggle">
                     contact

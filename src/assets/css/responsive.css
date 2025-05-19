@@ -674,3 +674,31 @@
     padding: 12px;
   }
 }
+
+
+/************
+16. Men's product
+************/
+
+/* Responsive Design */
+@media (max-width: 767px) {
+  .products-banner {
+    height: 200px;
+  }
+
+  .products-banner-overlay h1 {
+    font-size: 2rem;
+  }
+
+  .products-banner-overlay p {
+    font-size: 1rem;
+  }
+
+  .products-container {
+    padding: 20px 15px;
+  }
+
+  .section_title h2 {
+    font-size: 1.5rem;
+  }
+}

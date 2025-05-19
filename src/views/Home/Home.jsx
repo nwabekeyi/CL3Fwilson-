@@ -10,6 +10,7 @@ import BestSeller from "../../components/Products/BestSeller";
 import Benefit from "../../components/Benefit";
 import Advertisement from "../../components/Advertisement";
 import LoginRegister from "../../components/LoginRegisterModal";
+import MensProducts from "../../components/Products/MensProducts";
 
 class Home extends Component {
   constructor(props) {
@@ -83,6 +84,7 @@ class Home extends Component {
           loginClicked={() => this.loginClicked()}
           onHide={() => this.showHideModal()}
         />
+        <MensProducts />
       </div>
     );
   }

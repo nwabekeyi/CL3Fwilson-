@@ -7,9 +7,9 @@ export const getAllProducts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await API({ method: "GET", url: `/products` });
-      return res;
+      return res.data; // Ensure only data is returned
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(error.message || "Failed to fetch products");
     }
   }
 );
@@ -19,9 +19,9 @@ export const getProduct = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     try {
       const res = await API({ method: "GET", url: `/products/${id}` });
-      return res;
+      return res.data;
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(error.message || `Failed to fetch product ${id}`);
     }
   }
 );
@@ -31,9 +31,9 @@ export const getProductsByCategory = createAsyncThunk(
   async (category, { rejectWithValue }) => {
     try {
       const res = await API({ method: "GET", url: `/products?category=${category}` });
-      return res;
+      return res.data;
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(error.message || `Failed to fetch category ${category}`);
     }
   }
 );
@@ -43,9 +43,9 @@ export const search = createAsyncThunk(
   async (query, { rejectWithValue }) => {
     try {
       const res = await API({ method: "GET", url: `/search?query=${query}` });
-      return res;
+      return res.data;
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(error.message || `Search failed for query ${query}`);
     }
   }
 );
@@ -55,9 +55,9 @@ export const applyFilters = createAsyncThunk(
   async (filterString, { rejectWithValue }) => {
     try {
       const res = await API({ method: "GET", url: `/products?${filterString}` });
-      return res;
+      return res.data;
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(error.message || "Failed to apply filters");
     }
   }
 );
@@ -66,6 +66,7 @@ export const applyFilters = createAsyncThunk(
 const initialState = {
   products: [],
   product: null,
+  selectedProduct: null,
   loading: false,
   error: null,
   searchResults: [],
@@ -75,7 +76,12 @@ const productSlice = createSlice({
   name: "products",
   initialState,
   reducers: {
-    // You can add sync reducers here if needed
+    setSelectedProduct: (state, action) => {
+      state.selectedProduct = action.payload;
+    },
+    clearSelectedProduct: (state) => {
+      state.selectedProduct = null;
+    },
   },
   extraReducers: (builder) => {
     // getAllProducts
@@ -90,7 +96,7 @@ const productSlice = createSlice({
       })
       .addCase(getAllProducts.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || action.error.message;
+        state.error = action.payload;
       });
 
     // getProduct
@@ -105,7 +111,7 @@ const productSlice = createSlice({
       })
       .addCase(getProduct.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || action.error.message;
+        state.error = action.payload;
       });
 
     // getProductsByCategory
@@ -120,7 +126,7 @@ const productSlice = createSlice({
       })
       .addCase(getProductsByCategory.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || action.error.message;
+        state.error = action.payload;
       });
 
     // search
@@ -135,7 +141,7 @@ const productSlice = createSlice({
       })
       .addCase(search.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || action.error.message;
+        state.error = action.payload;
       });
 
     // applyFilters
@@ -150,9 +156,10 @@ const productSlice = createSlice({
       })
       .addCase(applyFilters.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || action.error.message;
+        state.error = action.payload;
       });
   },
 });
 
+export const { setSelectedProduct, clearSelectedProduct } = productSlice.actions;
 export default productSlice.reducer;

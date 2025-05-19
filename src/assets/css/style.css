@@ -2909,3 +2909,58 @@ ul.stander li a {
   display: inline-flex;
 }
 
+
+
+/*********************************
+11. Mens product
+*********************************/
+
+.mens-products-page {
+  font-family: "Poppins", sans-serif;
+}
+
+/* Fixed Banner Section */
+.products-banner {
+  height: 300px;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.products-banner-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 40px;
+  text-align: center;
+}
+
+.products-banner-overlay h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.products-banner-overlay p {
+  font-size: 1.2rem;
+  color: #ffffff;
+}
+
+/* Products Grid */
+.products-container {
+  padding: 40px 20px;
+}
+
+.products-container .section_title {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.products-container .row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
