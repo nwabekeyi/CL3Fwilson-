@@ -303,6 +303,7 @@ section {
   height: 50px;
   background: #1e1e27;
   transition: all 2s linear;
+  display: flex;
 }
 .top_nav_left {
   height: 50px;
@@ -310,6 +311,10 @@ section {
   font-size: 13px;
   color: #b5aec4;
   text-transform: uppercase;
+}
+.top_nav_right{
+  display:flex;
+  justify-content: flex-end;
 }
 
 /*********************************
@@ -511,9 +516,10 @@ section {
   transition: all 0.3s ease;
 }
 .account_selection li {
-  padding-left: 10px;
-  padding-right: 10px;
+
   line-height: 50px;
+  display: flex;
+
 }
 .account_selection li a {
   display: block;
@@ -552,6 +558,71 @@ section {
   float: right;
   padding-left: 0px;
   padding-right: 0px;
+}
+
+.navbar_menu {
+  display: flex;
+  list-style: none;
+  align-items: center;
+}
+
+.navbar_menu li.dropdown {
+  position: relative;
+}
+
+.navbar_menu li.dropdown .dropdown_toggle {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  padding: 10px;
+  gap: 5px;
+}
+
+.navbar_menu li.dropdown .dropdown_menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  min-width: 200px;
+  z-index: 1000;
+  width: fit-content;
+}
+
+.navbar_menu li.dropdown:hover .dropdown_menu {
+  display: block;
+}
+
+.navbar_menu li.dropdown .dropdown_menu li:hover a {
+  background-color: #333;
+  color: #fff !important;
+}
+
+.navbar_menu li.dropdown .dropdown_menu li a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  width: 100%;
+  font-size: 0.8em;
+  white-space: nowrap;
+}
+
+.navbar_menu li.dropdown .dropdown_menu li {
+  width: 100%;
+}
+
+.navbar_menu li.dropdown .dropdown_menu li a svg {
+  margin-right: 8px;
+}
+
+.navbar_menu, .navbar_user{
+  margin-bottom: 0;
 }
 .navbar_menu li {
   display: inline-block;
@@ -818,7 +889,8 @@ section {
   margin-bottom: 29px;
 }
 .main_slider_content h1 {
-  font-weight: 400;
+  font-size: 3em;
+  font-weight: 1.5em;
   line-height: 1;
 }
 .red_button {
@@ -1139,10 +1211,45 @@ section {
 *********************************/
 
 .deal_ofthe_week {
-  width: 100%;
-  margin-top: 41px;
-  background: #f2f2f2;
+  position: relative;
+  background-image: url('../../assets/images/banner_1.jp');
+  background-attachment: fixed; /* Ensures background stays fixed */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  padding: 80px 0;
+  color: #fff;
+  min-height: 600px; /* Ensure section has enough height for fixed effect */
+  overflow: visible; /* Prevent overflow issues */
+  z-index: 0; /* Ensure background is behind content */
 }
+
+.deal_overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.deal_ofthe_week_content {
+  position: relative;
+  z-index: 2;
+}
+
+.timer_num {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.timer_unit {
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+
 .deal_ofthe_week_img {
   height: 540px;
 }
@@ -2214,3 +2321,591 @@ ul.stander li a {
   float: right;
   margin-right: 34px;
 }
+
+
+/*********************************
+8. contact page
+*********************************/
+
+.contact-page {
+  font-family: Arial, sans-serif;
+}
+
+/* Fixed Banner Section */
+.contact-banner {
+  height: 300px;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.contact-banner-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 40px;
+  text-align: center;
+}
+
+.contact-banner-overlay h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.contact-banner-overlay p {
+  font-size: 1.2rem;
+}
+
+/* Contact Details */
+.contact-details-container {
+  padding: 40px 20px 0;
+}
+
+.contact-detail-box {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.contact-detail-box h4 {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.contact-detail-box p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Contact Form */
+.contact-form-container {
+  padding: 40px 20px;
+}
+
+.contact-form .form-group {
+  margin-bottom: 20px;
+}
+
+.contact-form .form-control {
+  border-radius: 5px;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+.contact-form button {
+  background-color: #ff4c4c;
+  border: none;
+  padding: 12px 28px;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.contact-form button:hover {
+  background-color: #e43c3c;
+}
+
+
+/*********************************
+9. FAQ page
+*********************************/
+
+.faq-page {
+  font-family: "Poppins", sans-serif;
+}
+
+/* Fixed Banner Section */
+.faq-banner {
+  height: 300px;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.faq-banner-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 40px;
+  text-align: center;
+}
+
+.faq-banner-overlay h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.faq-banner-overlay p {
+  font-size: 1.2rem;
+  color: #ffffff;
+}
+
+/* FAQ Sections */
+.faq-container {
+  padding: 40px 20px;
+}
+
+.faq-category {
+  margin-bottom: 40px;
+}
+
+.faq-category .section_title {
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.faq-list {
+  border: 1px solid #ebebeb;
+  border-radius: 5px;
+}
+
+.faq-item {
+  border-bottom: 1px solid #ebebeb;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.faq-question:hover {
+  background: #f3f3f3;
+}
+
+.faq-question h4 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #1e1e27;
+  margin: 0;
+}
+
+.faq-question svg {
+  color: #fe4c50;
+  font-size: 1rem;
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 20px;
+  transition: all 0.3s ease;
+}
+
+.faq-answer.open {
+  max-height: 200px; /* Adjust based on content */
+  padding: 15px 20px;
+}
+
+.faq-answer p {
+  font-size: 1rem;
+  color: #51545f;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 767px) {
+  .faq-banner {
+    height: 200px;
+  }
+
+  .faq-banner-overlay h1 {
+    font-size: 2rem;
+  }
+
+  .faq-banner-overlay p {
+    font-size: 1rem;
+  }
+
+  .faq-container {
+    padding: 20px 15px;
+  }
+
+  .faq-question h4 {
+    font-size: 1rem;
+  }
+
+  .faq-answer p {
+    font-size: 0.9rem;
+  }
+}
+
+
+/*********************************
+10. About page
+*********************************/
+.about-us-page {
+  font-family: "Poppins", sans-serif;
+}
+
+/* Fixed Banner Section */
+.about-banner {
+  height: 300px;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.about-banner-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 40px;
+  text-align: center;
+}
+
+.about-banner-overlay h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.about-banner-overlay p {
+  font-size: 1.2rem;
+  color: #ffffff;
+}
+
+/* Story, Mission, and Pageant Sections */
+.about-story-container,
+.about-mission-container,
+.about-pageant-container {
+  padding: 40px 20px;
+}
+
+.about-story-container .section_title,
+.about-mission-container .section_title,
+.about-pageant-container .section_title {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.about-story-container p,
+.about-mission-container p,
+.about-pageant-container p {
+  font-size: 1rem;
+  color: #51545f;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.about-pageant-container .red_button {
+  display: inline-flex;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 767px) {
+  .about-banner {
+    height: 200px;
+  }
+
+  .about-banner-overlay h1 {
+    font-size: 2rem;
+  }
+
+  .about-banner-overlay p {
+    font-size: 1rem;
+  }
+
+  .about-story-container,
+  .about-mission-container,
+  .about-pageant-container {
+    padding: 20px 15px;
+  }
+
+  .about-story-container p,
+  .about-mission-container p,
+  .about-pageant-container p {
+    font-size: 0.9rem;
+  }
+
+  .section_title h2 {
+    font-size: 1.5rem;
+  }
+}
+
+
+/*********************************
+11. Pageantry page
+*********************************/
+.pageant-registration-page {
+  font-family: "Poppins", sans-serif;
+}
+
+/* Fixed Banner Section */
+.pageant-banner {
+  height: 300px;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.pageant-banner-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 40px;
+  text-align: center;
+}
+
+.pageant-banner-overlay h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.pageant-banner-overlay p {
+  font-size: 1.2rem;
+  color: #ffffff;
+}
+
+/* Registration Form */
+.pageant-form-container {
+  padding: 40px 20px;
+}
+
+.pageant-form .section_title {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.pageant-form .form-group {
+  margin-bottom: 20px;
+}
+
+.pageant-form .form-control {
+  border-radius: 5px;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid #ebebeb;
+  color: #1e1e27;
+}
+
+.pageant-form .form-control:focus {
+  border-color: #fe4c50;
+  outline: none;
+}
+
+.pageant-form label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1e1e27;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.pageant-form .error {
+  color: #fe4c50;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  display: block;
+}
+
+.pageant-form .pageant-submit-button {
+  background-color: #fe4c50;
+  border: none;
+  padding: 12px 28px;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.pageant-form .pageant-submit-button:hover {
+  background-color: #fe7c7f;
+}
+
+/* Submission Success */
+.submission-success {
+  text-align: center;
+  padding: 40px;
+  background: #f3f3f3;
+  border-radius: 5px;
+}
+
+.submission-success h3 {
+  font-size: 1.8rem;
+  color: #1e1e27;
+  margin-bottom: 20px;
+}
+
+.submission-success p {
+  font-size: 1rem;
+  color: #51545f;
+  margin-bottom: 20px;
+}
+
+.submission-success .red_button {
+  display: inline-flex;
+}
+
+
+/*********************************
+11. Pageantry voting page
+*********************************/
+
+
+.pageant-voting-page {
+  font-family: "Poppins", sans-serif;
+}
+
+/* Fixed Banner Section */
+.voting-banner {
+  height: 300px;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.voting-banner-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 40px;
+  text-align: center;
+}
+
+.voting-banner-overlay h1 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  color: #ffffff;
+}
+
+.voting-banner-overlay p {
+  font-size: 1.2rem;
+  color: #ffffff;
+}
+
+/* Voting Section */
+.voting-container {
+  padding: 40px 20px;
+}
+
+.voting-container .section_title {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.vote-message {
+  text-align: center;
+  padding: 10px;
+  background: #f3f3f3;
+  color: #1e1e27;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  border-radius: 5px;
+}
+
+.contestant-card {
+  margin-bottom: 30px;
+  background: #ffffff;
+  border: 1px solid #ebebeb;
+  border-radius: 5px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.contestant-card:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.contestant-image {
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+}
+
+.contestant-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.contestant-details {
+  padding: 20px;
+  text-align: center;
+}
+
+.contestant-details h4 {
+  font-size: 1.5rem;
+  color: #1e1e27;
+  margin-bottom: 10px;
+}
+
+.contestant-details p {
+  font-size: 1rem;
+  color: #51545f;
+  margin-bottom: 15px;
+}
+
+.vote-count {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fe4c50;
+  margin-bottom: 15px;
+}
+
+.vote-button {
+  background-color: #fe4c50;
+  border: none;
+  padding: 12px 28px;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.vote-button:hover {
+  background-color: #fe7c7f;
+}
+
+.vote-button:disabled {
+  background-color: #b5aec4;
+  cursor: not-allowed;
+}
+
+.voting-info {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.voting-info p {
+  font-size: 1rem;
+  color: #51545f;
+  margin-bottom: 20px;
+}
+
+.voting-info .red_button {
+  display: inline-flex;
+}
+

@@ -580,3 +580,97 @@
 
 @media only screen and (max-width: 400px) {
 }
+
+
+/************
+15. pageantry page
+************/
+
+/* Responsive Design */
+@media (max-width: 767px) {
+  .pageant-banner {
+    height: 200px;
+  }
+
+  .pageant-banner-overlay h1 {
+    font-size: 2rem;
+  }
+
+  .pageant-banner-overlay p {
+    font-size: 1rem;
+  }
+
+  .pageant-form-container {
+    padding: 20px 15px;
+  }
+
+  .pageant-form .form-control {
+    font-size: 0.9rem;
+  }
+
+  .pageant-form label {
+    font-size: 0.9rem;
+  }
+
+  .pageant-form .pageant-submit-button {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .submission-success h3 {
+    font-size: 1.5rem;
+  }
+
+  .submission-success p {
+    font-size: 0.9rem;
+  }
+}
+
+
+/************
+15. pageantry voting page
+************/
+
+/* Responsive Design */
+@media (max-width: 767px) {
+  .voting-banner {
+    height: 200px;
+  }
+
+  .voting-banner-overlay h1 {
+    font-size: 2rem;
+  }
+
+  .voting-banner-overlay p {
+    font-size: 1rem;
+  }
+
+  .voting-container {
+    padding: 20px 15px;
+  }
+
+  .contestant-card {
+    margin-bottom: 20px;
+  }
+
+  .contestant-image {
+    height: 200px;
+  }
+
+  .contestant-details h4 {
+    font-size: 1.3rem;
+  }
+
+  .contestant-details p {
+    font-size: 0.9rem;
+  }
+
+  .vote-count {
+    font-size: 1rem;
+  }
+
+  .vote-button {
+    width: 100%;
+    padding: 12px;
+  }
+}

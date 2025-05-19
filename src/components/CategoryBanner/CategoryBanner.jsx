@@ -17,7 +17,7 @@ function CategoryBanner() {
               data-aos="fade-right"
             >
               <div className="banner_category">
-                <a href="categories.html">women's</a>
+                <a href="categories.html">women's by wilster</a>
               </div>
             </div>
           </div>
@@ -30,7 +30,7 @@ function CategoryBanner() {
               data-aos="fade-up"
             >
               <div className="banner_category">
-                <a href="categories.html">accessories's</a>
+                <a href="categories.html">Best deals</a>
               </div>
             </div>
           </div>

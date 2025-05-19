@@ -4,6 +4,8 @@ import HomeCartView from "../HomeCartView";
 import MobileMenu from "../MobileMenu";
 import device from "../../modules/mediaQuery";
 import MediaQuery from "react-responsive";
+import { FaShoppingCart, FaPhone, FaQuestionCircle, FaWhatsapp } from "react-icons/fa"; // Icons for dropdowns
+import companyLogo from '../../assets/images/companyLogo.jpg';
 
 const NavBar = ({ cart = {} }) => {
   const [modalShow, setModalShow] = useState(false);
@@ -23,35 +25,79 @@ const NavBar = ({ cart = {} }) => {
         <div className="row">
           <div className="col-lg-12 text-right">
             <div className="logo_container">
-              
-              <Link to="/fashion-cube">
-                CL3FWILSON
+              <Link to="/">
+                <img style={{ width: '80px', height: 'auto' }} src={companyLogo} alt="company logo" />
               </Link>
             </div>
             <nav className="navbar">
               <ul className="navbar_menu">
-                <li>
-                  <Link to="/home">home</Link>
+                <li><Link to="/home">home</Link></li>
+                <li className="dropdown">
+                  <Link to="/contact" className="dropdown_toggle">
+                    contact
+                    <i className="fa fa-angle-down" aria-hidden="true"></i>
+                  </Link>
+                  <ul className="dropdown_menu">
+                    <li>
+                      <Link to="/contact">
+                        <FaPhone aria-hidden="true" /> Contact
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/faq">
+                        <FaQuestionCircle aria-hidden="true" /> FAQ
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/whatsapp">
+                        <FaWhatsapp aria-hidden="true" /> WhatsApp Us
+                      </Link>
+                    </li>
+                  </ul>
                 </li>
-
-                <li>
-                  <a href="contact.html">contact</a>
+                <li className="dropdown">
+                  <Link className="dropdown_toggle">
+                    about
+                    <i className="fa fa-angle-down" aria-hidden="true"></i>
+                  </Link>
+                  <ul className="dropdown_menu">
+                    <li>
+                      <Link to="/about/cl3fwilson">About CL3Fwilson</Link>
+                    </li>
+                    <li>
+                      <Link to="/about/wilster">About Wilster</Link>
+                    </li>
+                  </ul>
+                </li>
+                <li className="dropdown">
+                  <Link className="dropdown_toggle">
+                    workshop
+                    <i className="fa fa-angle-down" aria-hidden="true"></i>
+                  </Link>
+                  <ul className="dropdown_menu">
+                    <li>
+                      <Link to="/workshop/register">Register</Link>
+                    </li>
+                    <li>
+                      <Link to="/workshop/vote">Vote for Your Candidate</Link>
+                    </li>
+                  </ul>
                 </li>
               </ul>
               <ul className="navbar_user">
                 <li>
-                  <a href="#">
+                  <Link to="/search">
                     <i className="fa fa-search" aria-hidden="true"></i>
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#">
+                  <Link to="/profile">
                     <i className="fa fa-user" aria-hidden="true"></i>
-                  </a>
+                  </Link>
                 </li>
                 <li className="checkout">
-                  <a href="#" onClick={toggleModal}>
-                    <i className="fas fa-shopping-bag"></i>
+                  <a href="#" onClick={toggleModal} style={{ display: 'flex', alignItems: 'center' }}>
+                    <FaShoppingCart size={20} />
                     {cart.totalQty !== undefined && (
                       <span id="checkout_items" className="checkout_items">
                         {cart.totalQty}

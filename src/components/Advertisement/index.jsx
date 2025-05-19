@@ -17,18 +17,12 @@ const Advertisement = ({ date }) => {
       if (diff <= 0) return false;
 
       const timeLeft = {
-        years: 0,
         days: 0,
         hours: 0,
         min: 0,
         sec: 0,
-        millisec: 0,
       };
 
-      if (diff >= 365.25 * 86400) {
-        timeLeft.years = Math.floor(diff / (365.25 * 86400));
-        diff -= timeLeft.years * 365.25 * 86400;
-      }
       if (diff >= 86400) {
         timeLeft.days = Math.floor(diff / 86400);
         diff -= timeLeft.days * 86400;
@@ -58,60 +52,48 @@ const Advertisement = ({ date }) => {
     return () => clearInterval(interval);
   }, [date]);
 
-  const addLeadingZeros = (value) => {
-    return String(value).padStart(2, "0");
-  };
+  const addLeadingZeros = (value) => String(value).padStart(2, "0");
 
   return (
-    <div className="deal_ofthe_week" data-aos="fade-up">
-      <div className="container">
-        <div className="row align-items-center">
-          <div className="col-lg-6">
-            <div className="deal_ofthe_week_img">
-              <img src={DEALOFWEEK} alt="Deal of the Week" />
-            </div>
+    <div className="deal_ofthe_week">
+    <div className="container">
+      <div className="row align-items-center">
+        <div className="col-lg-6">
+          <div className="deal_ofthe_week_img" data-aos="fade-up"> {/* Move AOS here */}
+            <img src={DEALOFWEEK} alt="Deal of the Week" />
           </div>
-          <div className="col-lg-6 text-right deal_ofthe_week_col">
-            <div className="deal_ofthe_week_content d-flex flex-column align-items-center float-right">
-              <div className="section_title">
-                <h2>Deal Of The Week</h2>
-              </div>
-              <ul className="timer">
-                <li className="d-inline-flex flex-column justify-content-center align-items-center">
-                  <div id="day" className="timer_num">
-                    {addLeadingZeros(countDown.days)}
-                  </div>
-                  <div className="timer_unit">
-                    {countDown.days === 1 ? "Day" : "Days"}
-                  </div>
-                </li>
-                <li className="d-inline-flex flex-column justify-content-center align-items-center">
-                  <div id="hour" className="timer_num">
-                    {addLeadingZeros(countDown.hours)}
-                  </div>
-                  <div className="timer_unit">Hours</div>
-                </li>
-                <li className="d-inline-flex flex-column justify-content-center align-items-center">
-                  <div id="minute" className="timer_num">
-                    {addLeadingZeros(countDown.min)}
-                  </div>
-                  <div className="timer_unit">Mins</div>
-                </li>
-                <li className="d-inline-flex flex-column justify-content-center align-items-center">
-                  <div id="second" className="timer_num">
-                    {addLeadingZeros(countDown.sec)}
-                  </div>
-                  <div className="timer_unit">Sec</div>
-                </li>
-              </ul>
-              <div className="red_button deal_ofthe_week_button">
-                <a href="#">shop now</a>
-              </div>
+        </div>
+        <div className="col-lg-6 text-right deal_ofthe_week_col">
+          <div className="deal_ofthe_week_content d-flex flex-column align-items-center float-right" data-aos="fade-up"> {/* Move AOS here */}
+            <div className="section_title">
+              <h2>Deal Of The Week</h2>
+            </div>
+            <ul className="timer">
+              <li className="d-inline-flex flex-column justify-content-center align-items-center">
+                <div className="timer_num">{addLeadingZeros(countDown.days)}</div>
+                <div className="timer_unit">{countDown.days === 1 ? "Day" : "Days"}</div>
+              </li>
+              <li className="d-inline-flex flex-column justify-content-center align-items-center">
+                <div className="timer_num">{addLeadingZeros(countDown.hours)}</div>
+                <div className="timer_unit">Hours</div>
+              </li>
+              <li className="d-inline-flex flex-column justify-content-center align-items-center">
+                <div className="timer_num">{addLeadingZeros(countDown.min)}</div>
+                <div className="timer_unit">Mins</div>
+              </li>
+              <li className="d-inline-flex flex-column justify-content-center align-items-center">
+                <div className="timer_num">{addLeadingZeros(countDown.sec)}</div>
+                <div className="timer_unit">Sec</div>
+              </li>
+            </ul>
+            <div className="red_button deal_ofthe_week_button">
+              <a href="#">shop now</a>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
   );
 };
 
