@@ -5,7 +5,7 @@ import MobileMenu from "../MobileMenu";
 import device from "../../modules/mediaQuery";
 import MediaQuery from "react-responsive";
 import { FaShoppingCart, FaPhone, FaQuestionCircle, FaWhatsapp } from "react-icons/fa"; // Icons for dropdowns
-import companyLogo from '../../assets/images/companyLogo.jpg';
+import companyLogo from '../../assets/images/cw.png';
 
 const NavBar = ({ cart = {} }) => {
   const [modalShow, setModalShow] = useState(false);
@@ -26,7 +26,7 @@ const NavBar = ({ cart = {} }) => {
           <div className="col-lg-12 text-right">
             <div className="logo_container">
               <Link to="/">
-                <img style={{ width: '80px', height: 'auto' }} src={companyLogo} alt="company logo" />
+                <img style={{ width: '100px', height: 'auto' }} src={companyLogo} alt="company logo" />
               </Link>
             </div>
             <nav className="navbar">
