@@ -13,6 +13,7 @@ import FAQPage from "../views/FAQ";
 import AboutUsPage from "../views/About";
 import PageantRegistrationPage from "../views/pageantryregistrationPage.jsx";
 import PageantVotingPage from "../views/pageantryVotingpage/index.jsx";
+import Wilster from "../views/Wilster/index.jsx";
 
 const routes = [
   {
@@ -56,7 +57,7 @@ const routes = [
     component: AboutUsPage,
   },
   {
-    path: "/workshop/register",
+    path: "/workshop",
     layout: BaseLayout,
     component: PageantRegistrationPage,
   },
@@ -64,6 +65,11 @@ const routes = [
     path: "/workshop/vote",
     layout: BaseLayout,
     component: PageantVotingPage,
+  },
+  {
+    path: "/about/wilster",
+    layout: BaseLayout,
+    component: Wilster,
   },
 ];
 

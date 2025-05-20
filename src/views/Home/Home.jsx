@@ -11,6 +11,10 @@ import Benefit from "../../components/Benefit";
 import Advertisement from "../../components/Advertisement";
 import LoginRegister from "../../components/LoginRegisterModal";
 import MensProducts from "../../components/Products/MensProducts";
+import {
+  MensSection,
+  WomensSectionOne
+} from "../../components/homeSection";
 
 class Home extends Component {
   constructor(props) {
@@ -60,7 +64,9 @@ class Home extends Component {
     return (
       <div>
         <HomeBanner />
-        <CategoryBanner />
+        {/* <CategoryBanner /> */}
+        <MensSection />
+        <WomensSectionOne />
         {products ? (
           <NewArrivals
             products={products}
@@ -69,7 +75,7 @@ class Home extends Component {
           />
         ) : null}
         <Benefit />
-        <Advertisement />
+        {/* <Advertisement /> */}
         {products ? (
           <BestSeller
             products={products}

@@ -1,15 +1,39 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import HomeCartView from "../HomeCartView";
 import MobileMenu from "../MobileMenu";
 import device from "../../modules/mediaQuery";
 import MediaQuery from "react-responsive";
-import { FaShoppingCart, FaPhone, FaQuestionCircle, FaWhatsapp } from "react-icons/fa"; // Icons for dropdowns
-import companyLogo from '../../assets/images/cw.png';
+import { FaShoppingCart, FaPhone, FaQuestionCircle, FaWhatsapp } from "react-icons/fa";
+import companyLogo from "../../assets/images/cw.png";
 
-const NavBar = ({ cart = {} }) => {
+const NavBar = () => {
   const [modalShow, setModalShow] = useState(false);
   const [activeClass, setActiveClass] = useState(false);
+
+  // Get cart items from Redux store
+  const cartItems = useSelector((state) => state.cart.items);
+
+  // Compute total quantity
+  const totalQty = cartItems.reduce((total, item) => total + item.quantity, 0);
+
+  // Format cart for HomeCartView
+  const cart = {
+    items: cartItems.reduce((acc, item) => {
+      acc[item.productId] = {
+        item: {
+          title: item.title,
+          price: item.price,
+          imagePath: item.imagePath,
+        },
+        qty: item.quantity,
+        price: item.price,
+      };
+      return acc;
+    }, {}),
+    totalPrice: cartItems.reduce((total, item) => total + item.price * item.quantity, 0),
+  };
 
   const toggleModal = () => {
     setModalShow((prev) => !prev);
@@ -26,7 +50,7 @@ const NavBar = ({ cart = {} }) => {
           <div className="col-lg-12 text-right">
             <div className="logo_container">
               <Link to="/">
-                <img style={{ width: '100px', height: 'auto' }} src={companyLogo} alt="company logo" />
+                <img style={{ width: "100px", height: "auto" }} src={companyLogo} alt="company logo" />
               </Link>
             </div>
             <nav className="navbar">
@@ -65,18 +89,18 @@ const NavBar = ({ cart = {} }) => {
                       <Link to="/about/cl3fwilson">About CL3Fwilson</Link>
                     </li>
                     <li>
-                      <Link to="/about/wilster">About Wilster</Link>
+                      <Link to="/about/wilster">Women's by Wilster</Link>
                     </li>
                   </ul>
                 </li>
                 <li className="dropdown">
-                  <Link className="dropdown_toggle">
+                  <Link to='/workshop' className="dropdown_toggle">
                     workshop
                     <i className="fa fa-angle-down" aria-hidden="true"></i>
                   </Link>
                   <ul className="dropdown_menu">
                     <li>
-                      <Link to="/workshop/register">Register</Link>
+                      <Link to="/workshop">Our workshop</Link>
                     </li>
                     <li>
                       <Link to="/workshop/vote">Vote for Your Candidate</Link>
@@ -96,11 +120,11 @@ const NavBar = ({ cart = {} }) => {
                   </Link>
                 </li>
                 <li className="checkout">
-                  <a href="#" onClick={toggleModal} style={{ display: 'flex', alignItems: 'center' }}>
+                  <a href="#" onClick={toggleModal} style={{ display: "flex", alignItems: "center" }}>
                     <FaShoppingCart size={20} />
-                    {cart.totalQty !== undefined && (
+                    {totalQty > 0 && (
                       <span id="checkout_items" className="checkout_items">
-                        {cart.totalQty}
+                        {totalQty}
                       </span>
                     )}
                   </a>

@@ -1,0 +1,41 @@
+.section-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: 20px;
+    padding: 20px;
+  }
+  
+  .section-heading {
+    font-size: 3.5rem;
+    font-weight: bold;
+    line-height: 1.2;
+    color: #000000;
+  }
+
+  .section-description {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    color: #000000;
+  }
+
+
+  @media (max-width: 768px) {
+    .section-content {
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: 10px;
+      padding: 15px;
+    }
+  
+    .section-heading {
+      font-size: 2rem;
+    }
+  
+    .section-description {
+      font-size: 1rem;
+    }
+
+  }

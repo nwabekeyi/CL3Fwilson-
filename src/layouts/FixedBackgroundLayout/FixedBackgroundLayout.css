@@ -1,0 +1,27 @@
+.fixed-background {
+  height: 100vh;
+  width: 100%;
+  background-size: 100%;
+  background-position: 50% 100%; /* Align image to the top */
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  overflow: auto;
+  background-color: #f0f0f0; /* Optional: Add a background color for empty space */
+}
+
+.content-container {
+  padding: 40px;
+  max-width: 700px;
+  margin-left: 20px;
+  color: #000000;
+}
+
+@media (max-width: 768px) {
+  .content-container {
+    padding: 20px;
+    max-width: 100%;
+    margin-left: 10px;
+  }
+}

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import LoginRegister from "../../components/LoginRegisterModal";
-import Auth from "../../modules/Auth";
 
 const SingleProduct = ({ product, postCart }) => {
   const location = useLocation();
@@ -12,8 +10,6 @@ const SingleProduct = ({ product, postCart }) => {
     selectedSize: "",
     id: "",
     quantity: 1,
-    modalShow: false,
-    login: true,
   });
 
   // Dummy product for when no product is selected
@@ -57,12 +53,6 @@ const SingleProduct = ({ product, postCart }) => {
       }));
     }
   }, [product, state.pic]);
-
-  const showHideModal = () => setState((prev) => ({ ...prev, modalShow: false }));
-
-  const loginClicked = () => setState((prev) => ({ ...prev, modalShow: true, login: true }));
-
-  const registerClicked = () => setState((prev) => ({ ...prev, modalShow: true, login: false }));
 
   const handleThumbnailClick = (item) => {
     setState((prev) => ({
@@ -113,23 +103,19 @@ const SingleProduct = ({ product, postCart }) => {
 
   const addToBag = () => {
     if (product) {
-      if (Auth.getUserDetails() && Auth.getToken()) {
-        const selectedVariant = product.variants.find((v) => v._id === state.id) || product.variants[0];
-        postCart({
-          productId: state.id || product.variants[0]._id,
-          variantDetails: {
-            size: selectedVariant.size,
-            color: selectedVariant.color,
-            imagePath: selectedVariant.imagePath,
-            price: selectedVariant.price,
-            title: product.title,
-          },
-        }).then((res) => {
-          console.log("Cart updated:", res);
-        });
-      } else {
-        setState((prev) => ({ ...prev, modalShow: true }));
-      }
+      const selectedVariant = product.variants.find((v) => v._id === state.id) || product.variants[0];
+      postCart({
+        productId: state.id || product.variants[0]._id,
+        variantDetails: {
+          size: selectedVariant.size,
+          color: selectedVariant.color,
+          imagePath: selectedVariant.imagePath,
+          price: selectedVariant.price,
+          title: product.title,
+        },
+      }).then((res) => {
+        console.log("Cart updated:", res);
+      });
     }
   };
 
@@ -276,14 +262,6 @@ const SingleProduct = ({ product, postCart }) => {
           </div>
         </div>
       </div>
-
-      <LoginRegister
-        show={state.modalShow}
-        login={state.login}
-        registerClicked={registerClicked}
-        loginClicked={loginClicked}
-        onHide={showHideModal}
-      />
     </div>
   );
 };

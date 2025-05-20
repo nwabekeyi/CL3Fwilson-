@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Banner1 from "../../assets/images/banner_1.jpg";
+import HomeBanner from "../../components/HomeBanner";
+
 
 function PageantRegistrationPage() {
   // Form state
@@ -67,6 +69,7 @@ function PageantRegistrationPage() {
 
   return (
     <div className="pageant-registration-page">
+      <HomeBanner />
       {/* Fixed Background Banner */}
       <div
         className="pageant-banner"

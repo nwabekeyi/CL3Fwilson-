@@ -68,6 +68,21 @@ export const postCart = createAsyncThunk(
   }
 );
 
+export const removeCartItem = createAsyncThunk(
+  "cart/removeCartItem",
+  async (productId, { getState, rejectWithValue }) => {
+    try {
+      const state = getState();
+      let cart = [...state.cart.items];
+      cart = cart.filter((item) => item.productId !== productId);
+      saveCart(cart);
+      return cart;
+    } catch (error) {
+      return rejectWithValue(error.toString());
+    }
+  }
+);
+
 const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -104,6 +119,21 @@ const cartSlice = createSlice({
         state.items = action.payload;
       })
       .addCase(postCart.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // removeCartItem
+    builder
+      .addCase(removeCartItem.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(removeCartItem.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+      })
+      .addCase(removeCartItem.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
