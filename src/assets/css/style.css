@@ -961,7 +961,7 @@
   height: 100%;
   background-repeat: no-repeat;
   background-size: cover;
-  background-position: center center;
+  background-position: center 0;
   transition: transform 0.5s ease; /* Smooth scaling transition */
   z-index: 0; /* Ensure background stays behind content */
 }
