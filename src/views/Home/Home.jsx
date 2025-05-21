@@ -13,7 +13,9 @@ import LoginRegister from "../../components/LoginRegisterModal";
 import MensProducts from "../../components/Products/MensProducts";
 import {
   MensSection,
-  WomensSectionOne
+  WomensSectionOne,
+  MensSectionTwo,
+  WomensSectionTwo
 } from "../../components/homeSection";
 
 class Home extends Component {
@@ -64,25 +66,14 @@ class Home extends Component {
     return (
       <div>
         <HomeBanner />
-        {/* <CategoryBanner /> */}
         <MensSection />
         <WomensSectionOne />
-        {products ? (
-          <NewArrivals
-            products={products}
-            departments={departments}
-            addToBag={this.addToBag}
-          />
-        ) : null}
+        <MensSectionTwo />
+        <WomensSectionTwo />
+        <CategoryBanner />
+        <MensProducts />
         <Benefit />
-        {/* <Advertisement /> */}
-        {products ? (
-          <BestSeller
-            products={products}
-            departments={departments}
-            addToBag={this.addToBag}
-          />
-        ) : null}
+        <Advertisement />
         <LoginRegister
           show={this.state.modalShow}
           login={this.state.login}
@@ -90,7 +81,6 @@ class Home extends Component {
           loginClicked={() => this.loginClicked()}
           onHide={() => this.showHideModal()}
         />
-        <MensProducts />
       </div>
     );
   }

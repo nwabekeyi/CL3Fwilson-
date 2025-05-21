@@ -217,9 +217,6 @@ function MensProducts() {
       </div>
 
       <div className="container products-container" data-aos="fade-up">
-        <div className="section_title">
-          <h2>Shop Men's Products</h2>
-        </div>
         <div className="row">
           {products.map((product) => (
             <div

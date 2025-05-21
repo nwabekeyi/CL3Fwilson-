@@ -3,9 +3,9 @@ import { useLocation } from "react-router-dom"; // Import useLocation
 import { Carousel } from "react-bootstrap";
 
 // Import background images for home (men's fashion)
-import BackgroundImage1 from "../../assets/images/slider_1.jpg";
-import BackgroundImage2 from "../../assets/images/slider_2.jpg";
-import BackgroundImage3 from "../../assets/images/slider_3.jpg";
+import BackgroundImage1 from "../../assets/images/heroImage.jpeg";
+import BackgroundImage2 from "../../assets/images/heroImage2.jpeg";
+import BackgroundImage3 from "../../assets/images/heroImage3.jpeg";
 
 // Placeholder images for wilster (women's fashion) and workshop (you can replace these)
 import WilsterImage1 from "../../assets/images/slider_1.jpg"; // Add these images to your assets
