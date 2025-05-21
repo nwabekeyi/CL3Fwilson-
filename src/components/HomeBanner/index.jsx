@@ -8,9 +8,9 @@ import BackgroundImage2 from "../../assets/images/heroImage2.jpeg";
 import BackgroundImage3 from "../../assets/images/heroImage3.jpeg";
 
 // Placeholder images for wilster (women's fashion) and workshop (you can replace these)
-import WilsterImage1 from "../../assets/images/slider_1.jpg"; // Add these images to your assets
-import WilsterImage2 from "../../assets/images/slider_2.jpg";
-import WilsterImage3 from "../../assets/images/slider_3.jpg";
+import WilsterImage1 from "../../assets/images/wilster1.jpg"; // Add these images to your assets
+import WilsterImage2 from "../../assets/images/wilster2.jpg";
+import WilsterImage3 from "../../assets/images/wilster3.jpg";
 import WorkshopImage1 from "../../assets/images/slider_1.jpg";
 import WorkshopImage2 from "../../assets/images/slider_2.jpg";
 import WorkshopImage3 from "../../assets/images/slider_3.jpg";
@@ -89,7 +89,7 @@ function HomeBanner() {
     case "/":
       contentToDisplay = homeContent;
       break;
-    case "/wilster":
+    case "/about/wilster":
       contentToDisplay = wilsterContent;
       break;
     case "/workshop":
@@ -116,7 +116,11 @@ function HomeBanner() {
                     <h6>{item.subtitle}</h6>
                     <h1>{item.title}</h1>
                     <div className="red_button shop_now_button">
-                      <a href={item.link}>shop now</a>
+                      <a href={item.link}>{location.pathname === '/about/wilster' 
+                      ? 'coming soon'
+                      :
+                      'shop now'
+                    }</a>
                     </div>
                   </div>
                 </div>

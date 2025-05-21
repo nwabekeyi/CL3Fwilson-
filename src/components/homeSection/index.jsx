@@ -37,9 +37,9 @@ const WomensSectionTwo = () => {
   return (
     <FixedBackgroundLayout backgroundImage={womensBg2}>
       <SectionContent
-        heading="Discover Timeless Beauty"
+        heading="Discover Timeless Beauty(By Wilster)"
         linkTo="/shop/women"
-        buttonText="Browse Now"
+        buttonText="Coming soon"
       />
     </FixedBackgroundLayout>
   );
