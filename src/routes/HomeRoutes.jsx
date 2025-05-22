@@ -14,22 +14,23 @@ import AboutUsPage from "../views/About";
 import PageantRegistrationPage from "../views/pageantryregistrationPage.jsx";
 import PageantVotingPage from "../views/pageantryVotingpage/index.jsx";
 import Wilster from "../views/Wilster/index.jsx";
-
+import AdminPage from "../views/Admin/adminPage.jsx"; // Import the AdminPage component
+import LoginForm from "../components/LoginRegisterModal/LoginForm.jsx";
 const routes = [
   {
     path: "/",
     layout: BaseLayout,
-    component: Home, // ✅ Pass reference, not JSX
+    component: Home,
   },
   {
     path: "/admin",
     layout: BaseLayout,
-    component: Home, // ✅ Pass reference, not JSX
+    component: AdminPage, // Updated to use AdminPage
   },
   {
     path: "/home",
     layout: BaseLayout,
-    component: () => <Navigate to="/fashion-cube" replace />, // ✅ use function for redirection
+    component: () => <Navigate to="/fashion-cube" replace />,
   },
   {
     path: "/fashion-cube/single-product/:id",
@@ -70,6 +71,11 @@ const routes = [
     path: "/about/wilster",
     layout: BaseLayout,
     component: Wilster,
+  },
+  {
+    path: "/sign-in",
+    layout: BaseLayout,
+    component: LoginForm,
   },
 ];
 
