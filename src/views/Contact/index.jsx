@@ -41,7 +41,7 @@ function ContactPage() {
           <div className="col-md-8">
             <form className="contact-form">
               <div className="form-group">
-                <label htmlFor="name">Name:</label>
+                <label htmlFor="name">Full Name:</label>
                 <input type="text" id="name" className="form-control" placeholder="Your Name" required />
               </div>
               <div className="form-group">
