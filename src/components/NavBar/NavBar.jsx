@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import HomeCartView from "../HomeCartView";
@@ -11,6 +11,7 @@ import companyLogo from "../../assets/images/cw.png";
 const NavBar = () => {
   const [modalShow, setModalShow] = useState(false);
   const [activeClass, setActiveClass] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   // Get cart items from Redux store
   const cartItems = useSelector((state) => state.cart.items);
@@ -43,14 +44,41 @@ const NavBar = () => {
     setActiveClass((prev) => !prev);
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolling(window.scrollY > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    // Initial check in case user reloads mid-scroll
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
-    <div className="main_nav_container">
+<div
+  className="main_nav_container"
+  style={{
+    background: isScrolling && "transparent",
+    transition: "background 0.3s ease",
+    backdropFilter: isScrolling ? "blur(5px)" : "none", // optional: adds a subtle blur
+  }}
+>
+
       <div className="container">
         <div className="row">
           <div className="col-lg-12 text-right">
             <div className="logo_container">
               <Link to="/">
-                <img style={{ width: "100px", height: "auto" }} src={companyLogo} alt="company logo" />
+                <img
+                  style={{ width: "100px", height: "auto" }}
+                  src={companyLogo}
+                  alt="company logo"
+                />
               </Link>
             </div>
             <nav className="navbar">
@@ -58,56 +86,34 @@ const NavBar = () => {
                 <li><Link to="/">home</Link></li>
                 <li className="dropdown">
                   <Link to="/contact" className="dropdown_toggle">
-                    contact
-                    <i className="fa fa-angle-down" aria-hidden="true"></i>
+                    contact <i className="fa fa-angle-down" aria-hidden="true"></i>
                   </Link>
                   <ul className="dropdown_menu">
-                    <li>
-                      <Link to="/contact">
-                        <FaPhone aria-hidden="true" /> Contact
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/faq">
-                        <FaQuestionCircle aria-hidden="true" /> FAQ
-                      </Link>
-                    </li>
-                    <li>
-                      <Link to="/whatsapp">
-                        <FaWhatsapp aria-hidden="true" /> WhatsApp Us
-                      </Link>
-                    </li>
+                    <li><Link to="/contact"><FaPhone /> Contact</Link></li>
+                    <li><Link to="/faq"><FaQuestionCircle /> FAQ</Link></li>
+                    <li><Link to="/whatsapp"><FaWhatsapp /> WhatsApp Us</Link></li>
                   </ul>
                 </li>
                 <li className="dropdown">
                   <Link className="dropdown_toggle">
-                    about
-                    <i className="fa fa-angle-down" aria-hidden="true"></i>
+                    about <i className="fa fa-angle-down" aria-hidden="true"></i>
                   </Link>
                   <ul className="dropdown_menu">
-                    <li>
-                      <Link to="/about/cl3fwilson">About CL3Fwilson</Link>
-                    </li>
-                    <li>
-                      <Link to="/about/wilster">Women's by Wilster</Link>
-                    </li>
+                    <li><Link to="/about/cl3fwilson">About CL3Fwilson</Link></li>
+                    <li><Link to="/about/wilster">Women's by Wilster</Link></li>
                   </ul>
                 </li>
                 <li className="dropdown">
                   <Link to='/workshop' className="dropdown_toggle">
-                    workshop
-                    <i className="fa fa-angle-down" aria-hidden="true"></i>
+                    workshop <i className="fa fa-angle-down" aria-hidden="true"></i>
                   </Link>
                   <ul className="dropdown_menu">
-                    <li>
-                      <Link to="/workshop">Our workshop</Link>
-                    </li>
-                    <li>
-                      <Link to="/workshop/vote">Vote for Your Candidate</Link>
-                    </li>
+                    <li><Link to="/workshop">Our workshop</Link></li>
+                    <li><Link to="/workshop/vote">Vote for Your Candidate</Link></li>
                   </ul>
                 </li>
               </ul>
+
               <ul className="navbar_user">
                 <li>
                   <Link to="/search">
@@ -130,6 +136,7 @@ const NavBar = () => {
                   </a>
                 </li>
               </ul>
+
               <div className="hamburger_container" onClick={toggleMenu}>
                 <i className="fa fa-bars" aria-hidden="true"></i>
               </div>
