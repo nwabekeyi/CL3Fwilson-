@@ -43,7 +43,7 @@ function AdminPage() {
 useEffect(() => {
   const auth = getAuth();
   const unsubscribe = auth.onAuthStateChanged((user) => {
-    if (user && user.email === "yourname@gmail.com") { // Your new admin email
+    if (user && user.email === "nwabekeyiprecious@gmail.com") { // Your new admin email
       fetchContestants();
       fetchParticipants();
     } else {

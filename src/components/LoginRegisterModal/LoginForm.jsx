@@ -19,6 +19,7 @@ const LoginForm = ({ forgotPasswordClicked, registerClicked }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    console.log(`Input changed: ${name}=${value}`); // Debug form inputs
     setFormState((prevState) => ({
       ...prevState,
       [name]: value,
@@ -27,6 +28,7 @@ const LoginForm = ({ forgotPasswordClicked, registerClicked }) => {
 
   const handleSubmit = async () => {
     const { email, password } = formState;
+    console.log("Submitting:", { email, password }); // Debug form state
 
     if (!Validator(email, EMAIL_RULE)) {
       setError("Invalid email format");
@@ -42,7 +44,7 @@ const LoginForm = ({ forgotPasswordClicked, registerClicked }) => {
     setError("");
     try {
       const result = await dispatch(userLogin({ email, password })).unwrap();
-      // Store token in localStorage to match insertToken logic
+      console.log("Login success:", result); // Debug success
       localStorage.setItem("auth", JSON.stringify(result.token));
       setLoading(false);
       navigate("/admin");
