@@ -12,7 +12,7 @@ const MensSectionTwo = () => {
     <FixedBackgroundLayout backgroundImage={mensBg2}>
       <SectionContent
         heading="Elevate Your Style"
-        linkTo="/shop/men"
+        linkTo="/mensProduct"
         buttonText="Shop now"
       />
     </FixedBackgroundLayout>
@@ -25,7 +25,7 @@ const WomensSectionOne = () => {
     <FixedBackgroundLayout backgroundImage={womensBg1}>
       <SectionContent
         heading="Chateau by Dusk(Wilster)"
-        linkTo="/shop/women"
+        linkTo="/about/wilster"
         buttonText="Coming soon"
       />
     </FixedBackgroundLayout>
@@ -38,7 +38,7 @@ const WomensSectionTwo = () => {
     <FixedBackgroundLayout backgroundImage={womensBg2}>
       <SectionContent
         heading="Discover Timeless Beauty(By Wilster)"
-        linkTo="/shop/women"
+        linkTo="/about/wilster"
         buttonText="Coming soon"
       />
     </FixedBackgroundLayout>
@@ -51,7 +51,7 @@ const MensSection = () => {
     <FixedBackgroundLayout backgroundImage={mensBg}>
       <SectionContent
         heading="Clavis Identitatis Tuae"
-        linkTo="/shop/men"
+        linkTo="/mensProduct"
         buttonText="Shop Now"
       />
     </FixedBackgroundLayout>

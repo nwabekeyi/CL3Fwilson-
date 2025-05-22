@@ -91,7 +91,7 @@ const NavBar = () => {
                   <ul className="dropdown_menu">
                     <li><Link to="/contact"><FaPhone /> Contact</Link></li>
                     <li><Link to="/faq"><FaQuestionCircle /> FAQ</Link></li>
-                    <li><Link to="/whatsapp"><FaWhatsapp /> WhatsApp Us</Link></li>
+                    <li><a href="https://wa.me/message/2YZ3Y7ILSIIAJ1" target="_blank"><FaWhatsapp /> WhatsApp Us</a></li>
                   </ul>
                 </li>
                 <li className="dropdown">
@@ -108,7 +108,7 @@ const NavBar = () => {
                     workshop <i className="fa fa-angle-down" aria-hidden="true"></i>
                   </Link>
                   <ul className="dropdown_menu">
-                    <li><Link to="/workshop">Our workshop</Link></li>
+                    <li><Link to="/workshop">Project Cl3fwilson</Link></li>
                     <li><Link to="/workshop/vote">Vote for Your Candidate</Link></li>
                   </ul>
                 </li>

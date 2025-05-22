@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Banner1 from "../../assets/images/banner_1.jpg";
+import Banner1 from "../../assets/images/contact.jpg";
 import { FaPlus, FaMinus } from "react-icons/fa"; // Icons for accordion toggle
 
 function FAQPage() {

@@ -1,5 +1,5 @@
 import React from "react";
-import Banner1 from "../../assets/images/banner_1.jpg";
+import Banner1 from "../../assets/images/contact.jpg"
 
 function ContactPage() {
   return (
@@ -22,15 +22,15 @@ function ContactPage() {
         <div className="row">
           <div className="col-md-4 contact-detail-box">
             <h4>📍 Address</h4>
-            <p>123 Tech Street, Innovation City<br />Lagos, Nigeria</p>
+            <p>9, Afam Ani avenue<br />Lagos, Nigeria</p>
           </div>
           <div className="col-md-4 contact-detail-box">
             <h4>📞 Phone</h4>
-            <p>+234 812 345 6789<br />+234 909 876 5432</p>
+            <p>+234 816 137 7696</p>
           </div>
           <div className="col-md-4 contact-detail-box">
-            <h4>📧 Email & Hours</h4>
-            <p>support@techacademy.com<br />Mon - Fri: 9am – 6pm</p>
+            <h4>📧 Email</h4>
+            <p>Cl3fwilsonfashionafrica@gmail.com</p>
           </div>
         </div>
       </div>
