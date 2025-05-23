@@ -1,6 +1,7 @@
 import React from "react";
 import Banner1 from "../../assets/images/womenCategory.jpg"; // Women's banner
 import Banner3 from "../../assets/images/menCategory.jpg";
+import { Link } from "react-router-dom";
 
 function CategoryBanner() {
   return (
@@ -16,7 +17,7 @@ function CategoryBanner() {
                 }}
               ></div>
               <div className="banner_category">
-                <a href="categories.html">men's</a>
+                <Link to="/mensProduct">men's</Link>
               </div>
             </div>
           </div>
@@ -29,7 +30,7 @@ function CategoryBanner() {
                 }}
               ></div>
               <div className="banner_category">
-                <a href="categories.html">women's by wilster</a>
+                <Link to="/about/wilster">women's by wilster</Link>
               </div>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import React from "react";
-import Banner1 from "../../assets/images/banner_1.jpg";
+import Banner1 from "../../assets/images/about.jpg";
+import { Link } from "react-router-dom";
 
 function AboutUsPage() {
   return (
@@ -12,7 +13,7 @@ function AboutUsPage() {
         }}
       >
         <div className="about-banner-overlay">
-          <h1>About MenStyle</h1>
+          <h1>About CL3Fwilson</h1>
           <p>Elevating men’s fashion and celebrating style through creativity and community.</p>
         </div>
       </div>
@@ -25,10 +26,19 @@ function AboutUsPage() {
               <h2>Our Story</h2>
             </div>
             <p>
-              Founded in 2018, MenStyle was born from a passion for redefining men’s fashion in Nigeria and beyond. We believe that style is more than clothing—it’s a statement of identity, confidence, and individuality. Our curated collections blend timeless elegance with modern trends, offering premium suits, casual wear, and accessories crafted for the modern man.
+            Founded in 2020, we have remained one of the pioneers in classic custom-fit, made-to-order suits. We remain unique in our approach to fashion.
             </p>
             <p>
-              What sets us apart is our commitment to quality and community. Every piece is designed with precision, using sustainable materials whenever possible. We’re not just a brand; we’re a movement to empower men to express themselves through fashion.
+            Our customers cut across the middle class corporate Africans to High class,our watch words are excellence and satisfactory service. To ensure that we stay true to our promise to customers, every single suit we make represents true value for your money.
+            </p>
+            <p>
+            We produce the perfect suit for any occasion in a comprehensive range of fits and Big and Tall sizes.
+ 
+            You can build the perfect outfit for any occasion with minimal effort whether it's prom Suits,Wedding suit,dinner suits or a Tweed jacket for that special weekend away.
+              
+            If you're stuck for ideas we've got style tips and suggestions for you.
+            
+            The CL3FWILSON signature, the tailored suit. Timeless,classy and refined, every piece is masterfully constructed by our in-house tailors using the finest fabrics with impeccable attention to detail.
             </p>
           </div>
         </div>
@@ -42,8 +52,7 @@ function AboutUsPage() {
               <h2>Our Mission</h2>
             </div>
             <p>
-              At MenStyle, our mission is to inspire confidence through exceptional fashion. We aim to provide high-quality, stylish clothing that fits every man’s lifestyle while fostering a community that celebrates creativity and self-expression. Through our online platform, we make premium fashion accessible, affordable, and sustainable.
-            </p>
+            To empower individuals to express confidence, sophistication, and timeless elegance through meticulously crafted suits and dresses that blend modern design with classic tailoring. We are committed to excellence in craftsmanship, sustainable practices, and creating garments that make every moment feel exceptional.            </p>
           </div>
         </div>
       </div>
@@ -53,16 +62,16 @@ function AboutUsPage() {
         <div className="row justify-content-center">
           <div className="col-md-10">
             <div className="section_title">
-              <h2>Our Style Pageant</h2>
+              <h2>Project Cl3fwilson</h2>
             </div>
             <p>
-              Launched in 2020, the MenStyle Pageant is our way of celebrating the diverse expressions of style across Nigeria. This unique initiative invites men aged 18-35 to showcase their fashion sense and personality. Users can vote for their favorite contestants on our platform, with winners featured in our campaigns and awarded exclusive fashion prizes.
+            Project Cl3fwilson is a semi-annual fashion workshop/competition that creates a platform for fashion designers. It works to educate fashion designers about sustainable theories.
             </p>
             <p>
-              The pageant is more than a competition—it’s a platform for creativity, confidence, and community. Join us in crowning the next style icon by registering or voting today!
+            Project cl3fwilson is a Workshop that educates emerging fashion designers on Fashion Business, Branding, and Marketing.
             </p>
             <div className="red_button shop_now_button">
-              <a href="/pageant">Explore the Pageant</a>
+              <Link to='/workshop'>Explore workshop</Link>
             </div>
           </div>
         </div>

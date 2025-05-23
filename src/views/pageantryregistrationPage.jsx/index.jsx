@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Banner1 from "../../assets/images/banner_1.jpg";
+import Banner1 from "../../assets/images/workshop4.jpg";
 import HomeBanner from "../../components/HomeBanner";
 import { db } from "../../firebase/config";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
@@ -158,13 +158,13 @@ function PageantRegistrationPage() {
         }}
       >
         <div className="pageant-banner-overlay">
-          <h1>Register for the MenStyle Pageant</h1>
+          <h1>Register for Project Cl3fwilson</h1>
           <p>Showcase your style and become the next fashion icon!</p>
         </div>
       </div>
 
       {/* Registration Form Section */}
-      <div className="container pageant-form-container" data-aos="fade-up">
+      <div id='registration-form' className="container pageant-form-container" data-aos="fade-up">
         <div className="row justify-content-center">
           <div className="col-md-8">
             {submitted ? (
