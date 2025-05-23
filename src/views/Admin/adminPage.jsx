@@ -249,7 +249,7 @@ useEffect(() => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="container pageant-form-container my-5" data-aos="fade-up">
+    <div className="container pageant-form-container my-5" >
       <div className="section_title">
         <h2>Admin Dashboard - Manage Participants</h2>
         <button

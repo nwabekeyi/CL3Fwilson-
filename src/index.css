@@ -76,9 +76,9 @@ button:focus-visible {
   font-size: 0.875em;
 }
 
-.pageant-form-container {
+/* .pageant-form-container {
   padding: 20px;
-}
+} */
 
 @media (prefers-color-scheme: light) {
   :root {
