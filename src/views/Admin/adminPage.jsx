@@ -5,11 +5,15 @@ import { db } from "../../firebase/config";
 import {
   collection,
   addDoc,
+  getDoc,
   getDocs,
   updateDoc,
   deleteDoc,
   doc,
   serverTimestamp,
+  onSnapshot,
+  query,
+  where,
 } from "firebase/firestore";
 import { uploadImage } from "../../utils/cloudinary";
 
@@ -39,51 +43,99 @@ function AdminPage() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // In src/views/AdminPage.jsx, line ~30
-useEffect(() => {
-  const auth = getAuth();
-  const unsubscribe = auth.onAuthStateChanged((user) => {
-    if (user && user.email === "nwabekeyiprecious@gmail.com") { // Your new admin email
-      fetchContestants();
-      fetchParticipants();
-    } else {
-      setContestants([]);
-      setParticipants([]);
-      navigate("/sign-in", { state: { from: "/admin" } });
-    }
-    setLoading(false);
-  });
-  return () => unsubscribe();
-}, [navigate]);
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      console.log("Auth State Changed:", user ? user.email : "No user logged in");
+      if (user && user.email === "nwabekeyiprecious@gmail.com") {
+        fetchContestants();
+        fetchParticipants();
+      } else {
+        console.log("Unauthorized or no user, redirecting...");
+        setContestants([]);
+        setParticipants([]);
+        navigate("/sign-in", { state: { from: "/admin" } });
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [navigate]);
 
-  const fetchContestants = async () => {
+  const fetchContestants = () => {
     try {
-      console.log("Fetching contestants...");
+      console.log("Setting up contestants listener...");
       const contestantsCollection = collection(db, "pageantContestants");
-      const snapshot = await getDocs(contestantsCollection);
-      const contestantsList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setContestants(contestantsList.filter((c) => c.status === "pending"));
+      console.log("Collection reference:", contestantsCollection.path);
+      return onSnapshot(contestantsCollection, (snapshot) => {
+        console.log("Contestants snapshot received at:", new Date().toISOString());
+        console.log("Total documents fetched:", snapshot.size);
+        const contestantsList = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        console.log("All contestants:", contestantsList);
+        const pendingContestants = contestantsList.filter(
+          (c) => c.status?.toLowerCase() === "pending"
+        );
+        console.log("Pending contestants:", pendingContestants);
+        setContestants(pendingContestants);
+      }, (error) => {
+        console.error("Error fetching contestants:", error);
+        setErrors({ ...errors, fetch: `Failed to fetch contestants: ${error.message}` });
+      });
     } catch (error) {
-      console.error("Error fetching contestants:", error);
+      console.error("Error setting up contestants listener:", error);
       setErrors({ ...errors, fetch: `Failed to fetch contestants: ${error.message}` });
     }
   };
 
-  const fetchParticipants = async () => {
+  const fetchParticipants = () => {
     try {
-      console.log("Fetching participants...");
+      console.log("Setting up participants listener...");
       const participantsCollection = collection(db, "participants");
-      const snapshot = await getDocs(participantsCollection);
-      const participantsList = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setParticipants(participantsList);
+      console.log("Collection reference:", participantsCollection.path);
+
+      // Initial fetch to ensure state is correct
+      getDocs(participantsCollection).then((snapshot) => {
+        const initialParticipants = snapshot.docs.map((doc) => ({
+          docId: doc.id, // Use Firestore document ID
+          ...doc.data(),
+        }));
+        console.log("Initial participants fetch:", initialParticipants);
+        setParticipants(initialParticipants);
+      }).catch((error) => {
+        console.error("Initial participants fetch failed:", error);
+        setErrors({ ...errors, fetch: `Failed to fetch participants initially: ${error.message}` });
+      });
+
+      // Real-time listener
+      return onSnapshot(participantsCollection, (snapshot) => {
+        console.log("Participants snapshot received at:", new Date().toISOString());
+        console.log("Total participants fetched:", snapshot.size);
+        const participantsList = snapshot.docs.map((doc) => ({
+          docId: doc.id, // Use Firestore document ID
+          ...doc.data(),
+        }));
+        console.log("All participants:", participantsList);
+        setParticipants(participantsList);
+      }, (error) => {
+        console.error("Error in participants onSnapshot:", error);
+        setErrors({ ...errors, fetch: `Failed to fetch participants: ${error.message}` });
+        // Fallback fetch
+        getDocs(participantsCollection).then((snapshot) => {
+          const participantsList = snapshot.docs.map((doc) => ({
+            docId: doc.id, // Use Firestore document ID
+            ...doc.data(),
+          }));
+          console.log("Fallback fetch participants:", participantsList);
+          setParticipants(participantsList);
+        }).catch((fallbackError) => {
+          console.error("Fallback fetch failed:", fallbackError);
+          setErrors({ ...errors, fetch: `Failed to fetch participants: ${fallbackError.message}` });
+        });
+      });
     } catch (error) {
-      console.error("Error fetching participants:", error);
+      console.error("Error setting up participants listener:", error);
       setErrors({ ...errors, fetch: `Failed to fetch participants: ${error.message}` });
     }
   };
@@ -141,19 +193,21 @@ useEffect(() => {
 
       const participantData = {
         ...contestant,
+        uid: contestant.id, // Store pageantContestants document ID
         photoURL,
         voters: [],
         createdAt: serverTimestamp(),
         status: "active",
       };
 
-      await addDoc(collection(db, "participants"), participantData);
+      console.log("Adding participant to Firestore with data:", participantData);
+      const participantRef = await addDoc(collection(db, "participants"), participantData);
+      console.log("Participant added with ID:", participantRef.id);
 
       const contestantRef = doc(db, "pageantContestants", contestant.id);
       await updateDoc(contestantRef, { status: "approved" });
+      console.log("Contestant approved:", contestant.id);
 
-      fetchContestants();
-      fetchParticipants();
       setPhotoFile(null);
       setPhotoPreview(null);
     } catch (error) {
@@ -201,7 +255,7 @@ useEffect(() => {
         photoURL = await uploadImage(photoFile);
       }
 
-      const participantRef = doc(db, "participants", editParticipant.id);
+      const participantRef = doc(db, "participants", editParticipant.docId);
       await updateDoc(participantRef, {
         ...formData,
         photoURL,
@@ -227,7 +281,6 @@ useEffect(() => {
       });
       setPhotoFile(null);
       setPhotoPreview(null);
-      fetchParticipants();
     } catch (error) {
       console.error("Error updating participant:", error);
       setErrors({ ...errors, submission: `Failed to update participant: ${error.message}` });
@@ -236,20 +289,86 @@ useEffect(() => {
     }
   };
 
-  const handleDeleteParticipant = async (participantId) => {
+  const handleDeleteParticipant = async (participantDocId) => {
     try {
-      await deleteDoc(doc(db, "participants", participantId));
-      fetchParticipants();
+      console.log("Attempting to delete participant with docId:", participantDocId);
+      console.log("Current participants state:", participants);
+
+      // Check if participant exists in state
+      const participantInState = participants.find((p) => p.docId === participantDocId);
+      if (!participantInState) {
+        console.error("Participant not found in state:", participantDocId);
+        setErrors({ ...errors, submission: `Participant ${participantDocId} not found in local state` });
+        return;
+      }
+      console.log("Participant found in state:", participantInState);
+
+      // Try to fetch the participant document
+      const participantRef = doc(db, "participants", participantDocId);
+      const participantSnap = await getDoc(participantRef);
+
+      if (participantSnap.exists()) {
+        // Delete from participants
+        await deleteDoc(participantRef);
+        console.log("Participant deleted from participants:", participantDocId);
+      } else {
+        console.warn("Participant document not found in Firestore:", participantDocId);
+        // Remove from state to prevent further errors
+        setParticipants(participants.filter((p) => p.docId !== participantDocId));
+      }
+
+      // Update pageantContestants to pending using uid
+      if (participantInState.uid) {
+        const contestantRef = doc(db, "pageantContestants", participantInState.uid);
+        const contestantSnap = await getDoc(contestantRef);
+        if (contestantSnap.exists()) {
+          await updateDoc(contestantRef, { status: "pending" });
+          console.log("Contestant status updated to pending in pageantContestants:", participantInState.uid);
+        } else {
+          console.warn("Contestant document not found in pageantContestants:", participantInState.uid);
+          setErrors({
+            ...errors,
+            submission: `Contestant ${participantInState.uid} not found in pageantContestants`,
+          });
+          return;
+        }
+      } else {
+        console.warn("No uid found in participant state:", participantDocId);
+        // Fallback: Try to find pageantContestants document by email
+        const contestantsCollection = collection(db, "pageantContestants");
+        const q = query(contestantsCollection, where("email", "==", participantInState.email));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const contestantDoc = querySnapshot.docs[0];
+          await updateDoc(doc(db, "pageantContestants", contestantDoc.id), { status: "pending" });
+          console.log("Contestant status updated to pending via email match:", contestantDoc.id);
+        } else {
+          console.warn("No matching contestant found in pageantContestants for email:", participantInState.email);
+          setErrors({
+            ...errors,
+            submission: `No contestant found in pageantContestants for participant ${participantDocId}`,
+          });
+          return;
+        }
+      }
+
+      // Scroll to pending contestants table
+      document.getElementById("pending-contestants").scrollIntoView({ behavior: "smooth" });
+
     } catch (error) {
       console.error("Error deleting participant:", error);
       setErrors({ ...errors, submission: `Failed to delete participant: ${error.message}` });
     }
   };
 
+  useEffect(() => {
+    console.log("Contestants state updated:", contestants);
+  }, [contestants]);
+
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="container pageant-form-container my-5" >
+    <div className="container pageant-form-container my-5">
       <div className="section_title">
         <h2>Admin Dashboard - Manage Participants</h2>
         <button
@@ -260,7 +379,7 @@ useEffect(() => {
         </button>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4" id="pending-contestants">
         <h5>Pending Contestants</h5>
         {contestants.length === 0 ? (
           <p>No pending contestants.</p>
@@ -310,10 +429,10 @@ useEffect(() => {
             </thead>
             <tbody>
               {participants.map((participant) => (
-                <tr key={participant.id}>
+                <tr key={participant.docId}>
                   <td>{participant.fullName}</td>
                   <td>{participant.email}</td>
-                  <td>{participant.voters.length}</td>
+                  <td>{participant.voters?.length || 0}</td>
                   <td>
                     <button
                       className="red_button pageant-submit-button me-2"
@@ -324,7 +443,7 @@ useEffect(() => {
                     </button>
                     <button
                       className="btn btn-danger"
-                      onClick={() => handleDeleteParticipant(participant.id)}
+                      onClick={() => handleDeleteParticipant(participant.docId)}
                       disabled={isSubmitting}
                     >
                       Delete
