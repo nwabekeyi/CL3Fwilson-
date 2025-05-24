@@ -54,6 +54,32 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.red_button {
+  background-color: #e30613;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.red_button:hover {
+  background-color: #c50511;
+}
+
+.pageant-submit-button {
+  font-size: 1rem;
+}
+
+.error {
+  color: red;
+  font-size: 0.875em;
+}
+
+/* .pageant-form-container {
+  padding: 20px;
+} */
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

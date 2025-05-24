@@ -1,15 +1,20 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { login } from "../../ServerRequest";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 // Async thunk for user login
 export const userLogin = createAsyncThunk(
   "auth/userLogin",
   async ({ email, password }, { rejectWithValue }) => {
     try {
-      const res = await login(email, password);
-      return res;
+      const auth = getAuth();
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      return {
+        user: { email: user.email, uid: user.uid },
+        token: await user.getIdToken(), // Firebase ID token
+      };
     } catch (error) {
-      return rejectWithValue(error);
+      return rejectWithValue(error.message); // Store only the error message
     }
   }
 );
@@ -43,6 +48,9 @@ const authSlice = createSlice({
       state.token = null;
       state.tokenInserted = false;
     },
+    clearError(state) {
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -52,17 +60,17 @@ const authSlice = createSlice({
       })
       .addCase(userLogin.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user || null;
-        state.token = action.payload.token || null;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
         state.error = null;
       })
       .addCase(userLogin.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || action.error.message;
+        state.error = action.payload; // Stores error message (string)
       });
   },
 });
 
-export const { insertTokenSuccess, insertTokenFail } = authSlice.actions;
+export const { insertTokenSuccess, insertTokenFail, clearError } = authSlice.actions;
 
 export default authSlice.reducer;
