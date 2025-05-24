@@ -71,7 +71,7 @@ class Home extends Component {
         <MensSectionTwo />
         <WomensSectionTwo />
         <CategoryBanner />
-        <MensProducts />
+        <MensProducts home={true}/>
         <Benefit />
         <Advertisement />
         <LoginRegister
