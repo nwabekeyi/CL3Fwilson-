@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import LoginRegister from "../LoginRegisterModal";
 import Auth from "../../modules/Auth";
+ import { Link } from "react-router-dom";
 
 const TopNavBar = ({ className }) => {
   const [modalShow, setModalShow] = useState(false);
@@ -100,13 +101,13 @@ const TopNavBar = ({ className }) => {
                     </a>
                     <ul className="account_selection">
                       <li>
-                        <a href="#" onClick={loginClicked}>
+                        <Link to='/sign-in'>
                           <i
                             className="fas fa-sign-in-alt"
                             aria-hidden="true"
                           ></i>
                           Sign In
-                        </a>
+                        </Link>
                       </li>
                     </ul>
                   </li>
