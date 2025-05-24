@@ -1,193 +1,157 @@
-import { useState } from "react";
-import { uploadImage } from "../utils/cloudinary";
+import { db } from "../firebase"; // Adjust path to your Firebase config
+import { 
+  collection, 
+  addDoc, 
+  getDoc, 
+  getDocs, 
+  updateDoc, 
+  deleteDoc, 
+  doc 
+} from "firebase/firestore";
+import { uploadImage } from "../utils/cloudinary"; // Your existing Cloudinary upload function
 
-export const useProductForm = (initialData = {}) => {
-  const [formData, setFormData] = useState({
-    title: "",
-    price: "",
-    imagePath: "",
-    department: "Men",
-    category: "",
-    description: "",
-    variants: [
-      { _id: `v${Date.now()}`, size: "", color: "", price: "", imagePath: "" },
-    ],
-    ...initialData,
-  });
-  const [photoFiles, setPhotoFiles] = useState({ main: null, variants: {} });
-  const [photoPreviews, setPhotoPreviews] = useState({
-    main: initialData.imagePath || null,
-    variants: initialData.variants?.reduce(
-      (acc, v) => ({ ...acc, [v._id]: v.imagePath }),
-      {}
-    ) || {},
-  });
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+// Initialize Firestore collection
+const productsCollection = collection(db, "products");
 
-  const handleChange = (e, variantId = null, field = null) => {
-    const { name, value } = e.target;
-    if (variantId && field) {
-      setFormData((prev) => ({
-        ...prev,
-        variants: prev.variants.map((v) =>
-          v._id === variantId ? { ...v, [field]: value } : v
-        ),
-      }));
-      setErrors((prev) => ({ ...prev, [`variant_${variantId}_${field}`]: "" }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
-
-  const handlePhotoChange = (e, variantId = null) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
-    const maxSize = 5 * 1024 * 1024;
-
-    if (!allowedTypes.includes(file.type)) {
-      setErrors((prev) => ({
-        ...prev,
-        [variantId ? `variant_${variantId}_photo` : "photo"]: "Only JPG, PNG, or GIF allowed!",
-      }));
-      return;
+// Add Product
+export const addProduct = async (formData, photoFiles) => {
+  try {
+    // Validate form data
+    if (!formData.title || !formData.price || !formData.category || !formData.description) {
+      throw new Error("Missing required fields");
     }
 
-    if (file.size > maxSize) {
-      setErrors((prev) => ({
-        ...prev,
-        [variantId ? `variant_${variantId}_photo` : "photo"]: "Image must be smaller than 5MB!",
-      }));
-      return;
-    }
-
-    const previewURL = URL.createObjectURL(file);
-    if (variantId) {
-      setPhotoFiles((prev) => ({
-        ...prev,
-        variants: { ...prev.variants, [variantId]: file },
-      }));
-      setPhotoPreviews((prev) => ({
-        ...prev,
-        variants: { ...prev.variants, [variantId]: previewURL },
-      }));
-      setErrors((prev) => ({ ...prev, [`variant_${variantId}_photo`]: "" }));
-    } else {
-      setPhotoFiles((prev) => ({ ...prev, main: file }));
-      setPhotoPreviews((prev) => ({ ...prev, main: previewURL }));
-      setErrors((prev) => ({ ...prev, photo: "" }));
-    }
-  };
-
-  const addVariant = () => {
-    setFormData((prev) => ({
-      ...prev,
-      variants: [
-        ...prev.variants,
-        { _id: `v${Date.now()}`, size: "", color: "", price: "", imagePath: "" },
-      ],
-    }));
-  };
-
-  const removeVariant = (variantId) => {
-    setFormData((prev) => ({
-      ...prev,
-      variants: prev.variants.filter((v) => v._id !== variantId),
-    }));
-    setPhotoFiles((prev) => {
-      const { [variantId]: _, ...rest } = prev.variants;
-      return { ...prev, variants: rest };
-    });
-    setPhotoPreviews((prev) => {
-      const { [variantId]: _, ...rest } = prev.variants;
-      return { ...prev, variants: rest };
-    });
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = "Title is required";
-    if (!formData.price || formData.price <= 0)
-      newErrors.price = "Valid price is required";
-    if (!formData.imagePath && !photoFiles.main)
-      newErrors.photo = "Main product image is required";
-    if (!formData.category.trim()) newErrors.category = "Category is required";
-    if (!formData.description.trim())
-      newErrors.description = "Description is required";
-
-    formData.variants.forEach((v) => {
-      if (!v.size.trim())
-        newErrors[`variant_${v._id}_size`] = "Size is required";
-      if (!v.color.trim())
-        newErrors[`variant_${v._id}_color`] = "Color is required";
-      if (!v.price || v.price <= 0)
-        newErrors[`variant_${v._id}_price`] = "Valid price is required";
-      if (!v.imagePath && !photoFiles.variants[v._id])
-        newErrors[`variant_${v._id}_photo`] = "Variant image is required";
-    });
-
-    return newErrors;
-  };
-
-  const handlePhotoUploads = async () => {
-    const uploads = {};
+    // Upload main product image if exists using Cloudinary
+    let mainImageUrl = formData.imagePath;
     if (photoFiles.main) {
-      uploads.main = await uploadImage(photoFiles.main);
-    } else {
-      uploads.main = formData.imagePath;
+      mainImageUrl = await uploadImage(photoFiles.main);
     }
 
-    const variantUploads = {};
-    for (const variant of formData.variants) {
-      if (photoFiles.variants[variant._id]) {
-        variantUploads[variant._id] = await uploadImage(
-          photoFiles.variants[variant._id]
-        );
-      } else {
-        variantUploads[variant._id] = variant.imagePath;
-      }
+    // Upload variant images using Cloudinary
+    const variantsWithImages = await Promise.all(
+      formData.variants.map(async (variant) => {
+        let variantImageUrl = variant.imagePath;
+        if (photoFiles.variants[variant._id]) {
+          variantImageUrl = await uploadImage(photoFiles.variants[variant._id]);
+        }
+        return { ...variant, imagePath: variantImageUrl };
+      })
+    );
+
+    // Prepare product data
+    const productData = {
+      ...formData,
+      imagePath: mainImageUrl,
+      variants: variantsWithImages,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Add to Firestore
+    const docRef = await addDoc(productsCollection, productData);
+    return { id: docRef.id, ...productData };
+  } catch (error) {
+    console.error("Error adding product:", error);
+    throw error;
+  }
+};
+
+// Update Product
+export const updateProduct = async (productId, formData, photoFiles) => {
+  try {
+    const productRef = doc(db, "products", productId);
+    
+    // Get existing product
+    const productSnap = await getDoc(productRef);
+    if (!productSnap.exists()) {
+      throw new Error("Product not found");
     }
-    uploads.variants = variantUploads;
 
-    return uploads;
-  };
+    // Upload new main image if provided using Cloudinary
+    let mainImageUrl = formData.imagePath;
+    if (photoFiles.main) {
+      mainImageUrl = await uploadImage(photoFiles.main);
+    }
 
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      price: "",
-      imagePath: "",
-      department: "Men",
-      category: "",
-      description: "",
-      variants: [
-        { _id: `v${Date.now()}`, size: "", color: "", price: "", imagePath: "" },
-      ],
-    });
-    setPhotoFiles({ main: null, variants: {} });
-    setPhotoPreviews({ main: null, variants: {} });
-    setErrors({});
-    setIsSubmitting(false);
-  };
+    // Upload new variant images using Cloudinary
+    const variantsWithImages = await Promise.all(
+      formData.variants.map(async (variant) => {
+        let variantImageUrl = variant.imagePath;
+        if (photoFiles.variants[variant._id]) {
+          variantImageUrl = await uploadImage(photoFiles.variants[variant._id]);
+        }
+        return { ...variant, imagePath: variantImageUrl };
+      })
+    );
 
-  return {
-    formData,
-    setFormData,
-    photoFiles,
-    photoPreviews,
-    errors,
-    isSubmitting,
-    setIsSubmitting,
-    setErrors,
-    handleChange,
-    handlePhotoChange,
-    addVariant,
-    removeVariant,
-    validateForm,
-    handlePhotoUploads,
-    resetForm,
-  };
+    // Prepare updated product data
+    const updatedProductData = {
+      ...formData,
+      imagePath: mainImageUrl,
+      variants: variantsWithImages,
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Update in Firestore
+    await updateDoc(productRef, updatedProductData);
+    return { id: productId, ...updatedProductData };
+  } catch (error) {
+    console.error("Error updating product:", error);
+    throw error;
+  }
+};
+
+// Delete Product
+export const deleteProduct = async (productId) => {
+  try {
+    const productRef = doc(db, "products", productId);
+    const productSnap = await getDoc(productRef);
+    
+    if (!productSnap.exists()) {
+      throw new Error("Product not found");
+    }
+
+    // Note: Cloudinary image deletion requires the public_id
+    // You'll need to implement deleteImage in your cloudinary.js
+    // For now, images will remain in Cloudinary unless you add deletion logic
+
+    // Delete from Firestore
+    await deleteDoc(productRef);
+    return { success: true, id: productId };
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    throw error;
+  }
+};
+
+// Get Single Product
+export const getProduct = async (productId) => {
+  try {
+    const productRef = doc(db, "products", productId);
+    const productSnap = await getDoc(productRef);
+    
+    if (!productSnap.exists()) {
+      throw new Error("Product not found");
+    }
+    
+    return { id: productSnap.id, ...productSnap.data() };
+  } catch (error) {
+    console.error("Error getting product:", error);
+    throw error;
+  }
+};
+
+// Get All Products
+export const getAllProducts = async () => {
+  try {
+    const productsSnapshot = await getDocs(productsCollection);
+    const products = productsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    return products;
+  } catch (error) {
+    console.error("Error getting all products:", error);
+    throw error;
+  }
 };
