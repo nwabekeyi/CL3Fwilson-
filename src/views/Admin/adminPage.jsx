@@ -6,6 +6,7 @@ import { useAuthAdmin } from "../../hooks/useAuthAdmin";
 import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
 import { useParticipantForm } from "../../hooks/useParticipantForm";
 import { addParticipant, updateParticipant, deleteParticipant } from "../../utils/firestoreUtils";
+import ProductManager from "./ProductManager";
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -366,6 +367,8 @@ function AdminPage() {
           {errors.submission || contestantsError || participantsError}
         </div>
       )}
+
+      <ProductManager />
     </div>
   );
 }

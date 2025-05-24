@@ -12,7 +12,26 @@ const SingleProduct = ({ product, postCart }) => {
     quantity: 1,
   });
 
-  // Dummy product for when no product is selected
+  // Get preferred currency and conversion rates from sessionStorage
+  const preferredCurrency = sessionStorage.getItem("preferredCurrency") || "NGN";
+  const conversionRates = JSON.parse(sessionStorage.getItem("conversionRates")) || {
+    NGN: 1,
+    USD: 0.00061,
+    EUR: 0.00057,
+  };
+  const currencySymbols = {
+    NGN: "₦",
+    USD: "$",
+    EUR: "€",
+  };
+  const currencySymbol = currencySymbols[preferredCurrency] || "₦";
+
+  // Function to convert NGN price to selected currency
+  const convertPrice = (ngnPrice, currency) => {
+    return Number((ngnPrice * (conversionRates[currency] || 1)).toFixed(2));
+  };
+
+  // Dummy product for when no product is provided
   const dummyProduct = {
     _id: "dummy",
     title: "Product Not Available",
@@ -39,20 +58,27 @@ const SingleProduct = ({ product, postCart }) => {
     ],
   };
 
-  // Set default variant image when product or dummy product loads
+  // Use the product prop or dummyProduct
+  const displayProduct = product || dummyProduct;
+  const isDummy = displayProduct === dummyProduct;
+
+  // Convert price for display
+  const convertedPrice = convertPrice(displayProduct.price, preferredCurrency);
+  const convertedOldPrice = (convertedPrice + 30).toFixed(2);
+
+  // Set default variant image when product changes
   useEffect(() => {
-    const currentProduct = product || dummyProduct;
-    if (currentProduct.variants?.length > 0 && !state.pic) {
+    if (displayProduct.variants?.length > 0 && !state.pic) {
       setState((prev) => ({
         ...prev,
-        pic: currentProduct.variants[0].imagePath,
-        id: currentProduct.variants[0]._id,
-        color: currentProduct.variants[0].color,
-        size: currentProduct.variants[0].size,
-        selectedSize: currentProduct.variants[0].size,
+        pic: displayProduct.variants[0].imagePath,
+        id: displayProduct.variants[0]._id,
+        color: displayProduct.variants[0].color,
+        size: displayProduct.variants[0].size,
+        selectedSize: displayProduct.variants[0].size,
       }));
     }
-  }, [product, state.pic]);
+  }, [displayProduct, state.pic]);
 
   const handleThumbnailClick = (item) => {
     setState((prev) => ({
@@ -66,62 +92,63 @@ const SingleProduct = ({ product, postCart }) => {
   };
 
   const onAddClicked = () => {
-    if (product) {
-      const selectedVariant = product.variants.find((v) => v._id === state.id) || product.variants[0];
+    if (!isDummy) {
+      const selectedVariant = displayProduct.variants.find((v) => v._id === state.id) || displayProduct.variants[0];
       setState((prev) => ({ ...prev, quantity: prev.quantity + 1 }));
       postCart({
-        productId: state.id || product.variants[0]._id,
+        productId: state.id || displayProduct.variants[0]._id,
         increase: true,
         variantDetails: {
           size: selectedVariant.size,
           color: selectedVariant.color,
           imagePath: selectedVariant.imagePath,
-          price: selectedVariant.price,
-          title: product.title,
+          price: selectedVariant.price, // Store NGN price
+          title: displayProduct.title,
+          currency: preferredCurrency, // Include currency
         },
       });
     }
   };
 
   const onRemoveClicked = () => {
-    if (product && state.quantity > 1) {
-      const selectedVariant = product.variants.find((v) => v._id === state.id) || product.variants[0];
+    if (!isDummy && state.quantity > 1) {
+      const selectedVariant = displayProduct.variants.find((v) => v._id === state.id) || displayProduct.variants[0];
       setState((prev) => ({ ...prev, quantity: prev.quantity - 1 }));
       postCart({
-        productId: state.id || product.variants[0]._id,
+        productId: state.id || displayProduct.variants[0]._id,
         decrease: true,
         variantDetails: {
           size: selectedVariant.size,
           color: selectedVariant.color,
           imagePath: selectedVariant.imagePath,
-          price: selectedVariant.price,
-          title: product.title,
+          price: selectedVariant.price, // Store NGN price
+          title: displayProduct.title,
+          currency: preferredCurrency, // Include currency
         },
       });
     }
   };
 
   const addToBag = () => {
-    if (product) {
-      const selectedVariant = product.variants.find((v) => v._id === state.id) || product.variants[0];
+    if (!isDummy) {
+      const selectedVariant = displayProduct.variants.find((v) => v._id === state.id) || displayProduct.variants[0];
       postCart({
-        productId: state.id || product.variants[0]._id,
+        productId: state.id || displayProduct.variants[0]._id,
         variantDetails: {
           size: selectedVariant.size,
           color: selectedVariant.color,
           imagePath: selectedVariant.imagePath,
-          price: selectedVariant.price,
-          title: product.title,
+          price: selectedVariant.price, // Store NGN price
+          title: displayProduct.title,
+          currency: preferredCurrency, // Include currency
         },
       }).then((res) => {
         console.log("Cart updated:", res);
+      }).catch((err) => {
+        console.error("Error updating cart:", err);
       });
     }
   };
-
-  // Use dummy product if no product is selected
-  const displayProduct = product || dummyProduct;
-  const isDummy = displayProduct === dummyProduct;
 
   return (
     <div className="container single_product_container">
@@ -158,8 +185,8 @@ const SingleProduct = ({ product, postCart }) => {
                   <div className="single_product_thumbnails">
                     <ul>
                       {displayProduct.variants && displayProduct.variants.length > 0 ? (
-                        displayProduct.variants.slice(0, 4).map((item, index) => (
-                          <li key={index} onClick={() => handleThumbnailClick(item)}>
+                        displayProduct.variants.slice(0, 4).map((item) => (
+                          <li key={item._id} onClick={() => handleThumbnailClick(item)}>
                             <img
                               src={item.imagePath}
                               alt={`${item.color} ${item.size}`}
@@ -196,16 +223,12 @@ const SingleProduct = ({ product, postCart }) => {
                 <h2>{displayProduct.title}</h2>
                 <p>{displayProduct.description}</p>
               </div>
-              <div className="free_delivery d-flex flex-row align-items-center justify-content-center">
-                <span>
-                  <i className="fas fa-truck"></i>
-                </span>
-                <span>free delivery</span>
-              </div>
               <div className="original_price">
-                ₹{(parseFloat(displayProduct.price) + 30).toFixed(2)}
+                {currencySymbol}{convertedOldPrice}
               </div>
-              <div className="product_price">₹{displayProduct.price.toFixed(2)}</div>
+              <div className="product_price">
+                {currencySymbol}{convertedPrice.toFixed(2)}
+              </div>
               <ul className="star_rating">
                 <li><i className="fa fa-star" aria-hidden="true"></i></li>
                 <li><i className="fa fa-star" aria-hidden="true"></i></li>
@@ -217,9 +240,9 @@ const SingleProduct = ({ product, postCart }) => {
                 <span>Select Color:</span>
                 <ul>
                   {displayProduct.variants && displayProduct.variants.length > 0 ? (
-                    displayProduct.variants.map((item, index) => (
+                    displayProduct.variants.map((item) => (
                       <li
-                        key={index}
+                        key={item._id}
                         style={{ background: item.color.toLowerCase() }}
                         onClick={() => handleThumbnailClick(item)}
                       ></li>
@@ -252,6 +275,20 @@ const SingleProduct = ({ product, postCart }) => {
                 <div className="product_favorite d-flex flex-column align-items-center justify-content-center">
                   <i className="far fa-heart"></i>
                 </div>
+              </div>
+              {/* Delivery Section */}
+              <div className="delivery_info mt-3">
+                <h5>Delivery</h5>
+                <p>
+                  The cost of delivery will be determined by the method of dispatch. Delivery will take anywhere between 7 days to 3 weeks depending on the product, location, and delivery timeline. Please speak with our consultants for more detailed assistance with delivery.
+                </p>
+              </div>
+              {/* Return Section */}
+              <div className="return_info mt-3">
+                <h5>Return</h5>
+                <p>
+                  Returns are accepted within 30 days of delivery, provided items are unused and in original condition. Contact our support team to initiate a return.
+                </p>
               </div>
               {isDummy && (
                 <p className="text-danger mt-3">

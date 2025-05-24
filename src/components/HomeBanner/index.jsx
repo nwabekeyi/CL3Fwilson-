@@ -79,7 +79,7 @@ function HomeBanner() {
     {
       background: WorkshopImage3,
       subtitle: `Pageant Showcase ${currentYear}`,
-      title: "Showcase Your Designs on the Runway",
+      title: "Showcase Your Designs",
       link: "#registration-form",
     },
   ];

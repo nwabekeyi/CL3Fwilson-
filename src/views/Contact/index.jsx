@@ -26,7 +26,7 @@ function ContactPage() {
           </div>
           <div className="col-md-4 contact-detail-box">
             <h4>📞 Phone</h4>
-            <p>+234 816 137 7696</p>
+            <p>+234 902 021 9518</p>
           </div>
           <div className="col-md-4 contact-detail-box">
             <h4>📧 Email</h4>
