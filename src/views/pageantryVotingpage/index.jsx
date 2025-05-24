@@ -64,8 +64,8 @@ function PageantVotingPage() {
         }}
       >
         <div className="voting-banner-overlay">
-          <h1>Vote for Your Favorite MenStyle Contestant</h1>
-          <p>Support the next fashion icon by casting your vote!</p>
+          <h1>Vote for Your Favorite Contestant</h1>
+          <p>Support your favorite fashion designer by casting your vote!</p>
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation } from "react-router-dom"; // Import useLocation
+import { useLocation } from "react-router-dom";
 import { Carousel } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
@@ -8,13 +8,14 @@ import BackgroundImage1 from "../../assets/images/heroImage.jpeg";
 import BackgroundImage2 from "../../assets/images/heroImage2.jpeg";
 import BackgroundImage3 from "../../assets/images/heroImage3.jpeg";
 
-// Placeholder images for wilster (women's fashion) and workshop (you can replace these)
-import WilsterImage1 from "../../assets/images/wilster1.jpg"; // Add these images to your assets
+// Placeholder images for wilster (women's fashion) and workshop
+import WilsterImage1 from "../../assets/images/wilster1.jpg";
 import WilsterImage2 from "../../assets/images/wilster2.jpg";
 import WilsterImage3 from "../../assets/images/wilster3.jpg";
 import WorkshopImage1 from "../../assets/images/workshop1.jpg";
 import WorkshopImage2 from "../../assets/images/workshop2.jpg";
 import WorkshopImage3 from "../../assets/images/workshop3.jpg";
+
 const currentYear = new Date().getFullYear();
 
 function HomeBanner() {
@@ -66,19 +67,19 @@ function HomeBanner() {
   const workshopContent = [
     {
       background: WorkshopImage1,
-      subtitle: `Fashion Workshop Pageant ${currentYear}`,
-      title: "Join Our Annual Fashion Design Event",
+      subtitle: `Fashion Workshop ${currentYear}`,
+      title: "Join Our Annual Fashion Design Workshop",
       link: "#registration-form",
     },
     {
       background: WorkshopImage2,
       subtitle: `Workshop Registration Now Open`,
-      title: "Learn from Industry Experts",
+      title: "Learn from Other Fashion Designers",
       link: "#registration-form",
     },
     {
       background: WorkshopImage3,
-      subtitle: `Pageant Showcase ${currentYear}`,
+      subtitle: `Project Cl3fwilson ${currentYear}`,
       title: "Showcase Your Designs",
       link: "#registration-form",
     },
@@ -100,36 +101,57 @@ function HomeBanner() {
       contentToDisplay = homeContent; // Fallback to home content
   }
 
+  // Handle smooth scrolling for registration form
+  const handleScrollToForm = (e) => {
+    e.preventDefault();
+    const formElement = document.querySelector("#registration-form");
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <Carousel>
-      {contentToDisplay.map((item, index) => (
-        <Carousel.Item key={index}>
-          <div
-            className="d-block w-100 main_slider"
-            style={{
-              backgroundImage: `url(${item.background})`,
-            }}
-          >
-            <div className="container fill_height">
-              <div className="row align-items-center fill_height">
-                <div className="col">
-                  <div className="main_slider_content" data-aos="fade-right">
-                    <h6>{item.subtitle}</h6>
-                    <h1>{item.title}</h1>
-                    <div className="red_button shop_now_button">
-                      <Link to={item.link}>{location.pathname === '/about/wilster' 
-                      ? 'coming soon'
-                      : location.pathname === '/workshop' ? 'Register'
-                      :'shop now'
-                    }</Link>
+      {contentToDisplay.map((item, index) => {
+        // Determine link text based on pathname
+        const linkText =
+          location.pathname === "/about/wilster"
+            ? "coming soon"
+            : location.pathname === "/workshop"
+            ? "Register"
+            : "shop now";
+
+        return (
+          <Carousel.Item key={index}>
+            <div
+              className="d-block w-100 main_slider"
+              style={{
+                backgroundImage: `url(${item.background})`,
+              }}
+            >
+              <div className="container fill_height">
+                <div className="row align-items-center fill_height">
+                  <div className="col">
+                    <div className="main_slider_content" data-aos="fade-right">
+                      <h6>{item.subtitle}</h6>
+                      <h1>{item.title}</h1>
+                      <div className="red_button shop_now_button">
+                        {linkText === "Register" ? (
+                          <a href="#registration-form" onClick={handleScrollToForm}>
+                            {linkText}
+                          </a>
+                        ) : (
+                          <Link to={item.link}>{linkText}</Link>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </Carousel.Item>
-      ))}
+          </Carousel.Item>
+        );
+      })}
     </Carousel>
   );
 }
