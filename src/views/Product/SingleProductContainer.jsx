@@ -1,13 +1,20 @@
-import { connect } from "react-redux";
+import React from "react";
+import { useDispatch } from "react-redux";
 import SingleProduct from "./SingleProduct";
 import { postCart } from "../../redux/slices/cartSlice";
 
-const mapStoreToProps = (state) => ({
-  product: state.product.selectedProduct,
-});
+const SingleProductContainer = () => {
+  const dispatch = useDispatch();
 
-const mapDispatchToProps = {
-  postCart,
+  // Retrieve product from sessionStorage
+  const selectedProduct = JSON.parse(sessionStorage.getItem("selectedProduct") || "{}");
+console.log(selectedProduct)
+  // Pass postCart as a prop, dispatching the action when called
+  const handlePostCart = (cartData) => {
+    dispatch(postCart(cartData));
+  };
+
+  return <SingleProduct product={selectedProduct} postCart={handlePostCart} />;
 };
 
-export default connect(mapStoreToProps, mapDispatchToProps)(SingleProduct);
+export default SingleProductContainer;
