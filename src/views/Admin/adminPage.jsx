@@ -1,218 +1,46 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { getAuth } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { db } from "../../firebase/config";
-import {
-  collection,
-  addDoc,
-  getDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  doc,
-  serverTimestamp,
-  onSnapshot,
-  query,
-  where,
-} from "firebase/firestore";
-import { uploadImage } from "../../utils/cloudinary";
+import { useAuthAdmin } from "../../hooks/useAuthAdmin";
+import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
+import { useParticipantForm } from "../../hooks/useParticipantForm";
+import { addParticipant, updateParticipant, deleteParticipant } from "../../utils/firestoreUtils";
 
 function AdminPage() {
-  const [contestants, setContestants] = useState([]);
-  const [participants, setParticipants] = useState([]);
-  const [editParticipant, setEditParticipant] = useState(null);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    stageName: "",
-    email: "",
-    gender: "",
-    age: "",
-    nationality: "",
-    stateOfOrigin: "",
-    location: "",
-    phone: "",
-    whatsapp: "",
-    instagram: "",
-    bio: "",
-    photoURL: "",
-  });
-  const [photoFile, setPhotoFile] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null);
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      console.log("Auth State Changed:", user ? user.email : "No user logged in");
-      if (user && user.email === "nwabekeyiprecious@gmail.com") {
-        fetchContestants();
-        fetchParticipants();
-      } else {
-        console.log("Unauthorized or no user, redirecting...");
-        setContestants([]);
-        setParticipants([]);
-        navigate("/sign-in", { state: { from: "/admin" } });
-      }
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, [navigate]);
-
-  const fetchContestants = () => {
-    try {
-      console.log("Setting up contestants listener...");
-      const contestantsCollection = collection(db, "pageantContestants");
-      console.log("Collection reference:", contestantsCollection.path);
-      return onSnapshot(contestantsCollection, (snapshot) => {
-        console.log("Contestants snapshot received at:", new Date().toISOString());
-        console.log("Total documents fetched:", snapshot.size);
-        const contestantsList = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        console.log("All contestants:", contestantsList);
-        const pendingContestants = contestantsList.filter(
-          (c) => c.status?.toLowerCase() === "pending"
-        );
-        console.log("Pending contestants:", pendingContestants);
-        setContestants(pendingContestants);
-      }, (error) => {
-        console.error("Error fetching contestants:", error);
-        setErrors({ ...errors, fetch: `Failed to fetch contestants: ${error.message}` });
-      });
-    } catch (error) {
-      console.error("Error setting up contestants listener:", error);
-      setErrors({ ...errors, fetch: `Failed to fetch contestants: ${error.message}` });
-    }
-  };
-
-  const fetchParticipants = () => {
-    try {
-      console.log("Setting up participants listener...");
-      const participantsCollection = collection(db, "participants");
-      console.log("Collection reference:", participantsCollection.path);
-
-      // Initial fetch to ensure state is correct
-      getDocs(participantsCollection).then((snapshot) => {
-        const initialParticipants = snapshot.docs.map((doc) => ({
-          docId: doc.id, // Use Firestore document ID
-          ...doc.data(),
-        }));
-        console.log("Initial participants fetch:", initialParticipants);
-        setParticipants(initialParticipants);
-      }).catch((error) => {
-        console.error("Initial participants fetch failed:", error);
-        setErrors({ ...errors, fetch: `Failed to fetch participants initially: ${error.message}` });
-      });
-
-      // Real-time listener
-      return onSnapshot(participantsCollection, (snapshot) => {
-        console.log("Participants snapshot received at:", new Date().toISOString());
-        console.log("Total participants fetched:", snapshot.size);
-        const participantsList = snapshot.docs.map((doc) => ({
-          docId: doc.id, // Use Firestore document ID
-          ...doc.data(),
-        }));
-        console.log("All participants:", participantsList);
-        setParticipants(participantsList);
-      }, (error) => {
-        console.error("Error in participants onSnapshot:", error);
-        setErrors({ ...errors, fetch: `Failed to fetch participants: ${error.message}` });
-        // Fallback fetch
-        getDocs(participantsCollection).then((snapshot) => {
-          const participantsList = snapshot.docs.map((doc) => ({
-            docId: doc.id, // Use Firestore document ID
-            ...doc.data(),
-          }));
-          console.log("Fallback fetch participants:", participantsList);
-          setParticipants(participantsList);
-        }).catch((fallbackError) => {
-          console.error("Fallback fetch failed:", fallbackError);
-          setErrors({ ...errors, fetch: `Failed to fetch participants: ${fallbackError.message}` });
-        });
-      });
-    } catch (error) {
-      console.error("Error setting up participants listener:", error);
-      setErrors({ ...errors, fetch: `Failed to fetch participants: ${error.message}` });
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    setErrors({ ...errors, [name]: "" });
-  };
-
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
-    const maxSize = 5 * 1024 * 1024;
-
-    if (!allowedTypes.includes(file.type)) {
-      setErrors({ ...errors, photo: "Only JPG, PNG, or GIF allowed!" });
-      return;
-    }
-
-    if (file.size > maxSize) {
-      setErrors({ ...errors, photo: "Image must be smaller than 5MB!" });
-      return;
-    }
-
-    const previewURL = URL.createObjectURL(file);
-    setPhotoPreview(previewURL);
-    setPhotoFile(file);
-    setErrors({ ...errors, photo: "" });
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
-    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
-      newErrors.email = "Valid email is required";
-    if (!formData.age || formData.age < 18 || formData.age > 35)
-      newErrors.age = "Age must be between 18 and 35";
-    if (!formData.phone.match(/^\+?[1-9]\d{1,14}$/))
-      newErrors.phone = "Valid phone number is required";
-    if (!formData.bio.trim() || formData.bio.length < 50)
-      newErrors.bio = "Bio must be at least 50 characters";
-    return newErrors;
-  };
+  const { loading } = useAuthAdmin();
+  const { data: contestants, error: contestantsError } = useFirestoreCollection(
+    db,
+    "pageantContestants",
+    (c) => c.status?.toLowerCase() === "pending"
+  );
+  const { data: participants, error: participantsError } = useFirestoreCollection(db, "participants");
+  const {
+    formData,
+    photoFile,
+    photoPreview,
+    errors,
+    isSubmitting,
+    setIsSubmitting,
+    setErrors,
+    handleChange,
+    handlePhotoChange,
+    validateForm,
+    handlePhotoUpload,
+    resetForm,
+    setFormData,
+  } = useParticipantForm();
+  const [editParticipant, setEditParticipant] = useState(null);
 
   const handleAddParticipant = async (contestant) => {
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
-      let photoURL = contestant.photoURL;
-      if (photoFile) {
-        photoURL = await uploadImage(photoFile);
-      }
-
-      const participantData = {
-        ...contestant,
-        uid: contestant.id, // Store pageantContestants document ID
-        photoURL,
-        voters: [],
-        createdAt: serverTimestamp(),
-        status: "active",
-      };
-
-      console.log("Adding participant to Firestore with data:", participantData);
-      const participantRef = await addDoc(collection(db, "participants"), participantData);
-      console.log("Participant added with ID:", participantRef.id);
-
-      const contestantRef = doc(db, "pageantContestants", contestant.id);
-      await updateDoc(contestantRef, { status: "approved" });
-      console.log("Contestant approved:", contestant.id);
-
-      setPhotoFile(null);
-      setPhotoPreview(null);
+      const photoURL = await handlePhotoUpload(contestant.photoURL);
+      await addParticipant(db, contestant, photoURL);
+      resetForm();
     } catch (error) {
-      console.error("Error adding participant:", error);
-      setErrors({ ...errors, submission: `Failed to add participant: ${error.message}` });
+      setErrors({ ...errors, submission: error.message });
     } finally {
       setIsSubmitting(false);
     }
@@ -235,7 +63,6 @@ function AdminPage() {
       bio: participant.bio,
       photoURL: participant.photoURL,
     });
-    setPhotoPreview(participant.photoURL);
   };
 
   const handleUpdateParticipant = async (e) => {
@@ -250,120 +77,20 @@ function AdminPage() {
     }
 
     try {
-      let photoURL = formData.photoURL;
-      if (photoFile) {
-        photoURL = await uploadImage(photoFile);
-      }
-
-      const participantRef = doc(db, "participants", editParticipant.docId);
-      await updateDoc(participantRef, {
-        ...formData,
-        photoURL,
-        age: Number(formData.age),
-        updatedAt: serverTimestamp(),
-      });
-
+      const photoURL = await handlePhotoUpload(formData.photoURL);
+      await updateParticipant(db, editParticipant.docId, formData, photoURL);
       setEditParticipant(null);
-      setFormData({
-        fullName: "",
-        stageName: "",
-        email: "",
-        gender: "",
-        age: "",
-        nationality: "",
-        stateOfOrigin: "",
-        location: "",
-        phone: "",
-        whatsapp: "",
-        instagram: "",
-        bio: "",
-        photoURL: "",
-      });
-      setPhotoFile(null);
-      setPhotoPreview(null);
+      resetForm();
     } catch (error) {
-      console.error("Error updating participant:", error);
-      setErrors({ ...errors, submission: `Failed to update participant: ${error.message}` });
+      setErrors({ ...errors, submission: error.message });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDeleteParticipant = async (participantDocId) => {
-    try {
-      console.log("Attempting to delete participant with docId:", participantDocId);
-      console.log("Current participants state:", participants);
-
-      // Check if participant exists in state
-      const participantInState = participants.find((p) => p.docId === participantDocId);
-      if (!participantInState) {
-        console.error("Participant not found in state:", participantDocId);
-        setErrors({ ...errors, submission: `Participant ${participantDocId} not found in local state` });
-        return;
-      }
-      console.log("Participant found in state:", participantInState);
-
-      // Try to fetch the participant document
-      const participantRef = doc(db, "participants", participantDocId);
-      const participantSnap = await getDoc(participantRef);
-
-      if (participantSnap.exists()) {
-        // Delete from participants
-        await deleteDoc(participantRef);
-        console.log("Participant deleted from participants:", participantDocId);
-      } else {
-        console.warn("Participant document not found in Firestore:", participantDocId);
-        // Remove from state to prevent further errors
-        setParticipants(participants.filter((p) => p.docId !== participantDocId));
-      }
-
-      // Update pageantContestants to pending using uid
-      if (participantInState.uid) {
-        const contestantRef = doc(db, "pageantContestants", participantInState.uid);
-        const contestantSnap = await getDoc(contestantRef);
-        if (contestantSnap.exists()) {
-          await updateDoc(contestantRef, { status: "pending" });
-          console.log("Contestant status updated to pending in pageantContestants:", participantInState.uid);
-        } else {
-          console.warn("Contestant document not found in pageantContestants:", participantInState.uid);
-          setErrors({
-            ...errors,
-            submission: `Contestant ${participantInState.uid} not found in pageantContestants`,
-          });
-          return;
-        }
-      } else {
-        console.warn("No uid found in participant state:", participantDocId);
-        // Fallback: Try to find pageantContestants document by email
-        const contestantsCollection = collection(db, "pageantContestants");
-        const q = query(contestantsCollection, where("email", "==", participantInState.email));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-          const contestantDoc = querySnapshot.docs[0];
-          await updateDoc(doc(db, "pageantContestants", contestantDoc.id), { status: "pending" });
-          console.log("Contestant status updated to pending via email match:", contestantDoc.id);
-        } else {
-          console.warn("No matching contestant found in pageantContestants for email:", participantInState.email);
-          setErrors({
-            ...errors,
-            submission: `No contestant found in pageantContestants for participant ${participantDocId}`,
-          });
-          return;
-        }
-      }
-
-      // Scroll to pending contestants table
-      document.getElementById("pending-contestants").scrollIntoView({ behavior: "smooth" });
-
-    } catch (error) {
-      console.error("Error deleting participant:", error);
-      setErrors({ ...errors, submission: `Failed to delete participant: ${error.message}` });
-    }
+  const handleDeleteParticipantAction = (participantDocId) => {
+    deleteParticipant(db, participantDocId, participants, setErrors, setParticipants);
   };
-
-  useEffect(() => {
-    console.log("Contestants state updated:", contestants);
-  }, [contestants]);
 
   if (loading) return <div>Loading...</div>;
 
@@ -373,7 +100,7 @@ function AdminPage() {
         <h2>Admin Dashboard - Manage Participants</h2>
         <button
           className="btn btn-secondary mb-3"
-          onClick={() => getAuth().signOut().then(() => navigate("/fashion-cube/login"))}
+          onClick={() => getAuth().signOut().then(() => navigate("/sign-up"))}
         >
           Sign Out
         </button>
@@ -443,7 +170,7 @@ function AdminPage() {
                     </button>
                     <button
                       className="btn btn-danger"
-                      onClick={() => handleDeleteParticipant(participant.docId)}
+                      onClick={() => handleDeleteParticipantAction(participant.docId)}
                       disabled={isSubmitting}
                     >
                       Delete
@@ -469,9 +196,7 @@ function AdminPage() {
                 value={formData.fullName}
                 onChange={handleChange}
               />
-              {errors.fullName && (
-                <span className="error">{errors.fullName}</span>
-              )}
+              {errors.fullName && <span className="error">{errors.fullName}</span>}
             </div>
             <div className="form-group">
               <label htmlFor="stageName">Stage Name:</label>
@@ -627,23 +352,7 @@ function AdminPage() {
               className="btn btn-secondary ms-2"
               onClick={() => {
                 setEditParticipant(null);
-                setPhotoPreview(null);
-                setPhotoFile(null);
-                setFormData({
-                  fullName: "",
-                  stageName: "",
-                  email: "",
-                  gender: "",
-                  age: "",
-                  nationality: "",
-                  stateOfOrigin: "",
-                  location: "",
-                  phone: "",
-                  whatsapp: "",
-                  instagram: "",
-                  bio: "",
-                  photoURL: "",
-                });
+                resetForm();
               }}
             >
               Cancel
@@ -652,11 +361,10 @@ function AdminPage() {
         </div>
       )}
 
-      {errors.submission && (
-        <div className="alert alert-danger mt-3">{errors.submission}</div>
-      )}
-      {errors.fetch && (
-        <div className="alert alert-danger mt-3">{errors.fetch}</div>
+      {(errors.submission || contestantsError || participantsError) && (
+        <div className="alert alert-danger mt-3">
+          {errors.submission || contestantsError || participantsError}
+        </div>
       )}
     </div>
   );
