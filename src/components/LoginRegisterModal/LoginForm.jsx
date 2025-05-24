@@ -56,7 +56,6 @@ const LoginForm = ({ forgotPasswordClicked, registerClicked }) => {
   };
 
   return (
-    <div>
       <div className="login-form">
         <h2>Login</h2>
         {error && <div className="alert alert-danger">{error}</div>}
@@ -109,7 +108,6 @@ const LoginForm = ({ forgotPasswordClicked, registerClicked }) => {
           New user? Please Register
         </div>
       </div>
-    </div>
   );
 };
 

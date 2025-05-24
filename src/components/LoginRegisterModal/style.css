@@ -5,12 +5,15 @@
  */
 
 .login-form {
-  width: 100%;
-
+  width: 40%;
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   border-radius: 4px;
-  margin: auto;
+  margin: 250px auto auto auto;
+  height: 50vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .form-group {

@@ -41,16 +41,16 @@ function PageantRegistrationPage() {
     if (!file) return;
 
     // Validate file type and size
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(file.type)) {
-      setErrors({ ...errors, photo: 'Only JPG, PNG, or GIF allowed!' });
+      setErrors({ ...errors, photo: "Only JPG, PNG, or GIF allowed!" });
       return;
     }
 
     if (file.size > maxSize) {
-      setErrors({ ...errors, photo: 'Image must be smaller than 5MB!' });
+      setErrors({ ...errors, photo: "Image must be smaller than 5MB!" });
       return;
     }
 
@@ -60,7 +60,7 @@ function PageantRegistrationPage() {
 
     // Update form data
     setFormData({ ...formData, photo: file });
-    setErrors({ ...errors, photo: '' });
+    setErrors({ ...errors, photo: "" });
   };
 
   const validateForm = () => {
@@ -82,7 +82,7 @@ function PageantRegistrationPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -92,7 +92,7 @@ function PageantRegistrationPage() {
 
     try {
       // Upload photo to Cloudinary
-      let photoURL = '';
+      let photoURL = "";
       if (formData.photo) {
         photoURL = await uploadImage(formData.photo);
       }
@@ -113,12 +113,12 @@ function PageantRegistrationPage() {
         bio: formData.bio,
         photoURL,
         createdAt: serverTimestamp(),
-        status: 'pending'
+        status: "pending",
       };
 
       // Save to Firestore
       await addDoc(collection(db, "pageantContestants"), contestantData);
-      
+
       setSubmitted(true);
       // Reset form
       setFormData({
@@ -139,13 +139,11 @@ function PageantRegistrationPage() {
       setPhotoPreview(null);
     } catch (error) {
       console.error("Error submitting form:", error);
-      setErrors({...errors, submission: "Failed to submit form. Please try again."});
+      setErrors({ ...errors, submission: "Failed to submit form. Please try again." });
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  // ... [keep all your existing JSX return code, but update the photo input section as shown below]
 
   return (
     <div className="pageant-registration-page">
@@ -163,8 +161,39 @@ function PageantRegistrationPage() {
         </div>
       </div>
 
+      {/* About Project Cl3fwilson Section */}
+      <div className="container about-project-section mt-5 mb-5" data-aos="fade-up">
+        <div className="row justify-content-center">
+          <div className="col-md-8">
+            <div className="section_title">
+              <h2>About Project Cl3fwilson</h2>
+            </div>
+            <p style={{marginTop:'30px'}}>
+              Project Cl3fwilson is a semi-annual fashion workshop and competition that creates a platform for fashion designers. It works to educate emerging fashion designers about sustainable theories, fashion business, branding, and marketing.
+            </p>
+            <p>
+              The goal of this workshop is to help aspiring fashion designers develop a global brand mindset. Designers will be taught how to define and position their brands to the same standards as global brands.
+            </p>
+            <p>
+              The competition creates a unique platform for passionate and talented fashion game-changers and rewards the best with career-changing prizes to maximize long-term impact. Each fashion competition cycle takes participants on an educational journey lasting for a month.
+            </p>
+            <h5>Who Can Participate?</h5>
+            <ul>
+              <li>Fashion creators</li>
+              <li>Fashion designers</li>
+              <li>Fashion illustrators</li>
+              <li>Participants must be aged 18 years or older</li>
+            </ul>
+            <h5>Duration of the Show</h5>
+            <p>
+              The show will run for a period of one month. The contestants will be housed in a very conducive environment for a period of one month, relating with one another, learning, and completing fashion tasks and challenges.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Registration Form Section */}
-      <div id='registration-form' className="container pageant-form-container" data-aos="fade-up">
+      <div id="registration-form" className="container pageant-form-container" data-aos="fade-up">
         <div className="row justify-content-center">
           <div className="col-md-8">
             {submitted ? (
@@ -183,9 +212,7 @@ function PageantRegistrationPage() {
                 <div className="section_title">
                   <h2>Contestant Registration</h2>
                 </div>
-                <h5 className="my-4">
-                  Participant Details
-                </h5>
+                <h5 className="my-4">Participant Details</h5>
                 <div className="form-group">
                   <label htmlFor="fullName">Full Name:</label>
                   <input
@@ -209,10 +236,9 @@ function PageantRegistrationPage() {
                     id="stageName"
                     name="stageName"
                     className="form-control"
-                    placeholder="Your stage Name"
+                    placeholder="Your Stage Name"
                     value={formData.stageName}
                     onChange={handleChange}
-                    required
                   />
                   {errors.stageName && (
                     <span className="error">{errors.stageName}</span>
@@ -228,17 +254,16 @@ function PageantRegistrationPage() {
                     onChange={handleChange}
                     required
                   >
-                    <option value="" disabled hidden>Select your gender</option>
+                    <option value="" disabled hidden>
+                      Select your gender
+                    </option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                     <option value="non-binary">Non-binary</option>
                     <option value="prefer-not-to-say">I prefer not to say</option>
                   </select>
-                  {errors.gender && (
-                    <span className="error">{errors.gender}</span>
-                  )}
-              </div>
-
+                  {errors.gender && <span className="error">{errors.gender}</span>}
+                </div>
                 <div className="form-group">
                   <label htmlFor="age">Age:</label>
                   <input
@@ -267,35 +292,41 @@ function PageantRegistrationPage() {
                     onChange={handleChange}
                     required
                   />
-                  {errors.nationality && <span className="error">{errors.nationality}</span>}
+                  {errors.nationality && (
+                    <span className="error">{errors.nationality}</span>
+                  )}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="state">State of origin:</label>
+                  <label htmlFor="stateOfOrigin">State of Origin:</label>
                   <input
                     type="text"
-                    id="state"
+                    id="stateOfOrigin"
                     name="stateOfOrigin"
                     className="form-control"
-                    placeholder="Your State of origin"
+                    placeholder="Your State of Origin"
                     value={formData.stateOfOrigin}
                     onChange={handleChange}
                     required
                   />
-                  {errors.stateOfOrigin && <span className="error">{errors.stateOfOrigin}</span>}
+                  {errors.stateOfOrigin && (
+                    <span className="error">{errors.stateOfOrigin}</span>
+                  )}
                 </div>
-                   <div className="form-group">
+                <div className="form-group">
                   <label htmlFor="location">Current Location:</label>
                   <input
                     type="text"
                     id="location"
                     name="location"
                     className="form-control"
-                    placeholder="Your current location"
+                    placeholder="Your Current Location"
                     value={formData.location}
                     onChange={handleChange}
                     required
                   />
-                  {errors.location && <span className="error">{errors.location}</span>}
+                  {errors.location && (
+                    <span className="error">{errors.location}</span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label htmlFor="bio">Bio (Tell us about yourself):</label>
@@ -322,26 +353,24 @@ function PageantRegistrationPage() {
                     onChange={handlePhotoChange}
                     required
                   />
-                  
                   {/* Image Preview */}
                   {photoPreview && (
                     <div className="mt-2">
                       <img
                         src={photoPreview}
                         alt="Preview"
-                        style={{ maxWidth: '200px', maxHeight: '200px' }}
+                        style={{ maxWidth: "200px", maxHeight: "200px" }}
                         className="img-thumbnail"
                       />
                     </div>
                   )}
-
                   {/* Upload Progress Bar */}
                   {isSubmitting && (
                     <div className="progress mt-2">
                       <div
                         className="progress-bar progress-bar-striped progress-bar-animated"
                         role="progressbar"
-                        style={{ width: '100%' }}
+                        style={{ width: "100%" }}
                         aria-valuenow="100"
                         aria-valuemin="0"
                         aria-valuemax="100"
@@ -350,12 +379,9 @@ function PageantRegistrationPage() {
                       </div>
                     </div>
                   )}
-
                   {errors.photo && <div className="text-danger">{errors.photo}</div>}
                 </div>
-                 <h5 className="my-4">
-                  Contact Information
-                </h5>
+                <h5 className="my-4">Contact Information</h5>
                 <div className="form-group">
                   <label htmlFor="phone">Phone Number:</label>
                   <input
@@ -371,18 +397,20 @@ function PageantRegistrationPage() {
                   {errors.phone && <span className="error">{errors.phone}</span>}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="whatsapp">Whatsapp Number:</label>
+                  <label htmlFor="whatsapp">WhatsApp Number:</label>
                   <input
                     type="tel"
                     id="whatsapp"
                     name="whatsapp"
                     className="form-control"
-                    placeholder="Your Whatsapp Number"
+                    placeholder="Your WhatsApp Number"
                     value={formData.whatsapp}
                     onChange={handleChange}
                     required
                   />
-                  {errors.whatsapp && <span className="error">{errors.whatsapp}</span>}
+                  {errors.whatsapp && (
+                    <span className="error">{errors.whatsapp}</span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label htmlFor="email">Email:</label>
@@ -410,17 +438,22 @@ function PageantRegistrationPage() {
                     onChange={handleChange}
                     required
                   />
-                  {errors.instagram && <span className="error">{errors.instagram}</span>}
+                  {errors.instagram && (
+                    <span className="error">{errors.instagram}</span>
+                  )}
                 </div>
-               
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="red_button pageant-submit-button"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
                     <>
-                      <span className="spinner-border spinner-border-sm me-2 h-auto" role="status" aria-hidden="true"></span>
+                      <span
+                        className="spinner-border spinner-border-sm me-2 h-auto"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
                       Submitting...
                     </>
                   ) : (

@@ -12,8 +12,8 @@ function Benefit(params) {
                 <i className="fa fa-truck" aria-hidden="true"></i>
               </div>
               <div className="benefit_content">
-                <h6>free shipping</h6>
-                <p>Suffered Alteration in Some Form</p>
+                <h6>Worldwide Shipping</h6>
+                <p>Get your order anywhere</p>
               </div>
             </div>
           </div>
@@ -23,8 +23,8 @@ function Benefit(params) {
                 <i className="far fa-money-bill-alt"></i>
               </div>
               <div className="benefit_content">
-                <h6>cach on delivery</h6>
-                <p>The Internet Tend To Repeat</p>
+                <h6>Secured Payment</h6>
+                <p>Payment cards accepted</p>
               </div>
             </div>
           </div>
@@ -34,8 +34,8 @@ function Benefit(params) {
                 <i className="fa fa-undo" aria-hidden="true"></i>
               </div>
               <div className="benefit_content">
-                <h6>45 days return</h6>
-                <p>Making it Look Like Readable</p>
+                <h6>Refund Policy</h6>
+                <p>Terms and conditions apply</p>
               </div>
             </div>
           </div>
@@ -45,8 +45,8 @@ function Benefit(params) {
                 <i className="far fa-clock"></i>
               </div>
               <div className="benefit_content">
-                <h6>opening all week</h6>
-                <p>8AM - 09PM</p>
+                <h6>Support 24/7</h6>
+                <p>You can contact us anytime</p>
               </div>
             </div>
           </div>

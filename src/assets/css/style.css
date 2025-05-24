@@ -2984,3 +2984,35 @@
   flex-wrap: wrap;
 }
 
+/* //pageantry page */
+/* assets/css/style.css */
+.about-project-section {
+  padding: 20px 0;
+}
+.about-project-section p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 15px;
+}
+.about-project-section h5 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+.about-project-section ul {
+  list-style-type: disc;
+  margin-left: 20px;
+  margin-bottom: 15px;
+}
+.about-project-section ul li {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+}
+.section_title h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}

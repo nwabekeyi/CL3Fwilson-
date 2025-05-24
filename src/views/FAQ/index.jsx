@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Banner1 from "../../assets/images/contact.jpg";
+import Banner1 from "../../assets/images/faq.png";
 import { FaPlus, FaMinus } from "react-icons/fa"; // Icons for accordion toggle
 
 function FAQPage() {
@@ -13,52 +13,52 @@ function FAQPage() {
   // FAQ data
   const faqs = [
     {
-      category: "Fashion Store",
+      category: "Shopping",
       questions: [
         {
-          question: "How do I choose the right size for clothing?",
+          question: "Do You Ship Internationally?",
           answer:
-            "Our sizing chart is available on each product page. Measure your chest, waist, and hips, and compare them to our guide. For tailored fits, consider one size up for comfort. If you’re unsure, contact our support team at support@menstyle.com.",
+            "Yes we do, through DHL",
         },
         {
-          question: "What is your shipping policy?",
+          question: "How long does it take for home delivery?",
           answer:
-            "We offer free standard shipping on orders over $50 within Nigeria. Orders are processed within 1-2 business days and delivered in 3-7 days. International shipping is available; rates vary by location. Check our Shipping page for details.",
-        },
-        {
-          question: "Can I return or exchange an item?",
-          answer:
-            "Yes, we accept returns within 30 days of delivery if the item is unworn and in original condition. Exchanges are free within Nigeria. Start a return via your account or email support@menstyle.com. See our Returns page for more.",
-        },
-        {
-          question: "Do you offer custom tailoring services?",
-          answer:
-            "Currently, we offer standard sizes, but we’re launching a custom tailoring service in 2026. Sign up for our newsletter to stay updated on this feature!",
+            "Delivery dates on preorder will be any where between 7 days - 3 weeks depending on production and delivery timelines. Please speak with our consultants for more detailed assistance with delivery",
         },
       ],
     },
     {
-      category: "Pageant Voting",
+      category: "Payment",
       questions: [
         {
-          question: "How can I vote for a pageant contestant?",
+          question: "What Payment Methods Are Accepted?",
           answer:
-            "Visit the 'Vote for Your Candidate' page under the Workshop menu. Log in or create an account, browse contestant profiles, and cast your vote. Each user gets one vote per day during the voting period.",
+            "Paystack and stripe",
         },
         {
-          question: "Who is eligible to participate in the pageant?",
+          question: "Can I use a different payment method?",
           answer:
-            "The pageant is open to men aged 18-35 who are registered on our platform. Contestants must submit a profile with photos and a bio. Registration is free and available on the 'Register' page under Workshop.",
+            "No please",
+        },
+      ],
+    },
+    {
+      category: "Workshop",
+      questions: [
+        {
+          question: "How can I vote for a contestant?",
+          answer:
+            "Visit the 'Workshop' page under the Workshop menu  and cast your vote.",
         },
         {
-          question: "When are the pageant results announced?",
+          question: "Who is eligible to participate in the workshop?",
           answer:
-            "Voting closes on the last day of each month, and results are announced within 7 days on our website and social media. Winners receive exclusive fashion prizes and feature in our campaigns.",
+            "The workshop is open to men aged 18-35 who are registered on our platform. Contestants must submit a profile with photos and a bio. Registration is free and available on the 'Register' page under Workshop.",
         },
         {
           question: "Can I vote multiple times for the same contestant?",
           answer:
-            "You can vote once per day for your favorite contestant. Multiple votes in a single day are not allowed to ensure fairness. Follow us on social media for voting reminders!",
+            "You can vote multiple times per day for your favorite contestant. Follow us on social media for voting reminders!",
         },
       ],
     },

@@ -63,7 +63,7 @@ export const useFirestoreCollection = (db, collectionName, filterFn = null) => {
     };
 
     fetchData();
-  }, [db, collectionName, filterFn]);
+  }, []);
 
   return { data, error };
 };

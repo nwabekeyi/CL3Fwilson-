@@ -27,6 +27,11 @@ function SingleProduct({ productItem, addToBag, onProductClick }) {
     EUR: 0.00057, // 1 NGN ≈ 0.00057 EUR
   };
 
+  // Save conversion rates to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem("conversionRates", JSON.stringify(conversionRates));
+  }, []); // Run once on mount to save conversion rates
+
   // Function to convert NGN price to selected currency
   const convertPrice = (ngnPrice, currency) => {
     return Number((ngnPrice * conversionRates[currency]).toFixed(2));
@@ -83,6 +88,7 @@ function SingleProduct({ productItem, addToBag, onProductClick }) {
           imagePath: variant.imagePath,
           price: variant.price, // Store NGN price
           title: productItem.title,
+          currency: preferredCurrency, // Include currency
         },
       })
     );
