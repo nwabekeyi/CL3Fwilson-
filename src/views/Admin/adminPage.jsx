@@ -89,8 +89,8 @@ function AdminPage() {
     }
   };
 
-  const handleDeleteParticipantAction = (participantDocId) => {
-    deleteParticipant(db, participantDocId, participants, setErrors, setParticipants);
+  const handleDeleteParticipantAction = async (participantUid) => {
+    await deleteParticipant(db, participantUid, setErrors);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -171,7 +171,7 @@ function AdminPage() {
                     </button>
                     <button
                       className="btn btn-danger"
-                      onClick={() => handleDeleteParticipantAction(participant.docId)}
+                      onClick={() => handleDeleteParticipantAction(participant.uid)} // Changed to participant.uid
                       disabled={isSubmitting}
                     >
                       Delete
