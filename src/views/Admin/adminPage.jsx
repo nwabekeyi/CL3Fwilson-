@@ -6,7 +6,7 @@ import { useAuthAdmin } from "../../hooks/useAuthAdmin";
 import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
 import { useParticipantForm } from "../../hooks/useParticipantForm";
 import { addParticipant, updateParticipant, deleteParticipant } from "../../utils/firestoreUtils";
-import ProductManager from "./ProductManager";
+import ProductManager from "./productManager";
 
 function AdminPage() {
   const navigate = useNavigate();

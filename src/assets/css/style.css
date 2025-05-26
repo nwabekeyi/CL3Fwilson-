@@ -2969,20 +2969,7 @@
   color: #ffffff;
 }
 
-/* Products Grid */
-.products-container {
-  padding: 40px 20px;
-}
 
-.products-container .section_title {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.products-container .row {
-  display: flex;
-  flex-wrap: wrap;
-}
 
 /* //pageantry page */
 /* assets/css/style.css */
