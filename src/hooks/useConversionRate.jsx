@@ -1,16 +1,11 @@
-// /root/horizon-server/public/admin/src/hooks/useConversionRate.js
 import { useState, useEffect } from "react";
-import { db } from "../firebase/config"; // Adjust path to your Firebase config
-import { collection, doc, setDoc, getDoc } from "firebase/firestore";
+import { db } from "../firebase/config";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
-// Initialize Firestore collection
-const conversionRatesCollection = collection(db, "conversionRates");
-
-// Default conversion rates (fallback)
 const defaultConversionRates = {
   NGN: 1,
-  USD: 0.00061, // 1 NGN ≈ 0.00061 USD
-  EUR: 0.00057, // 1 NGN ≈ 0.00057 EUR
+  USD: 0.00061,
+  EUR: 0.00057,
 };
 
 const useConversionRate = () => {
@@ -18,7 +13,7 @@ const useConversionRate = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch the single conversion rates document
+  // Fetch from Firestore only if sessionStorage empty
   const fetchConversionRates = async () => {
     setLoading(true);
     setError(null);
@@ -28,12 +23,9 @@ const useConversionRate = () => {
 
       if (ratesDoc.exists()) {
         const rates = ratesDoc.data();
-        console.log("Conversion rates:", rates); // Log rates when fetched
         setConversionRates(rates);
       } else {
-        // Initialize with default rates if no document exists
         await setDoc(ratesDocRef, defaultConversionRates);
-        console.log("Initialized default conversion rates:", defaultConversionRates);
         setConversionRates(defaultConversionRates);
       }
     } catch (err) {
@@ -44,7 +36,7 @@ const useConversionRate = () => {
     }
   };
 
-  // Update the single conversion rates document
+  // Update Firestore and state
   const updateConversionRates = async (newRates) => {
     setLoading(true);
     setError(null);
@@ -56,13 +48,12 @@ const useConversionRate = () => {
       }
 
       const updatedRates = {
-        NGN: 1, // NGN is always 1
+        NGN: 1,
         USD: parseFloat(newRates.USD) || defaultConversionRates.USD,
         EUR: parseFloat(newRates.EUR) || defaultConversionRates.EUR,
       };
 
       await setDoc(ratesDocRef, updatedRates);
-      console.log("Updated conversion rates:", updatedRates);
       setConversionRates(updatedRates);
       return updatedRates;
     } catch (err) {
@@ -74,10 +65,26 @@ const useConversionRate = () => {
     }
   };
 
-  // Fetch rates on mount
+  // On mount, try to load from sessionStorage first
   useEffect(() => {
-    fetchConversionRates();
+    const storedRates = sessionStorage.getItem("conversionRate");
+    if (storedRates) {
+      try {
+        const parsedRates = JSON.parse(storedRates);
+        setConversionRates(parsedRates);
+      } catch {
+        // corrupted sessionStorage, fallback to fetch
+        fetchConversionRates();
+      }
+    } else {
+      fetchConversionRates();
+    }
   }, []);
+
+  // Sync conversionRates state into sessionStorage whenever it changes
+  useEffect(() => {
+    sessionStorage.setItem("conversionRate", JSON.stringify(conversionRates));
+  }, [conversionRates]);
 
   return {
     conversionRates,

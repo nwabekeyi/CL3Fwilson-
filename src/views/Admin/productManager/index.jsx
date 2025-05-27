@@ -1,4 +1,3 @@
-// /root/horizon-server/public/admin/src/ProductManager.jsx
 import React from "react";
 import useProductManager from "../../../hooks/useProductManager";
 import useConversionRate from "../../../hooks/useConversionRate"; // Import conversion rate hook
@@ -28,7 +27,9 @@ const ProductManager = () => {
     const productData = {
       name: formData.get("name"),
       price: parseFloat(formData.get("price")),
-      variants: [{ _id: "variant1", name: formData.get("variantName") }],
+      oldPrice: parseFloat(formData.get("oldPrice")) || null, // Add oldPrice, allow null if empty
+      department: formData.get("department"),
+      variants: [{ _id: "variant1", color: formData.get("variantColor") }],
     };
     const photoFiles = {
       main: formData.get("mainImage"),
@@ -142,13 +143,15 @@ const ProductManager = () => {
             <div className="product-details">
               <h3>{product.name}</h3>
               <p>Price: ${product.price}</p>
+              {product.oldPrice && <p>Old Price: ${product.oldPrice}</p>} {/* Display oldPrice if exists */}
+              <p>Department: {product.department}</p>
               <div className="variants">
                 {product.variants.map((variant) => (
                   <div key={variant._id} className="variant">
-                    <span>{variant.name}</span>
+                    <span>{variant.color}</span>
                     <img
                       src={variant.imagePath}
-                      alt={variant.name}
+                      alt={variant.color || "Variant"}
                       className="variant-image"
                     />
                   </div>
@@ -170,6 +173,14 @@ const ProductManager = () => {
         <h2>Add New Product</h2>
         <form onSubmit={handleAddProduct}>
           <div className="form-group">
+            <label htmlFor="department">Department:</label>
+            <select id="department" name="department" required>
+              <option value="">Select a Department</option>
+              <option value="cl3fwilson">cl3fwilson</option>
+              <option value="wilster">wilster</option>
+            </select>
+          </div>
+          <div className="form-group">
             <label htmlFor="name">Name:</label>
             <input type="text" id="name" name="name" required />
           </div>
@@ -184,6 +195,15 @@ const ProductManager = () => {
             />
           </div>
           <div className="form-group">
+            <label htmlFor="oldPrice">Old Price:</label>
+            <input
+              type="number"
+              id="oldPrice"
+              name="oldPrice"
+              step="0.01"
+            />
+          </div>
+          <div className="form-group">
             <label htmlFor="mainImage">Main Image:</label>
             <input
               type="file"
@@ -193,8 +213,8 @@ const ProductManager = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="variantName">Variant Name:</label>
-            <input type="text" id="variantName" name="variantName" />
+            <label htmlFor="variantColor">Variant Color:</label>
+            <input type="text" id="variantColor" name="variantColor" />
           </div>
           <div className="form-group">
             <label htmlFor="variantImage">Variant Image:</label>

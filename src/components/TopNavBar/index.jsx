@@ -52,7 +52,7 @@ const TopNavBar = ({ className }) => {
             <div className="top_nav_right">
               <ul className="top_nav_menu">
                 <li className="currency">
-                  <a href="#">
+                  <a href="/">
                     {selectedCurrency.toLowerCase()}
                     <i className="fa fa-angle-down"></i>
                   </a>
