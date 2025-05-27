@@ -5,6 +5,7 @@ import { Navigate } from "react-router-dom";
 import BaseLayout from "../layouts/BaseLayout";
 
 // Route Views
+import WomensProducts from "../components/Products/WomensProduct.jsx";
 import Home from "../views/Home/HomeContainer";
 import SingleProductContainer from "../views/Product/SingleProductContainer";
 import CategoryContainer from "../views/Category/CategoryContainer";
@@ -75,6 +76,11 @@ const routes = [
   },
   {
     path: "/mensProduct",
+    layout: BaseLayout,
+    component: MensProducts,
+  },
+  {
+    path: "/womensProduct",
     layout: BaseLayout,
     component: MensProducts,
   },

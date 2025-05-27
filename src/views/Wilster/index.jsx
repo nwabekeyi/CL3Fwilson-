@@ -1,7 +1,7 @@
 import React from "react";
 import HomeBanner from "../../components/HomeBanner";
 import "./Wilster.css"; // Optional: For custom styling
-
+import WomensProducts from "../../components/Products/WomensProduct";
 const Wilster = () => {
   return (
     <div>
@@ -15,6 +15,8 @@ const Wilster = () => {
           A new era of fashion is on its way. Wilster will soon launch with a carefully curated selection of apparel and accessories designed for elegance and comfort.
         </p>
       </section>
+
+      <WomensProducts wilster/>
     </div>
   );
 };

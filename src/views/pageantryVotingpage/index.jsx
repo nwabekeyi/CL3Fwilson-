@@ -242,7 +242,7 @@ function PageantVotingPage() {
             month.
           </p>
           <div className="red_button shop_now_button">
-            <a href="/pageant">Learn More About the Pageant</a>
+            <a href="/pageant">Learn More</a>
           </div>
         </div>
       </div>

@@ -86,6 +86,30 @@
   .blog_title {
     font-size: 20px;
   }
+  .layout-Container{
+    margin-top: 100px;
+  }
+  .main_nav_container .container{
+    margin: 0;
+    width: 100%;
+  }
+  .main_nav_container .container .row{
+    width: 100vw;
+  }
+  .section-heading{
+    text-align: left;
+  }
+
+  .main_slider_content{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+ .fixed-background{
+  background-position: center !important;
+ }
 }
 
 /************
@@ -237,6 +261,51 @@
     justify-content: center;
     margin-top: 10px;
   }
+  .layout-Container{
+    width: 100vw;
+  }
+  .main_slider_content h6{
+    text-align: center;
+  }
+  .shop_now_button{
+    font-size: 10px;
+    width: 110px !important;
+  }
+  .cr{
+    display: flex !important;
+    justify-content: center;
+  }
+
+  .footer_social{
+    margin-bottom: 0;
+  }
+
+  .footer_nav_container{
+    margin-top: 0;
+  }
+
+  footer.footer{
+    margin-top: 1%;
+  }
+
+  .logo_container a img{
+    margin-left: -10px;
+  }
+  .shop_now_button{
+    width: 130px !important;
+  }
+
+  .contact-banner-overlay, 
+  .about-banner-overlay,
+  .faq-banner-overlay,
+  .voting-banner-overlay{
+    height: 100%;
+    width: 100%;
+  }
+
+  .col-md-10 .shop_now_button{
+    width: auto !important;
+  }
 }
 
 /************
@@ -355,6 +424,9 @@
   }
   .footer_nav li a {
     font-size: 13px;
+  }
+  .layout-Container{
+    margin-top: 0;
   }
 }
 
@@ -572,6 +644,7 @@
     margin-top: 5px;
     margin-bottom: 30px;
   }
+ 
 }
 
 /************
@@ -700,5 +773,10 @@
 
   .section_title h2 {
     font-size: 1.5rem;
+  }
+
+  .logo_container a img{
+    width: 60px !important;
+    margin-left: -10px;
   }
 }

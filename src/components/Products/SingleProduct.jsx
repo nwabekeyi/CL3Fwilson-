@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { postCart } from "../../redux/slices/cartSlice";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import useConversionRate from "../../hooks/useConversionRate"; // Import the hook
 
 const currencySymbols = {
   NGN: "₦",
@@ -13,69 +14,62 @@ const currencySymbols = {
 function SingleProduct({ productItem, addToBag, onProductClick }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { conversionRates, loading: rateLoading, error: rateError } = useConversionRate(); // Use hook for conversionRates
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [priceData, setPriceData] = useState({ price: 0, oldPrice: 0, symbol: "₦" });
-  const [preferredCurrency, setPreferredCurrency] = useState(
-    sessionStorage.getItem("preferredCurrency") || "NGN"
-  );
+  const [preferredCurrency, setPreferredCurrency] = useState("NGN"); // Default to NGN
+  const [convertedPrice, setConvertedPrice] = useState(null);
+  const [convertedOldPrice, setConvertedOldPrice] = useState(null);
+  const [currencySymbol, setCurrencySymbol] = useState("₦");
 
-  // Conversion rates
-  const conversionRates = {
-    NGN: 1,
-    USD: 0.00061, // 1 NGN ≈ 0.00061 USD
-    EUR: 0.00057, // 1 NGN ≈ 0.00057 EUR
-  };
-
-  // Save conversion rates to sessionStorage
-  useEffect(() => {
-    sessionStorage.setItem("conversionRates", JSON.stringify(conversionRates));
-  }, []); // Run once on mount to save conversion rates
-
-  // Function to convert NGN price to selected currency
-  const convertPrice = (ngnPrice, currency) => {
-    return Number((ngnPrice * conversionRates[currency]).toFixed(2));
-  };
-
-  // Get the default variant or fallback to product price
   const defaultVariant = productItem.variants?.[0] || {
     price: productItem.price || 0,
     imagePath: productItem.imagePath || "",
   };
 
+  // Retain preferredCurrency logic from sessionStorage
   useEffect(() => {
-    // Ensure the preferred currency is valid, fallback to NGN
-    const validCurrency = ["NGN", "USD", "EUR"].includes(preferredCurrency) ? preferredCurrency : "NGN";
+    const storedCurrency = sessionStorage.getItem("preferredCurrency");
+    if (storedCurrency) {
+      setPreferredCurrency(storedCurrency);
+    }
+  }, []);
 
-    // Get the base price in NGN and convert to selected currency
-    const basePriceNGN = parseFloat(defaultVariant.price) || 0;
-    const convertedPrice = convertPrice(basePriceNGN, validCurrency);
-    const oldPrice = (convertedPrice + 30).toFixed(2); // Add 30 in selected currency
+  // Retain currency conversion logic
+  useEffect(() => {
+    const validCurrency = ["NGN", "USD", "EUR"].includes(preferredCurrency)
+      ? preferredCurrency
+      : "NGN";
 
-    // Set price data with the correct symbol
+    const basePriceNGN = parseFloat(productItem.price) || 0;
+    const baseOldPriceNGN = parseFloat(productItem.oldPrice) || null; // Use oldPrice from product
+    const rate = conversionRates[validCurrency] || 1;
+
+    const converted = +(basePriceNGN * rate).toFixed(2);
+    const old = baseOldPriceNGN
+      ? +(baseOldPriceNGN * rate).toFixed(2)
+      : +(converted + 30).toFixed(2); // Fallback if oldPrice is null
     const symbol = currencySymbols[validCurrency] || "₦";
-    setPriceData({
-      price: convertedPrice.toFixed(2),
-      oldPrice,
-      symbol,
-    });
 
+    setConvertedPrice(converted.toFixed(2));
+    setConvertedOldPrice(old.toFixed(2));
+    setCurrencySymbol(symbol);
     setLoading(false);
-  }, [defaultVariant.price, preferredCurrency]);
+  }, [preferredCurrency, conversionRates, productItem.price, productItem.oldPrice]);
 
   const handleProductClick = (e) => {
     e.preventDefault();
-    // Save product details in sessionStorage as selectedProduct
-    sessionStorage.setItem("selectedProduct", JSON.stringify(productItem));
+    console.log(productItem)
+    sessionStorage.setItem("selectedProduct", JSON.stringify(productItem)); // Retain sessionStorage for product
     onProductClick();
-    navigate(`/fashion-cube/single-product/${productItem._id}`);
+    navigate(`/fashion-cube/single-product/${productItem.id}`);
   };
 
   const handleLikeClick = (e) => {
     e.stopPropagation();
     setIsLiked(!isLiked);
   };
-
+console.log(productItem)
   const handleAddToCart = (e) => {
     e.stopPropagation();
     const variant = productItem.variants[0];
@@ -86,24 +80,31 @@ function SingleProduct({ productItem, addToBag, onProductClick }) {
           size: variant.size,
           color: variant.color,
           imagePath: variant.imagePath,
-          price: variant.price, // Store NGN price
-          title: productItem.title,
-          currency: preferredCurrency, // Include currency
+          price: variant.price, // NGN
+          title: productItem.name,
+          currency: preferredCurrency,
+          price: productItem.price
         },
       })
     );
     addToBag(productItem._id);
   };
 
-  if (loading) return null;
+  if (loading || rateLoading || convertedPrice === null) {
+    return <div className="loading">Loading...</div>;
+  }
+
+  if (rateError) {
+    return <div className="error">{rateError}</div>;
+  }
 
   return (
     <div className="product-item men">
       <div className="product discount product_filter" onClick={handleProductClick}>
         <div className="product_image">
           <img
-            src={defaultVariant.imagePath}
-            alt={productItem.title}
+            src={productItem.imagePath}
+            alt={productItem.name}
             className="img-fluid"
           />
         </div>
@@ -112,11 +113,13 @@ function SingleProduct({ productItem, addToBag, onProductClick }) {
         </div>
         <div className="product_info">
           <h6 className="product_name">
-            <div>{productItem.title}</div>
+            <div>{productItem.name}</div>
           </h6>
           <div className="product_price">
-            {priceData.symbol} {priceData.price}
-            <span> {priceData.symbol} {priceData.oldPrice}</span>
+            {currencySymbol} {convertedPrice}
+            {convertedOldPrice && (
+              <span> {currencySymbol} {convertedOldPrice}</span>
+            )}
           </div>
         </div>
       </div>

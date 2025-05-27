@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Import useLocation
 import { useSelector } from "react-redux";
 import HomeCartView from "../HomeCartView";
 import MobileMenu from "../MobileMenu";
@@ -7,11 +7,15 @@ import device from "../../modules/mediaQuery";
 import MediaQuery from "react-responsive";
 import { FaShoppingCart, FaPhone, FaQuestionCircle, FaWhatsapp } from "react-icons/fa";
 import companyLogo from "../../assets/images/cw.png";
+import wilster from "../../assets/images/wilster.jpg";
 
 const NavBar = () => {
   const [modalShow, setModalShow] = useState(false);
   const [activeClass, setActiveClass] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
+
+  // Get current pathname
+  const location = useLocation();
 
   // Get cart items from Redux store
   const cartItems = useSelector((state) => state.cart.items);
@@ -59,16 +63,18 @@ const NavBar = () => {
     };
   }, []);
 
-  return (
-<div
-  className="main_nav_container"
-  style={{
-    background: isScrolling && "transparent",
-    transition: "background 0.3s ease",
-    backdropFilter: isScrolling ? "blur(5px)" : "none", // optional: adds a subtle blur
-  }}
->
+  // Determine which logo to use based on pathname
+  const logoSource = location.pathname === "/about/wilster" ? wilster : companyLogo;
 
+  return (
+    <div
+      className="main_nav_container"
+      style={{
+        background: isScrolling && "transparent",
+        transition: "background 0.3s ease",
+        backdropFilter: isScrolling ? "blur(5px)" : "none",
+      }}
+    >
       <div className="container">
         <div className="row">
           <div className="col-lg-12 text-right">
@@ -76,7 +82,7 @@ const NavBar = () => {
               <Link to="/">
                 <img
                   style={{ width: "100px", height: "auto" }}
-                  src={companyLogo}
+                  src={logoSource} // Use dynamic logo source
                   alt="company logo"
                 />
               </Link>
@@ -91,7 +97,11 @@ const NavBar = () => {
                   <ul className="dropdown_menu">
                     <li><Link to="/contact"><FaPhone /> Contact</Link></li>
                     <li><Link to="/faq"><FaQuestionCircle /> FAQ</Link></li>
-                    <li><a href="https://wa.me/message/2YZ3Y7ILSIIAJ1" target="_blank"><FaWhatsapp /> WhatsApp Us</a></li>
+                    <li>
+                      <a href="https://wa.me/message/2YZ3Y7ILSIIAJ1" target="_blank">
+                        <FaWhatsapp /> WhatsApp Us
+                      </a>
+                    </li>
                   </ul>
                 </li>
                 <li className="dropdown">
@@ -104,7 +114,7 @@ const NavBar = () => {
                   </ul>
                 </li>
                 <li className="dropdown">
-                  <Link to='/workshop' className="dropdown_toggle">
+                  <Link to="/workshop" className="dropdown_toggle">
                     workshop <i className="fa fa-angle-down" aria-hidden="true"></i>
                   </Link>
                   <ul className="dropdown_menu">
@@ -118,11 +128,6 @@ const NavBar = () => {
                 <li>
                   <Link to="/search">
                     <i className="fa fa-search" aria-hidden="true"></i>
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/profile">
-                    <i className="fa fa-user" aria-hidden="true"></i>
                   </Link>
                 </li>
                 <li className="checkout">

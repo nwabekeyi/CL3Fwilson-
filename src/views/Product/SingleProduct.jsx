@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import useConversionRate from "../../hooks/useConversionRate"; // Import the hook
 
 const SingleProduct = ({ product, postCart }) => {
   const location = useLocation();
+  const { conversionRates, loading: rateLoading, error: rateError } = useConversionRate(); // Use hook
   const [state, setState] = useState({
     color: "",
     size: "",
@@ -11,14 +13,16 @@ const SingleProduct = ({ product, postCart }) => {
     id: "",
     quantity: 1,
   });
+  const [preferredCurrency, setPreferredCurrency] = useState("NGN"); // Default to NGN
 
-  // Get preferred currency and conversion rates from sessionStorage
-  const preferredCurrency = sessionStorage.getItem("preferredCurrency") || "NGN";
-  const conversionRates = JSON.parse(sessionStorage.getItem("conversionRates")) || {
-    NGN: 1,
-    USD: 0.00061,
-    EUR: 0.00057,
-  };
+  // Retrieve preferredCurrency from sessionStorage
+  useEffect(() => {
+    const storedCurrency = sessionStorage.getItem("preferredCurrency");
+    if (storedCurrency && ["NGN", "USD", "EUR"].includes(storedCurrency)) {
+      setPreferredCurrency(storedCurrency);
+    }
+  }, []);
+
   const currencySymbols = {
     NGN: "₦",
     USD: "$",
@@ -28,7 +32,11 @@ const SingleProduct = ({ product, postCart }) => {
 
   // Function to convert NGN price to selected currency
   const convertPrice = (ngnPrice, currency) => {
-    return Number((ngnPrice * (conversionRates[currency] || 1)).toFixed(2));
+    if (!ngnPrice || isNaN(ngnPrice)) return 0;
+    if (!conversionRates || !conversionRates[currency] || rateLoading) {
+      return currency === "NGN" ? Number(ngnPrice.toFixed(2)) : 0; // Fallback to NGN or 0
+    }
+    return Number((ngnPrice * conversionRates[currency]).toFixed(2));
   };
 
   // Dummy product for when no product is provided
@@ -36,6 +44,7 @@ const SingleProduct = ({ product, postCart }) => {
     _id: "dummy",
     title: "Product Not Available",
     price: 0,
+    oldPrice: null,
     imagePath: "https://via.placeholder.com/800x600?text=Product+Not+Found",
     department: "Men",
     category: "Unknown",
@@ -62,9 +71,11 @@ const SingleProduct = ({ product, postCart }) => {
   const displayProduct = product || dummyProduct;
   const isDummy = displayProduct === dummyProduct;
 
-  // Convert price for display
+  // Convert prices for display
   const convertedPrice = convertPrice(displayProduct.price, preferredCurrency);
-  const convertedOldPrice = (convertedPrice + 30).toFixed(2);
+  const convertedOldPrice = displayProduct.oldPrice
+    ? convertPrice(displayProduct.oldPrice, preferredCurrency)
+    : convertPrice(displayProduct.price * 1.3, preferredCurrency); // 30% markup if no oldPrice
 
   // Set default variant image when product changes
   useEffect(() => {
@@ -99,12 +110,11 @@ const SingleProduct = ({ product, postCart }) => {
         productId: state.id || displayProduct.variants[0]._id,
         increase: true,
         variantDetails: {
-          size: selectedVariant.size,
           color: selectedVariant.color,
           imagePath: selectedVariant.imagePath,
-          price: selectedVariant.price, // Store NGN price
-          title: displayProduct.title,
-          currency: preferredCurrency, // Include currency
+          name: displayProduct.name,
+          currency: preferredCurrency,
+          price: product.price
         },
       });
     }
@@ -118,12 +128,11 @@ const SingleProduct = ({ product, postCart }) => {
         productId: state.id || displayProduct.variants[0]._id,
         decrease: true,
         variantDetails: {
-          size: selectedVariant.size,
           color: selectedVariant.color,
           imagePath: selectedVariant.imagePath,
-          price: selectedVariant.price, // Store NGN price
-          title: displayProduct.title,
-          currency: preferredCurrency, // Include currency
+          name: displayProduct.name,
+          currency: preferredCurrency,
+          price: product.price,
         },
       });
     }
@@ -138,21 +147,26 @@ const SingleProduct = ({ product, postCart }) => {
           size: selectedVariant.size,
           color: selectedVariant.color,
           imagePath: selectedVariant.imagePath,
-          price: selectedVariant.price, // Store NGN price
-          title: displayProduct.title,
-          currency: preferredCurrency, // Include currency
+          title: displayProduct.name,
+          currency: preferredCurrency,
+          price:product.price
         },
-      }).then((res) => {
-        console.log("Cart updated:", res);
-      }).catch((err) => {
-        console.error("Error updating cart:", err);
-      });
+      })
+        .then((res) => {
+          console.log("Cart updated:", res);
+        })
+        .catch((err) => {
+          console.error("Error updating cart:", err);
+        });
     }
   };
-
+console.log(product)
   return (
     <div className="container single_product_container">
       <div>
+        {/* Loading and Error States for Conversion Rates */}
+        {rateLoading && <div className="loading">Loading conversion rates...</div>}
+        {rateError && <div className="error">{rateError}</div>}
         <div className="row">
           <div className="col">
             <div className="breadcrumbs d-flex flex-row align-items-center">
@@ -224,7 +238,7 @@ const SingleProduct = ({ product, postCart }) => {
                 <p>{displayProduct.description}</p>
               </div>
               <div className="original_price">
-                {currencySymbol}{convertedOldPrice}
+                {currencySymbol}{convertedOldPrice.toFixed(2)}
               </div>
               <div className="product_price">
                 {currencySymbol}{convertedPrice.toFixed(2)}
@@ -237,7 +251,7 @@ const SingleProduct = ({ product, postCart }) => {
                 <li><i className="fa fa-star-o" aria-hidden="true"></i></li>
               </ul>
               <div className="product_color">
-                <span>Select Color:</span>
+                <span>Select color:</span>
                 <ul>
                   {displayProduct.variants && displayProduct.variants.length > 0 ? (
                     displayProduct.variants.map((item) => (
@@ -280,21 +294,9 @@ const SingleProduct = ({ product, postCart }) => {
               <div className="delivery_info mt-3">
                 <h5>Delivery</h5>
                 <p>
-                  The cost of delivery will be determined by the method of dispatch. Delivery will take anywhere between 7 days to 3 weeks depending on the product, location, and delivery timeline. Please speak with our consultants for more detailed assistance with delivery.
+                  The cost of delivery will be determined by the method of dispatch. Delivery will take anywhere between 7 days to 3 weeks depending on the product, location, and delivery timeline. Please speak to our customer service representative for further information.
                 </p>
               </div>
-              {/* Return Section */}
-              <div className="return_info mt-3">
-                <h5>Return</h5>
-                <p>
-                  Returns are accepted within 30 days of delivery, provided items are unused and in original condition. Contact our support team to initiate a return.
-                </p>
-              </div>
-              {isDummy && (
-                <p className="text-danger mt-3">
-                  This product is not available. Please browse other items.
-                </p>
-              )}
             </div>
           </div>
         </div>
