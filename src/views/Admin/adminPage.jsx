@@ -120,7 +120,7 @@ function AdminPage() {
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="text-left">
               {contestants.map((contestant) => (
                 <tr key={contestant.id}>
                   <td>{contestant.fullName}</td>
