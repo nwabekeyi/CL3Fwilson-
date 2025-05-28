@@ -301,6 +301,7 @@
   .voting-banner-overlay{
     height: 100%;
     width: 100%;
+    background-attachment: scroll;
   }
 
   .col-md-10 .shop_now_button{
@@ -320,6 +321,9 @@
 ************/
 
 @media only screen and (max-width: 880px) {
+  [data-aos^=fade][data-aos^=fade].aos-animate{
+    margin-top: 100px;
+  }
 }
 
 /************
@@ -334,6 +338,9 @@
 ************/
 
 @media only screen and (max-width: 767px) {
+  [data-aos^=fade][data-aos^=fade].aos-animate{
+    margin-top: 120px;
+  }
   h1 {
     font-size: 36px;
   }
@@ -442,6 +449,9 @@
 ************/
 
 @media only screen and (max-width: 480px) {
+  [data-aos^=fade][data-aos^=fade].aos-animate{
+    margin: 0;
+  }
 }
 
 /************
