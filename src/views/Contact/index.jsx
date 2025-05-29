@@ -12,7 +12,6 @@ function ContactPage() {
         }}
       >
         <div className="contact-banner-overlay">
-          <h1>Contact Us</h1>
           <p>We would love to hear from you!</p>
         </div>
       </div>

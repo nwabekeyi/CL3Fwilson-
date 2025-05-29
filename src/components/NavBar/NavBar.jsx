@@ -119,7 +119,7 @@ const NavBar = () => {
                   </Link>
                   <ul className="dropdown_menu">
                     <li><Link to="/workshop">Project Cl3fwilson</Link></li>
-                    <li><Link to="/">Vote for Your Candidate(coming soon)</Link></li>
+                    <li><Link to="/workshop/vote">Vote for Your Candidate</Link></li>
                   </ul>
                 </li>
               </ul>

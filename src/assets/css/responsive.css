@@ -109,6 +109,7 @@
 
  .fixed-background{
   background-position: center !important;
+  background-attachment:local !important;
  }
 
 }
@@ -307,7 +308,14 @@
   .voting-banner-overlay{
     height: 100%;
     width: 100%;
-    background-attachment: scroll;
+    background-attachment: none !important;
+  }
+
+  .contact-banner, 
+  .about-banner,
+  .faq-banner,
+  .voting-banner{
+    background-attachment: local !important;
   }
 
   .col-md-10 .shop_now_button{

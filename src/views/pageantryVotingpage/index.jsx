@@ -9,6 +9,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { db } from "../../firebase/config";
+import bgImage from '../../assets/images/wilster.jpg'
 
 function PageantVotingPage() {
   const [participants, setParticipants] = useState([]);
@@ -174,9 +175,9 @@ function PageantVotingPage() {
     <div className="pageant-voting-page">
       {/* Fixed Background Banner */}
       <div
-        className="voting-banner"
+        className={bgImage}
         style={{
-          backgroundImage: `url(https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80)`,
+          backgroundImage: ``,
         }}
       >
         <div className="voting-banner-overlay">
