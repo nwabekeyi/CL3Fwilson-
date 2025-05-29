@@ -2,7 +2,8 @@ import React from "react";
 import useProductManager from "../../../hooks/useProductManager";
 import useConversionRate from "../../../hooks/useConversionRate"; // Import conversion rate hook
 import "./ProductManager.css"; // External CSS for styling
-
+import "../../../assets/css/style.css"
+import "../../../assets/css/responsive.css"
 const ProductManager = () => {
   const {
     products,
@@ -76,7 +77,7 @@ const ProductManager = () => {
 
   return (
     <div className="product-manager">
-      <h1>Product Manager</h1>
+      <h2>Product Manager</h2>
 
       {/* Product Loading and Error States */}
       {productLoading && <div className="loading">Loading products...</div>}
@@ -84,7 +85,7 @@ const ProductManager = () => {
 
       {/* Conversion Rates Section */}
       <div className="conversion-rates">
-        <h2>Conversion Rates (Against NGN)</h2>
+        <h5>Conversion Rates (Against NGN)</h5>
         {rateLoading && <div className="loading">Loading rates...</div>}
         {rateError && <div className="error">{rateError}</div>}
         <div className="current-rates">
@@ -93,7 +94,7 @@ const ProductManager = () => {
           <p>EUR: {conversionRates.EUR}</p>
         </div>
         <div className="update-rates-form">
-          <h3>Update Conversion Rates</h3>
+          <h5>Update Conversion Rates</h5>
           <form onSubmit={handleUpdateRates}>
             <div className="form-group">
               <label htmlFor="USD">USD (1 NGN = ? USD):</label>
@@ -117,6 +118,7 @@ const ProductManager = () => {
                 required
               />
             </div>
+            <div id="btn">
             <button
               type="submit"
               disabled={rateLoading}
@@ -124,17 +126,22 @@ const ProductManager = () => {
             >
               Update Rates
             </button>
+            </div>
           </form>
         </div>
       </div>
 
       {/* Product List */}
+      <div className="product-list-section">
+      <h5>Product List</h5>
       <div className="product-list">
+
         {products.length === 0 && !productLoading && (
           <p className="no-products">No products found.</p>
         )}
         {products.map((product) => (
-          <div key={product.id} className="product-card">
+          <div key={product.id} className="product-card"
+                style={{maxWidth:"100%", height: "100%"}}>
             <img
               src={product.imagePath}
               alt={product.name}
@@ -167,10 +174,11 @@ const ProductManager = () => {
           </div>
         ))}
       </div>
+      </div>
 
       {/* Add Product Form */}
       <div className="add-product-form">
-        <h2>Add New Product</h2>
+        <h5>Add New Product</h5>
         <form onSubmit={handleAddProduct}>
           <div className="form-group">
             <label htmlFor="department">Department:</label>

@@ -5,6 +5,8 @@ import { db } from "../../firebase/config";
 import { useAuthAdmin } from "../../hooks/useAuthAdmin";
 import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
 import { useParticipantForm } from "../../hooks/useParticipantForm";
+import "../../assets/css/responsive.css"
+import "../../assets/css/style.css"
 import { addParticipant, updateParticipant, deleteParticipant } from "../../utils/firestoreUtils";
 import ProductManager from "./productManager";
 
@@ -96,19 +98,22 @@ function AdminPage() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="container pageant-form-container my-5">
+    <div className="container pageant-form-container">
       <div className="section_title">
         <h2>Admin Dashboard - Manage Participants</h2>
+        <div>
         <button
           className="btn btn-secondary mb-3"
           onClick={() => getAuth().signOut().then(() => navigate("/sign-up"))}
         >
           Sign Out
         </button>
+        </div>
+       
       </div>
 
       <div className="mt-4" id="pending-contestants">
-        <h5>Pending Contestants</h5>
+        <h5>Pending Contestants:</h5>
         {contestants.length === 0 ? (
           <p>No pending contestants.</p>
         ) : (
@@ -120,7 +125,7 @@ function AdminPage() {
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="text-left">
               {contestants.map((contestant) => (
                 <tr key={contestant.id}>
                   <td>{contestant.fullName}</td>
