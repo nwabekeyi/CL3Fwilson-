@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Modal } from "react-bootstrap";
 import { useSelector, useDispatch } from "react-redux";
-import { removeCartItem } from "../../redux/slices/cartSlice";
+import { removeCartItem, clearCart } from "../../redux/slices/cartSlice";
 import useConversionRate from "../../hooks/useConversionRate";
 import CheckoutDetailsModal from "./modal";
-import { db } from "../../firebase/config"; // <-- Your firebase config
+import { db } from "../../firebase/config";
 import { collection, addDoc } from "firebase/firestore";
 import EmptyCart from "../../assets/images/emptyCart.png";
 import jumpTo from "../../modules/Navigation";
@@ -13,21 +13,47 @@ import "./style.css";
 // Currency symbol logic
 const getCurrencySymbol = (currency) => {
   switch (currency?.toUpperCase()) {
-    case "NGN": return "₦";
-    case "USD": return "$";
-    case "EUR": return "€";
-    default: return "₦";
+    case "NGN":
+      return "₦";
+    case "USD":
+      return "$";
+    case "EUR":
+      return "€";
+    default:
+      return "₦";
   }
+};
+
+// Sanitize data to replace undefined with null
+const sanitizeData = (data) => {
+  if (Array.isArray(data)) {
+    return data.map(sanitizeData);
+  }
+  if (data && typeof data === "object") {
+    const sanitized = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (value === undefined) {
+        sanitized[key] = null; // Replace undefined with null
+      } else if (typeof value === "object" && value !== null) {
+        sanitized[key] = sanitizeData(value); // Recursively sanitize nested objects
+      } else {
+        sanitized[key] = value;
+      }
+    }
+    return sanitized;
+  }
+  return data;
 };
 
 const HomeCartView = (props) => {
   const dispatch = useDispatch();
   const items = useSelector((state) => state.cart.items);
   const { conversionRates, loading: rateLoading, error: rateError } = useConversionRate();
-
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [isPaystackLoading, setIsPaystackLoading] = useState(false); // State for Paystack loader
 
   const firstCurrency = items[0]?.currency || "NGN";
+
   const convertPrice = (ngnPrice, currency) => {
     if (!ngnPrice || isNaN(ngnPrice)) return 0;
     if (!conversionRates || !conversionRates[currency] || rateLoading) {
@@ -45,9 +71,10 @@ const HomeCartView = (props) => {
   }, 0);
 
   const symbol = getCurrencySymbol(firstCurrency);
-  const paystackKey = import.meta.env.VITE_PAYSTACK_KEY || ""; // Make sure this key exists in your .env file
+  const paystackKey = import.meta.env.VITE_PAYSTACK_KEY || "";
 
   const handlePay = (userDetails) => {
+    setIsPaystackLoading(true); // Show loader
     const handler = window.PaystackPop.setup({
       key: paystackKey,
       email: userDetails.email,
@@ -56,37 +83,60 @@ const HomeCartView = (props) => {
       callback: (response) => {
         (async () => {
           try {
-            await addDoc(collection(db, "orders"), {
+            // Sanitize items array
+            const sanitizedItems = items.map((item) => ({
+              productId: item.productId || "",
+              title: item.title || "",
+              price: item.price || 0,
+              quantity: item.quantity || 1,
+              currency: item.currency || firstCurrency,
+              imagePath: item.imagePath || "",
+            }));
+            // Prepare and sanitize order data
+            const orderData = sanitizeData({
               userDetails,
-              items,
+              items: sanitizedItems,
               total: totalPrice,
               currency: firstCurrency,
               paymentReference: response.reference,
               createdAt: new Date().toISOString(),
             });
+            console.log("Sanitized order data:", JSON.stringify(orderData, null, 2));
+            await addDoc(collection(db, "orders"), orderData);
             alert("Payment successful and order saved!");
-            items.length = 0; // Clear the cart
-            console.log(items)
+            dispatch(clearCart()); // Clear the cart
+            setShowDetailsModal(false); // Close CheckoutDetailsModal
+            props.onHide(); // Close HomeCartView modal
           } catch (err) {
-            console.error("Error saving order to Firestore:", err.message, err.stack, err.code);            alert("Payment succeeded but order saving failed.");
+            console.error("Error saving order to Firestore:", err.message, err.stack, err.code);
+            alert("Payment succeeded but order saving failed.");
+          } finally {
+            setIsPaystackLoading(false); // Hide loader
           }
-        })(); // Immediately-invoked async function
+        })();
       },
       onClose: () => {
+        setIsPaystackLoading(false); // Hide loader
         alert("Payment was cancelled.");
       },
     });
-  
+
     handler.openIframe();
   };
-  
+
   return (
     <>
       <Modal {...props} className="right">
         <Modal.Header closeButton>
           <Modal.Title>Your Cart</Modal.Title>
           {items.length > 0 && (
-            <span className="checkout--btn" onClick={() => setShowDetailsModal(true)}>checkout</span>
+            <span
+              className="checkout--btn"
+              onClick={() => setShowDetailsModal(true)}
+              style={{ pointerEvents: isPaystackLoading ? "none" : "auto" }}
+            >
+              checkout
+            </span>
           )}
         </Modal.Header>
 
@@ -113,7 +163,9 @@ const HomeCartView = (props) => {
                   </div>
                   <div className="basket--item--details">
                     <div className="basket--item--title">{item.title}</div>
-                    <div className="basket--item--quantity">Quantity: <span>{item.quantity}</span></div>
+                    <div className="basket--item--quantity">
+                      Quantity: <span>{item.quantity}</span>
+                    </div>
                     <div className="basket--item--price">
                       Price: <span>{getCurrencySymbol(itemCurrency)}{convertedPrice.toFixed(2)}</span>
                     </div>
@@ -121,6 +173,7 @@ const HomeCartView = (props) => {
                       className="btn btn-sm log-btn"
                       style={{ marginTop: "10px" }}
                       onClick={() => dispatch(removeCartItem(item.productId))}
+                      disabled={isPaystackLoading}
                     >
                       Remove
                     </button>
@@ -139,6 +192,7 @@ const HomeCartView = (props) => {
                 className="btn btn-wide log-btn"
                 style={{ marginTop: 20 }}
                 onClick={() => setShowDetailsModal(true)}
+                disabled={isPaystackLoading}
               >
                 Checkout
               </button>
@@ -152,6 +206,8 @@ const HomeCartView = (props) => {
         show={showDetailsModal}
         onHide={() => setShowDetailsModal(false)}
         onPay={handlePay}
+        isPaystackLoading={isPaystackLoading}
+        setIsPaystackLoading={setIsPaystackLoading}
       />
     </>
   );

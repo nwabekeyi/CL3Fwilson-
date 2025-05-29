@@ -3081,7 +3081,8 @@
     }
 
     .update-rates-form input,
-    .add-product-form select{
+    .add-product-form select,
+    .voting-container input{
       border-radius: 5px;
       padding: 12px;
       font-size: 1rem;
@@ -3127,3 +3128,61 @@
       object-fit: contain;
       height: 100%;
     }
+
+.section_voting_title{
+  text-align: center;
+  font-weight: bolder;
+  margin-bottom: 50px;
+}
+
+  .pageant-voting-page .row{
+    gap: 20px;
+  }
+
+  .contestant-card{
+    border: 1px solid darkgrey !important;
+    padding: 10px;
+    border-radius: 15px !important;
+    word-wrap: break-word;
+    transition: 0.5s ease-in-out !important;
+  }
+
+  .contestant-card:hover{
+    box-shadow: 2px 2px 20px lightgrey;
+    border: none;
+  }
+
+  .contestant-image img {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 15px !important;
+  }
+
+  .email-input-box{
+    border:1px solid lightgrey;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+
+  .contestant-details p {
+    max-height: 70px; /* Adjust this height as needed for ~50 characters */
+    overflow-y: auto;
+    padding-right: 5px;
+    line-height: 1.4;
+    font-size: 14px;
+  }
+
+  
+  .contestant-details p::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .contestant-details p::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 3px;
+  }
+  
+  .contestant-details p::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+  }
+  
