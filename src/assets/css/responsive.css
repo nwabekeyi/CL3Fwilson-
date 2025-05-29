@@ -110,6 +110,7 @@
  .fixed-background{
   background-position: center !important;
  }
+
 }
 
 /************
@@ -232,6 +233,11 @@
     margin-top: 30px;
     margin-bottom: 40px;
   }
+
+.pageant-form-container{
+  margin-top: 150px;
+}
+
   .footer_nav_container {
     height: auto;
     margin-top: 65px;
@@ -395,6 +401,11 @@
   }
   .newsletter_submit_btn {
     margin-top: 15px;
+  }
+
+  .product-card{
+    width: 100% !important;
+    max-width: 0 !important;
   }
 }
 
@@ -655,7 +666,69 @@
     margin-bottom: 30px;
   }
  
-}
+  .product-card{
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .product-card img{
+    object-fit: contain !important;
+  }
+
+  .section_title{
+    flex-direction: column;
+  }
+ .pageant-form-container{
+    margin-top: 100px;
+  }
+  .pageant-form .form-control {
+    font-size: 0.9rem;
+  }
+  .pageant-form label {
+    font-size: 0.9rem;
+  }
+  .pageant-form .pageant-submit-button {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+    table {
+      border: 0;
+      width: 100%;
+    }
+  
+    table thead {
+      display: none;
+    }
+  
+    table tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+    }
+  
+    table td {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-bottom: 1px solid #eee;
+    }
+  
+    table td::before {
+      content: attr(data-label);
+      font-weight: bold;
+      color: #555;
+    }
+  
+    table td:last-child {
+      border-bottom: 0;
+    }
+  }
+  
+
 
 /************
 14. 400px
