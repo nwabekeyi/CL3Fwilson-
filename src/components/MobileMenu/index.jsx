@@ -107,7 +107,7 @@ const MobileMenu = ({ activeClass, onClose }) => {
           </li>
           <li className="menu_item">
             <Link to="/workshop/vote" onClick={onClose}>
-              Vote for Your Candidate
+              Your Candidate
             </Link>
           </li>
         </ul>
