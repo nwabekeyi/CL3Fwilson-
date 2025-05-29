@@ -8,8 +8,11 @@ import {
   addDoc,
   getDoc,
 } from "firebase/firestore";
+import "../../assets/css/style.css"
+import "../../assets/css/responsive.css"
 import { db } from "../../firebase/config";
-import bgImage from '../../assets/images/wilster.jpg'
+
+import bgImage from '../../assets/images/voting.png'
 
 function PageantVotingPage() {
   const [participants, setParticipants] = useState([]);
@@ -177,7 +180,9 @@ function PageantVotingPage() {
       <div
         className={bgImage}
         style={{
-          backgroundImage: ``,
+          backgroundImage: `url(${bgImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
         }}
       >
         <div className="voting-banner-overlay">
@@ -188,7 +193,7 @@ function PageantVotingPage() {
 
       {/* Voting Section */}
       <div className="container voting-container" data-aos="fade-up">
-        <div className="section_title">
+        <div className="section_voting_title">
           <h2>Meet the Contestants</h2>
         </div>
 
