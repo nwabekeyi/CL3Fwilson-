@@ -1,67 +1,110 @@
-import React from "react";
-import Banner1 from "../../assets/images/contact.png"
+// src/components/ContactForm.jsx
+import React, { useState } from "react";
 
-function ContactPage() {
+const ContactForm = () => {
+  const [formState, setFormState] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [status, setStatus] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormState((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setStatus("");
+
+    try {
+      const response = await fetch("https://formspree.io/f/mqabzbez", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(formState),
+      });
+
+      if (response.ok) {
+        setStatus("Thank you! Your message has been sent.");
+        setFormState({ name: "", email: "", message: "" });
+      } else {
+        setStatus("Oops! Something went wrong. Please try again.");
+      }
+    } catch (error) {
+      console.error("Formspree submission error:", error);
+      setStatus("Oops! Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="contact-page">
-      {/* Fixed Background Banner */}
-      <div
-        className="contact-banner"
-        style={{
-          backgroundImage: `url(${Banner1})`,
-        }}
-      >
-        <div className="contact-banner-overlay">
-          <p>We would love to hear from you!</p>
-        </div>
+    <div className="container mt-4">
+      <div className="section_title">
+        <h2>Contact Us</h2>
+        <p>We would love to hear from you!</p>
       </div>
-
-      {/* Contact Details Section */}
-      <div className="container contact-details-container" data-aos="fade-up">
-        <div className="row">
-          <div className="col-md-4 contact-detail-box">
-            <h4>📍 Address</h4>
-            <p>9, Afam Ani avenue<br />Lagos, Nigeria</p>
-          </div>
-          <div className="col-md-4 contact-detail-box">
-            <h4>📞 Phone</h4>
-            <p>+234 902 021 9518</p>
-          </div>
-          <div className="col-md-4 contact-detail-box">
-            <h4>📧 Email</h4>
-            <p>Cl3fwilsonfashionafrica@gmail.com</p>
-          </div>
+      <form onSubmit={handleSubmit} className="pageant-form">
+        <div className="form-group">
+          <label htmlFor="name">Name:</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            className="form-control"
+            value={formState.name}
+            onChange={handleChange}
+            required
+            placeholder="Enter your name"
+          />
         </div>
-      </div>
-
-      {/* Contact Form Section */}
-      <div className="container contact-form-container" data-aos="fade-up">
-        <div className="row justify-content-center">
-          <div className="col-md-8">
-            <form className="contact-form">
-              <div className="form-group">
-                <label htmlFor="name">Full Name:</label>
-                <input type="text" id="name" className="form-control" placeholder="Your Name" required />
-              </div>
-              <div className="form-group">
-                <label htmlFor="email">Email:</label>
-                <input type="email" id="email" className="form-control" placeholder="Your Email" required />
-              </div>
-              <div className="form-group">
-                <label htmlFor="subject">Subject:</label>
-                <input type="text" id="subject" className="form-control" placeholder="Subject" required />
-              </div>
-              <div className="form-group">
-                <label htmlFor="message">Message:</label>
-                <textarea id="message" className="form-control" rows="5" placeholder="Your Message" required></textarea>
-              </div>
-              <button type="submit" className="btn btn-primary mt-3">Send Message</button>
-            </form>
-          </div>
+        <div className="form-group">
+          <label htmlFor="email">Email:</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            className="form-control"
+            value={formState.email}
+            onChange={handleChange}
+            required
+            placeholder="Enter your email"
+          />
         </div>
-      </div>
+        <div className="form-group">
+          <label htmlFor="message">Message:</label>
+          <textarea
+            id="message"
+            name="message"
+            className="form-control"
+            rows="5"
+            value={formState.message}
+            onChange={handleChange}
+            required
+            placeholder="Your message"
+          />
+        </div>
+        <button
+          type="submit"
+          className="red_button pageant-submit-button"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Sending..." : "Send Message"}
+        </button>
+        {status && (
+          <div className={`alert mt-3 ${status.includes("Thank you") ? "alert-success" : "alert-danger"}`}>
+            {status}
+          </div>
+        )}
+      </form>
     </div>
   );
-}
+};
 
-export default ContactPage;
+export default ContactForm;

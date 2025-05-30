@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
-export const useAuthAdmin = (adminEmail = "nwabekeyiprecious@gmail.com") => {
+export const useAuthAdmin = (adminEmail = ["nwabekeyiprecious@gmail.com","cl3fwilsonfashionafrica@gmail.com"]) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -10,7 +10,7 @@ export const useAuthAdmin = (adminEmail = "nwabekeyiprecious@gmail.com") => {
     const auth = getAuth();
     const unsubscribe = auth.onAuthStateChanged((user) => {
       console.log("Auth State Changed:", user ? user.email : "No user logged in");
-      if (user && user.email === adminEmail) {
+      if (user && adminEmail.includes(user.email)) {
         setLoading(false);
       } else {
         console.log("Unauthorized or no user, redirecting...");

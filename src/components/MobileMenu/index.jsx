@@ -1,10 +1,13 @@
+// src/components/MobileMenu.jsx
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { FaPhone, FaQuestionCircle, FaWhatsapp, FaAngleDown } from "react-icons/fa";
+import { Link, useLocation } from "react-router-dom";
+import Auth from "../../modules/Auth";
+import { FaPhone, FaQuestionCircle, FaWhatsapp, FaAngleDown, FaSignOutAlt } from "react-icons/fa";
 
 const MobileMenu = ({ activeClass, onClose }) => {
   const [selectedCurrency, setSelectedCurrency] = useState("NGN");
   const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
+  const location = useLocation();
 
   // Initialize currency from sessionStorage
   useEffect(() => {
@@ -18,15 +21,29 @@ const MobileMenu = ({ activeClass, onClose }) => {
   const handleCurrencyChange = (currency) => {
     sessionStorage.setItem("preferredCurrency", currency);
     setSelectedCurrency(currency);
-    setIsCurrencyOpen(false); // Close dropdown after selection
-    onClose(); // Close mobile menu
-    window.location.reload(); // Optional: reload if other content depends on currency
+    setIsCurrencyOpen(false);
+    onClose();
+    window.location.reload();
   };
 
   // Toggle currency dropdown
   const toggleCurrencyDropdown = () => {
     setIsCurrencyOpen((prev) => !prev);
   };
+
+  const handleLogout = async () => {
+    console.log("handleLogout: Initiating logout...");
+    try {
+      await Auth.logout();
+      window.dispatchEvent(new Event("storage"));
+      console.log("handleLogout: Logout successful");
+      onClose(); // Close mobile menu
+    } catch (error) {
+      console.error("handleLogout: Logout error:", error);
+    }
+  };
+
+  const isAdminPath = location.pathname === "/admin";
 
   return (
     <div className={activeClass ? "hamburger_menu active" : "hamburger_menu"}>
@@ -36,9 +53,7 @@ const MobileMenu = ({ activeClass, onClose }) => {
       <div className="hamburger_menu_content text-right">
         <ul className="menu_top_nav">
           <li className="menu_item currency">
-            <div className="currency_display">
-              Currency: {selectedCurrency}
-            </div>
+            <div className="currency_display">Currency: {selectedCurrency}</div>
             <div
               className="dropdown_toggle"
               onClick={toggleCurrencyDropdown}
@@ -110,6 +125,13 @@ const MobileMenu = ({ activeClass, onClose }) => {
               Vote for Your Candidate
             </Link>
           </li>
+          {isAdminPath && (
+            <li className="menu_item">
+              <a href="#" onClick={handleLogout}>
+                <FaSignOutAlt /> Sign out
+              </a>
+            </li>
+          )}
         </ul>
       </div>
     </div>

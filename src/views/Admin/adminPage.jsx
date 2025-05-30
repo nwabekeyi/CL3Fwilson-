@@ -102,12 +102,6 @@ function AdminPage() {
       <div className="section_title">
         <h2>Admin Dashboard - Manage Participants</h2>
         <div>
-        <button
-          className="btn btn-secondary mb-3"
-          onClick={() => getAuth().signOut().then(() => navigate("/sign-up"))}
-        >
-          Sign Out
-        </button>
         </div>
        
       </div>
