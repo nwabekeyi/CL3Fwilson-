@@ -1,15 +1,57 @@
+// components/TopNavBar.jsx
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import LoginRegister from "../LoginRegisterModal";
 import Auth from "../../modules/Auth";
- import { Link } from "react-router-dom";
+import { auth } from "../../firebase/config";
+import { onAuthStateChanged } from "firebase/auth";
 
 const TopNavBar = ({ className }) => {
   const [modalShow, setModalShow] = useState(false);
   const [login, setLogin] = useState(true);
+  const [user, setUser] = useState(Auth.getUserDetails());
+  const [token, setToken] = useState(Auth.getToken());
   const location = useLocation();
   const [selectedCurrency, setSelectedCurrency] = useState("NGN");
 
+  // Sync with Firebase auth state and localStorage
+  useEffect(() => {
+    // Firebase auth listener
+    const unsubscribe = auth ? onAuthStateChanged(auth, (firebaseUser) => {
+      const authUser = Auth.getUserDetails();
+      const authToken = Auth.getToken();
+      console.log("TopNavBar Auth State:", {
+        firebaseUser: firebaseUser ? firebaseUser.email : null,
+        authUser,
+        authToken,
+      });
+      setUser(authUser);
+      setToken(authToken);
+    }) : () => console.warn("Firebase auth not initialized in TopNavBar");
+
+    // localStorage listener
+    const handleStorageChange = (event) => {
+      if (event.key === "auth" || !event.key) {
+        const authUser = Auth.getUserDetails();
+        const authToken = Auth.getToken();
+        console.log("TopNavBar Storage Change:", { authUser, authToken });
+        setUser(authUser);
+        setToken(authToken);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    // Initial check
+    handleStorageChange({ key: "auth" });
+
+    return () => {
+      unsubscribe && unsubscribe();
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  // Load preferred currency
   useEffect(() => {
     const storedCurrency = sessionStorage.getItem("preferredCurrency");
     if (storedCurrency) {
@@ -27,19 +69,24 @@ const TopNavBar = ({ className }) => {
     setLogin(false);
   };
 
-  const logout = () => {
-    Auth.logout();
-    window.location.reload();
+  const logout = async () => {
+    console.log("TopNavBar: Logging out...");
+    try {
+      await Auth.logout();
+      setUser(null);
+      setToken(null);
+      // Removed navigate("/") to stay on current path
+    } catch (error) {
+      console.error("TopNavBar: Logout error:", error);
+    }
   };
-
-  const user = Auth.getUserDetails();
-  const token = Auth.getToken();
 
   const handleCurrencyChange = (currency) => {
     sessionStorage.setItem("preferredCurrency", currency);
     setSelectedCurrency(currency);
-    window.location.reload(); // Optional: if other content depends on currency
   };
+
+  const isAdminPath = location.pathname.toLowerCase().includes("/admin");
 
   return (
     <div className={`top_nav ${className}`}>
@@ -52,7 +99,7 @@ const TopNavBar = ({ className }) => {
             <div className="top_nav_right">
               <ul className="top_nav_menu">
                 <li className="currency">
-                  <a href="/">
+                  <a href="#">
                     {selectedCurrency.toLowerCase()}
                     <i className="fa fa-angle-down"></i>
                   </a>
@@ -78,22 +125,19 @@ const TopNavBar = ({ className }) => {
                 {user && token ? (
                   <li className="account">
                     <a href="#">
-                      {`Welcome ${user.user_name}`}
+                      {`Welcome ${user.user_name || user.email || "User"}`}
                       <i className="fa fa-angle-down"></i>
                     </a>
                     <ul className="account_selection">
                       <li>
                         <a href="#" onClick={logout}>
-                          <i
-                            className="fas fa-sign-in-alt"
-                            aria-hidden="true"
-                          ></i>
-                          Logout
+                          <i className="fas fa-sign-out-alt" aria-hidden="true"></i>
+                          Sign Out
                         </a>
                       </li>
                     </ul>
                   </li>
-                ) : location.pathname === "/admin" ? (
+                ) : isAdminPath ? (
                   <li className="account">
                     <a href="#">
                       Admin portal
@@ -101,11 +145,8 @@ const TopNavBar = ({ className }) => {
                     </a>
                     <ul className="account_selection">
                       <li>
-                        <Link to='/sign-in'>
-                          <i
-                            className="fas fa-sign-in-alt"
-                            aria-hidden="true"
-                          ></i>
+                        <Link to="/sign-in">
+                          <i className="fas fa-sign-in-alt" aria-hidden="true"></i>
                           Sign In
                         </Link>
                       </li>
