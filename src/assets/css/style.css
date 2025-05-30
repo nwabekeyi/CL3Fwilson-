@@ -3069,6 +3069,20 @@
     text-align: center;
    }
 
+   .product-manager{
+    margin-top: 50px !important;
+   }
+
+.section_title,
+.product-manager{
+  box-shadow: none !important;
+}
+
+.product-manager>div{
+  box-shadow: 1px 1px 20px rgba(0, 0, 0,0.2);
+  padding: 10px;
+}
+
    .product-manager h2{font-size: 24px;
     font-weight: bold;
     margin-bottom: 20px;}
@@ -3098,13 +3112,17 @@
       font-weight:bolder ;
     }
 
+    .pageant-form-container>div{
+      box-shadow: 1px 1px 20px rgba(0, 0, 0,0.2);
+      padding: 10px;
+    }
+
     .pageant-form-container{
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       margin-top: 170px;
+
     }
 
     .add-product-form{
-      box-shadow: none !important;
       background-color: transparent !important;
     }
 
