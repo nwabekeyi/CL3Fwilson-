@@ -1,5 +1,5 @@
 import React from "react";
-import Banner1 from "../../assets/images/about.jpg";
+import Banner1 from "../../assets/images/voting.jpg";
 import { Link } from "react-router-dom";
 
 function AboutUsPage() {
