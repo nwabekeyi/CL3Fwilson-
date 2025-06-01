@@ -10,7 +10,6 @@ function MensProducts({ home = false }) {
   const dispatch = useDispatch();
   const { products, loading, error } = useProductManager(); // Use product hook
   const { conversionRates, loading: rateLoading, error: rateError } = useConversionRate(); // Use conversion rate hook
-
   const addToBag = (id) => {
     console.log(`Added product ${id} to cart`);
   };

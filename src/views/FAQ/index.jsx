@@ -53,7 +53,7 @@ function FAQPage() {
         {
           question: "Who is eligible to participate in the workshop?",
           answer:
-            "The workshop is open to men aged 18-35 who are registered on our platform. Contestants must submit a profile with photos and a bio. Registration is free and available on the 'Register' page under Workshop.",
+            "The workshop is open to individuals aged 18-35 who are registered on our platform. Contestants must submit a profile with photos and a bio. Registration is free and available on the 'Register' page under Workshop.",
         },
         {
           question: "Can I vote multiple times for the same contestant?",

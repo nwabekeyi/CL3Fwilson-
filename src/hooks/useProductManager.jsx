@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { db } from "../firebase/config"; // Adjust path to your Firebase config
+import { db } from "../firebase/config";
 import {
   collection,
   addDoc,
@@ -9,12 +9,57 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
-import { uploadImage } from "../utils/cloudinary"; // Import Cloudinary upload function
+import { uploadImage } from "../utils/cloudinary";
 
 // Initialize Firestore collection
 const productsCollection = collection(db, "products");
 
+// Utility function to extract public ID from Cloudinary URL
+const getPublicIdFromUrl = (url) => {
+  try {
+    // Extract public ID from URL (e.g., "https://res.cloudinary.com/.../public_id.extension")
+    const parts = url.split("/");
+    const fileName = parts[parts.length - 1];
+    const publicId = fileName.split(".")[0]; // Remove file extension
+    return publicId;
+  } catch (error) {
+    console.error("Error extracting public ID from URL:", error);
+    return null;
+  }
+};
+
+// Utility function to delete image from Cloudinary
+const deleteImage = async (imageUrl) => {
+  try {
+    const publicId = getPublicIdFromUrl(imageUrl);
+    if (!publicId) {
+      throw new Error("Invalid Cloudinary URL");
+    }
+
+    // Cloudinary API call to delete the image
+    const response = await fetch("https://api.cloudinary.com/v1_1/<your-cloud-name>/image/destroy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Basic ${btoa("<your-api-key>:<your-api-secret>")}`, // Replace with your Cloudinary API key and secret
+      },
+      body: JSON.stringify({ public_id: publicId }),
+    });
+
+    const result = await response.json();
+    if (result.result !== "ok") {
+      throw new Error("Failed to delete image from Cloudinary");
+    }
+    return true;
+  } catch (error) {
+    console.error("Error deleting image from Cloudinary:", error);
+    return false;
+  }
+};
+
 const useProductManager = () => {
+
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -25,14 +70,25 @@ const useProductManager = () => {
     setError(null);
     try {
       const productsSnapshot = await getDocs(productsCollection);
-      const productsData = productsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      // If snapshot exists and has docs, map them; otherwise, return empty array
+      const productsData = productsSnapshot?.docs?.length
+        ? productsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+        : [];
       setProducts(productsData);
+      console.log(productsData);
     } catch (err) {
-      setError("Failed to fetch products");
-      console.error("Error fetching products:", err);
+      // Handle critical Firestore errors (e.g., permissions or network issues)
+      if (err.code === "permission-denied" || err.code === "unavailable") {
+        setError("Failed to fetch products due to permissions or network issues");
+        console.error("Error fetching products:", err);
+      } else {
+        // Non-existent collection: return empty array, no error state
+        setProducts([]);
+        console.warn("Products collection does not exist:", err);
+      }
     } finally {
       setLoading(false);
     }
@@ -43,31 +99,18 @@ const useProductManager = () => {
     setLoading(true);
     setError(null);
     try {
-      // Upload main image if provided
-      let mainImageUrl = productData.imagePath;
-      if (photoFiles.main) {
-        mainImageUrl = await uploadImage(photoFiles.main);
+      // Upload multiple images if provided
+      let imageUrls = productData.images || [];
+      if (photoFiles?.length > 0) {
+        imageUrls = await Promise.all(
+          photoFiles.map(async (file) => await uploadImage(file))
+        );
       }
-
-      // Upload variant images if provided
-      const variantsWithImages = await Promise.all(
-        productData.variants.map(async (variant, index) => {
-          let variantImageUrl = variant.imagePath;
-          if (photoFiles.variants[variant._id]) {
-            variantImageUrl = await uploadImage(photoFiles.variants[variant._id]);
-          }
-          return { ...variant, imagePath: variantImageUrl };
-        })
-      );
 
       // Prepare product data
       const finalProductData = {
         ...productData,
-        imagePath: mainImageUrl || "https://via.placeholder.com/800x600?text=No+Image",
-        variants: variantsWithImages.map((v) => ({
-          ...v,
-          imagePath: v.imagePath || "https://via.placeholder.com/800x600?text=No+Image",
-        })),
+        images: imageUrls.length > 0 ? imageUrls : ["https://via.placeholder.com/800x600?text=No+Image"],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -97,31 +140,29 @@ const useProductManager = () => {
         throw new Error("Product not found");
       }
 
-      // Upload main image if provided
-      let mainImageUrl = productData.imagePath;
-      if (photoFiles.main) {
-        mainImageUrl = await uploadImage(photoFiles.main);
-      }
+      // Upload new images if provided, preserve existing images if no new ones
+      let imageUrls = productData.images || [];
+      if (photoFiles?.length > 0) {
+        // Delete old images from Cloudinary if new images are provided
+        const oldImages = productSnap.data().images || [];
+        await Promise.all(
+          oldImages.map(async (imageUrl) => {
+            if (imageUrl && !imageUrl.includes("placeholder")) {
+              await deleteImage(imageUrl);
+            }
+          })
+        );
 
-      // Upload variant images if provided
-      const variantsWithImages = await Promise.all(
-        productData.variants.map(async (variant) => {
-          let variantImageUrl = variant.imagePath;
-          if (photoFiles.variants[variant._id]) {
-            variantImageUrl = await uploadImage(photoFiles.variants[variant._id]);
-          }
-          return { ...variant, imagePath: variantImageUrl };
-        })
-      );
+        // Upload new images
+        imageUrls = await Promise.all(
+          photoFiles.map(async (file) => await uploadImage(file))
+        );
+      }
 
       // Prepare updated product data
       const updatedProductData = {
         ...productData,
-        imagePath: mainImageUrl || productData.imagePath || "https://via.placeholder.com/800x600?text=No+Image",
-        variants: variantsWithImages.map((v) => ({
-          ...v,
-          imagePath: v.imagePath || "https://via.placeholder.com/800x600?text=No+Image",
-        })),
+        images: imageUrls.length > 0 ? imageUrls : productData.images || ["https://via.placeholder.com/800x600?text=No+Image"],
         updatedAt: new Date().toISOString(),
       };
 
@@ -141,7 +182,7 @@ const useProductManager = () => {
     }
   };
 
-  // Delete product
+  // Delete product and associated images
   const deleteProductHandler = async (productId) => {
     setLoading(true);
     setError(null);
@@ -152,11 +193,23 @@ const useProductManager = () => {
         throw new Error("Product not found");
       }
 
+      // Delete all associated images from Cloudinary
+      const productData = productSnap.data();
+      const images = productData.images || [];
+      await Promise.all(
+        images.map(async (imageUrl) => {
+          if (imageUrl && !imageUrl.includes("placeholder")) {
+            await deleteImage(imageUrl);
+          }
+        })
+      );
+
+      // Delete from Firestore
       await deleteDoc(productRef);
       setProducts((prev) => prev.filter((p) => p.id !== productId));
       return { success: true, id: productId };
     } catch (error) {
-      setError("Failed to delete product");
+      setError("Failed to delete product or images");
       console.error("Error deleting product:", error);
       throw error;
     } finally {
@@ -167,7 +220,7 @@ const useProductManager = () => {
   // Fetch products on mount
   useEffect(() => {
     fetchProducts();
-  }, []); // Empty dependency array to run once
+  }, []);
 
   return {
     products,

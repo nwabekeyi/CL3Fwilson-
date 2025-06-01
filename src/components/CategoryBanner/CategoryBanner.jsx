@@ -30,7 +30,7 @@ function CategoryBanner() {
                 }}
               ></div>
               <div className="banner_category">
-                <Link to="/about/wilster">women's by wilster</Link>
+                <Link to="/wilster">women's by wilster</Link>
               </div>
             </div>
           </div>

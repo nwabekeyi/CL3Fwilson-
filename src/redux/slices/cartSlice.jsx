@@ -34,7 +34,7 @@ export const getCartByUserId = createAsyncThunk(
 
 export const postCart = createAsyncThunk(
   "cart/postCart",
-  async ({ productId, increase = false, decrease = false, variantDetails = {} }, { getState, rejectWithValue }) => {
+  async ({ productId, quantity = 1, increase = false, decrease = false, variantDetails = {} }, { getState, rejectWithValue }) => {
     try {
       const state = getState();
       let cart = [...state.cart.items];
@@ -47,16 +47,16 @@ export const postCart = createAsyncThunk(
           cart[index].quantity += 1;
         } else if (decrease && cart[index].quantity > 1) {
           cart[index].quantity -= 1;
-        } else if (!increase && !decrease) {
-          // Add to cart (increment if exists)
-          cart[index].quantity += 1;
+        } else {
+          // Add to cart with specified quantity
+          cart[index].quantity += quantity;
         }
       } else if (!decrease) {
-        // Add new item (only if not decreasing)
+        // Add new item with specified quantity
         cart.push({
           productId,
-          quantity: 1,
-          ...variantDetails, // Store variant details (size, color, etc.)
+          quantity,
+          ...variantDetails,
         });
       }
 
@@ -93,7 +93,6 @@ const cartSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // getCartByUserId
     builder
       .addCase(getCartByUserId.pending, (state) => {
         state.loading = true;
@@ -106,10 +105,7 @@ const cartSlice = createSlice({
       .addCase(getCartByUserId.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
-
-    // postCart
-    builder
+      })
       .addCase(postCart.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -121,10 +117,7 @@ const cartSlice = createSlice({
       .addCase(postCart.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
-
-    // removeCartItem
-    builder
+      })
       .addCase(removeCartItem.pending, (state) => {
         state.loading = true;
         state.error = null;

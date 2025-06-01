@@ -96,7 +96,7 @@ const MobileMenu = ({ activeClass, onClose }) => {
             </Link>
           </li>
           <li className="menu_item">
-            <Link to="/about/wilster" onClick={onClose}>
+            <Link to="/wilster" onClick={onClose}>
               Women's by Wilster
             </Link>
           </li>

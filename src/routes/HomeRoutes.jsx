@@ -1,33 +1,41 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Navigate } from "react-router-dom";
 
 // Layout Types
 import BaseLayout from "../layouts/BaseLayout";
 
-// Route Views
-import WomensProducts from "../components/Products/WomensProduct.jsx";
-import Home from "../views/Home/HomeContainer";
-import SingleProductContainer from "../views/Product/SingleProductContainer";
-import CategoryContainer from "../views/Category/CategoryContainer";
-import ContactPage from "../views/Contact";
-import FAQPage from "../views/FAQ";
-import AboutUsPage from "../views/About";
-import PageantRegistrationPage from "../views/pageantryregistrationPage.jsx";
-import PageantVotingPage from "../views/pageantryVotingpage/index.jsx";
-import Wilster from "../views/Wilster/index.jsx";
-import MensProducts from "../components/Products/MensProducts.jsx";
-import AdminPage from "../views/Admin/adminPage.jsx"; // Import the AdminPage component
-import LoginForm from "../components/LoginRegisterModal/LoginForm.jsx";
+// Lazy-loaded Components
+const WomensProducts = lazy(() => import("../components/Products/WomensProduct.jsx"));
+const MensProducts = lazy(() => import("../components/Products/MensProducts.jsx"));
+const Home = lazy(() => import("../views/Home/HomeContainer"));
+const SingleProductContainer = lazy(() => import("../views/Product/SingleProductContainer"));
+const CategoryContainer = lazy(() => import("../views/Category/CategoryContainer"));
+const ContactPage = lazy(() => import("../views/Contact"));
+const FAQPage = lazy(() => import("../views/FAQ"));
+const AboutUsPage = lazy(() => import("../views/About"));
+const PageantRegistrationPage = lazy(() => import("../views/pageantryregistrationPage.jsx"));
+const PageantVotingPage = lazy(() => import("../views/pageantryVotingpage/index.jsx"));
+const Wilster = lazy(() => import("../views/Wilster/index.jsx"));
+const AdminPage = lazy(() => import("../views/Admin/adminPage.jsx"));
+const LoginForm = lazy(() => import("../components/LoginRegisterModal/LoginForm.jsx"));
+
+// Suspense fallback (can be a spinner or loading UI)
+const withSuspense = (Component) => (props) => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <Component {...props} />
+  </Suspense>
+);
+
 const routes = [
   {
     path: "/",
     layout: BaseLayout,
-    component: Home,
+    component: withSuspense(Home),
   },
   {
     path: "/admin",
     layout: BaseLayout,
-    component: AdminPage, // Updated to use AdminPage
+    component: withSuspense(AdminPage),
   },
   {
     path: "/home",
@@ -37,57 +45,57 @@ const routes = [
   {
     path: "/fashion-cube/single-product/:id",
     layout: BaseLayout,
-    component: SingleProductContainer,
+    component: withSuspense(SingleProductContainer),
   },
   {
     path: "/fashion-cube/shops/:category",
     layout: BaseLayout,
-    component: CategoryContainer,
+    component: withSuspense(CategoryContainer),
   },
   {
     path: "/contact",
     layout: BaseLayout,
-    component: ContactPage,
+    component: withSuspense(ContactPage),
   },
   {
     path: "/faq",
     layout: BaseLayout,
-    component: FAQPage,
+    component: withSuspense(FAQPage),
   },
   {
     path: "/about/cl3fwilson",
     layout: BaseLayout,
-    component: AboutUsPage,
+    component: withSuspense(AboutUsPage),
   },
   {
     path: "/workshop",
     layout: BaseLayout,
-    component: PageantRegistrationPage,
+    component: withSuspense(PageantRegistrationPage),
   },
   {
     path: "/workshop/vote",
     layout: BaseLayout,
-    component: PageantVotingPage,
+    component: withSuspense(PageantVotingPage),
   },
   {
-    path: "/about/wilster",
+    path: "/wilster",
     layout: BaseLayout,
-    component: Wilster,
+    component: withSuspense(Wilster),
   },
   {
     path: "/mensProduct",
     layout: BaseLayout,
-    component: MensProducts,
+    component: withSuspense(MensProducts),
   },
   {
     path: "/womensProduct",
     layout: BaseLayout,
-    component: MensProducts,
+    component: withSuspense(WomensProducts),
   },
   {
     path: "/sign-in",
     layout: BaseLayout,
-    component: LoginForm,
+    component: withSuspense(LoginForm),
   },
 ];
 

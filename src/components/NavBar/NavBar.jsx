@@ -64,7 +64,7 @@ const NavBar = () => {
   }, []);
 
   // Determine which logo to use based on pathname
-  const logoSource = location.pathname === "/about/wilster" ? wilster : companyLogo;
+  const logoSource = location.pathname === "/wilster" ? wilster : companyLogo;
 
   return (
     <div
@@ -110,7 +110,7 @@ const NavBar = () => {
                   </Link>
                   <ul className="dropdown_menu">
                     <li><Link to="/about/cl3fwilson">About CL3Fwilson</Link></li>
-                    <li><Link to="/about/wilster">Women's by Wilster</Link></li>
+                    <li><Link to="/wilster">Women's by Wilster</Link></li>
                   </ul>
                 </li>
                 <li className="dropdown">

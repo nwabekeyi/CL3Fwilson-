@@ -11,7 +11,13 @@ const MensSectionTwo = () => {
   return (
     <FixedBackgroundLayout backgroundImage={mensBg2}>
       <SectionContent
-        heading="Elevate Your Style"
+        heading={
+          <>
+            THE<br />
+            SATORIAL<br />
+            CODE
+          </>
+        }
         linkTo="/mensProduct"
         buttonText="Shop now"
       />
@@ -25,7 +31,7 @@ const WomensSectionOne = () => {
     <FixedBackgroundLayout backgroundImage={womensBg1}>
       <SectionContent
         heading="Chateau by Dusk(Wilster)"
-        linkTo="/about/wilster"
+        linkTo="/wilster"
         buttonText="Coming soon"
       />
     </FixedBackgroundLayout>
@@ -38,7 +44,7 @@ const WomensSectionTwo = () => {
     <FixedBackgroundLayout backgroundImage={womensBg2}>
       <SectionContent
         heading="Discover Timeless Beauty(By Wilster)"
-        linkTo="/about/wilster"
+        linkTo="/wilster"
         buttonText="Coming soon"
       />
     </FixedBackgroundLayout>
@@ -58,9 +64,9 @@ const MensSection = () => {
   );
 };
 
-export { 
-  MensSection, 
-  MensSectionTwo, 
-  WomensSectionOne, 
-  WomensSectionTwo 
+export {
+  MensSection,
+  MensSectionTwo,
+  WomensSectionOne,
+  WomensSectionTwo
 };
