@@ -111,7 +111,19 @@
   background-position: center !important;
   background-attachment:local !important;
  }
+ .navbar{
+  width: 70%;
+  display: flex;
+  justify-content: end !important;
+ }
 
+ .navbar_user li a {
+  margin-right: 0;
+ }
+
+ .hamburger_container{
+  margin: 0 15px;
+ }
 }
 
 /************

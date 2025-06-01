@@ -543,8 +543,18 @@
    background: #ffffff;
    box-shadow: 0 0 16px rgba(0, 0, 0, 0.15);
  }
+
+ .main_nav_container .container {
+  margin: 0;
+  width: 100vw;
+}
+
+.main_nav_container .container .row{
+  width: 100vw;
+  margin-right: 10px;
+}
  .navbar {
-   width: auto;
+   width: 50%   ;
    height: 100px;
    float: right;
    padding-left: 0px;
@@ -645,6 +655,7 @@
    text-align: center;
  }
  .navbar_user li a {
+  margin-right: 20px;
    display: -webkit-box;
    display: -moz-box;
    display: -ms-flexbox;
