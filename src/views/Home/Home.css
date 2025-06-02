@@ -25,7 +25,7 @@
 
 /* Ensure the SVG icon scales correctly */
 .whatsapp-icon svg {
-  width: 4vw; /* Increased icon size */
+  width: 7vh; /* Increased icon size */
   height: auto;
   color: #1e1e27;
 }
