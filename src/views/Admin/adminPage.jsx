@@ -1,47 +1,53 @@
 import React, { useState } from "react";
-import { getAuth } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { db } from "../../firebase/config";
 import { useAuthAdmin } from "../../hooks/useAuthAdmin";
 import { useFirestoreCollection } from "../../hooks/useFirestoreCollection";
 import { useParticipantForm } from "../../hooks/useParticipantForm";
-import "../../assets/css/responsive.css"
-import "../../assets/css/style.css"
+import "../../assets/css/responsive.css";
+import "../../assets/css/style.css";
 import { addParticipant, updateParticipant, deleteParticipant } from "../../utils/firestoreUtils";
 import ProductManager from "./productManager";
 
 function AdminPage() {
   const navigate = useNavigate();
   const { loading } = useAuthAdmin();
-  const { data: contestants, error: contestantsError } = useFirestoreCollection(
-    db,
-    "pageantContestants",
-    (c) => c.status?.toLowerCase() === "pending"
-  );
   const { data: participants, error: participantsError } = useFirestoreCollection(db, "participants");
   const {
     formData,
-    photoFile,
-    photoPreview,
     errors,
     isSubmitting,
     setIsSubmitting,
     setErrors,
     handleChange,
-    handlePhotoChange,
     validateForm,
-    handlePhotoUpload,
     resetForm,
     setFormData,
   } = useParticipantForm();
   const [editParticipant, setEditParticipant] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const handleAddParticipant = async (contestant) => {
+  const handleAddParticipant = async (e) => {
+    e.preventDefault();
     setIsSubmitting(true);
+
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      const photoURL = await handlePhotoUpload(contestant.photoURL);
-      await addParticipant(db, contestant, photoURL);
+      await addParticipant(db, {
+        fullName: formData.fullName,
+        codeName: formData.codeName,
+        email: formData.email,
+        about: formData.about,
+      });
       resetForm();
+      setSuccessMessage("Participant added successfully!");
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       setErrors({ ...errors, submission: error.message });
     } finally {
@@ -50,22 +56,16 @@ function AdminPage() {
   };
 
   const handleEditParticipant = (participant) => {
+    const newFormData = {
+      fullName: String(participant.fullName || ""),
+      codeName: String(participant.codeName || ""),
+      email: String(participant.email || ""),
+      about: String(participant.about || ""),
+    };
+    console.log("Editing participant:", participant);
+    console.log("Setting formData:", newFormData);
     setEditParticipant(participant);
-    setFormData({
-      fullName: participant.fullName,
-      stageName: participant.stageName,
-      email: participant.email,
-      gender: participant.gender,
-      age: participant.age,
-      nationality: participant.nationality,
-      stateOfOrigin: participant.stateOfOrigin,
-      location: participant.location,
-      phone: participant.phone,
-      whatsapp: participant.whatsapp,
-      instagram: participant.instagram,
-      bio: participant.bio,
-      photoURL: participant.photoURL,
-    });
+    setFormData(newFormData);
   };
 
   const handleUpdateParticipant = async (e) => {
@@ -80,10 +80,12 @@ function AdminPage() {
     }
 
     try {
-      const photoURL = await handlePhotoUpload(formData.photoURL);
-      await updateParticipant(db, editParticipant.docId, formData, photoURL);
+      console.log("Updating participant with docId:", editParticipant.docId, "data:", formData);
+      await updateParticipant(db, editParticipant.docId, formData);
       setEditParticipant(null);
       resetForm();
+      setSuccessMessage("Participant updated successfully!");
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       setErrors({ ...errors, submission: error.message });
     } finally {
@@ -91,8 +93,8 @@ function AdminPage() {
     }
   };
 
-  const handleDeleteParticipantAction = async (participantUid) => {
-    await deleteParticipant(db, participantUid, setErrors);
+  const handleDeleteParticipantAction = async (docId) => {
+    await deleteParticipant(db, docId, setErrors);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -101,47 +103,77 @@ function AdminPage() {
     <div className="container pageant-form-container">
       <div className="section_title">
         <h2>Admin Dashboard - Manage Participants</h2>
-        <div>
-        </div>
-       
       </div>
 
-      <div className="mt-4" id="pending-contestants">
-        <h5>Pending Contestants:</h5>
-        {contestants.length === 0 ? (
-          <p>No pending contestants.</p>
-        ) : (
-          <table className="table table-bordered">
-            <thead>
-              <tr>
-                <th>Full Name</th>
-                <th>Email</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody className="text-left">
-              {contestants.map((contestant) => (
-                <tr key={contestant.id}>
-                  <td>{contestant.fullName}</td>
-                  <td>{contestant.email}</td>
-                  <td>
-                    <button
-                      className="red_button pageant-submit-button"
-                      onClick={() => handleAddParticipant(contestant)}
-                      disabled={isSubmitting}
-                    >
-                      Approve
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      {successMessage && (
+        <div className="alert alert-success mt-3">{successMessage}</div>
+      )}
 
+      {/* Add Participant Form */}
       <div className="mt-4">
-        <h5>Participants</h5>
+        <h5>Add New Participant</h5>
+        <form className="pageant-form" onSubmit={handleAddParticipant}>
+          <div className="form-group">
+            <label htmlFor="fullName">Full Name:</label>
+            <input
+              type="text"
+              name="fullName"
+              className="form-control"
+              value={formData.fullName}
+              onChange={handleChange}
+              placeholder="Enter full name"
+            />
+            {errors.fullName && <span className="error">{errors.fullName}</span>}
+          </div>
+          <div className="form-group">
+            <label htmlFor="codeName">Code Name:</label>
+            <input
+              type="text"
+              name="codeName"
+              className="form-control"
+              value={formData.codeName}
+              onChange={handleChange}
+              placeholder="Enter code name"
+            />
+            {errors.codeName && <span className="error">{errors.codeName}</span>}
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">Email:</label>
+            <input
+              type="email"
+              name="email"
+              className="form-control"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter email"
+            />
+            {errors.email && <span className="error">{errors.email}</span>}
+          </div>
+          <div className="form-group">
+            <label htmlFor="about">About the Contestant:</label>
+            <textarea
+              name="about"
+              className="form-control"
+              rows="5"
+              value={formData.about}
+              onChange={handleChange}
+              placeholder="Describe the contestant (min 50 characters)"
+            />
+            {errors.about && <span className="error">{errors.about}</span>}
+          </div>
+          <button
+            type="submit"
+            className="red_button pageant-submit-button"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Adding..." : "Add Participant"}
+          </button>
+        </form>
+      </div>
+
+      {/* Participants Table */}
+      <div className="mt-4">
+        <h5>Contestants</h5>
         {participants.length === 0 ? (
           <p>No participants yet.</p>
         ) : (
@@ -149,6 +181,7 @@ function AdminPage() {
             <thead>
               <tr>
                 <th>Full Name</th>
+                <th>Code Name</th>
                 <th>Email</th>
                 <th>Voters</th>
                 <th>Actions</th>
@@ -157,8 +190,9 @@ function AdminPage() {
             <tbody>
               {participants.map((participant) => (
                 <tr key={participant.docId}>
-                  <td>{participant.fullName}</td>
-                  <td>{participant.email}</td>
+                  <td>{participant.fullName || "N/A"}</td>
+                  <td>{participant.codeName || "N/A"}</td>
+                  <td>{participant.email || "N/A"}</td>
                   <td>{participant.voters?.length || 0}</td>
                   <td>
                     <button
@@ -170,7 +204,7 @@ function AdminPage() {
                     </button>
                     <button
                       className="btn btn-danger"
-                      onClick={() => handleDeleteParticipantAction(participant.uid)} // Changed to participant.uid
+                      onClick={() => handleDeleteParticipantAction(participant.docId)}
                       disabled={isSubmitting}
                     >
                       Delete
@@ -183,6 +217,7 @@ function AdminPage() {
         )}
       </div>
 
+      {/* Edit Participant Form */}
       {editParticipant && (
         <div className="mt-4">
           <h5>Edit Participant</h5>
@@ -195,18 +230,21 @@ function AdminPage() {
                 className="form-control"
                 value={formData.fullName}
                 onChange={handleChange}
+                placeholder="Enter full name"
               />
               {errors.fullName && <span className="error">{errors.fullName}</span>}
             </div>
             <div className="form-group">
-              <label htmlFor="stageName">Stage Name:</label>
+              <label htmlFor="codeName">Code Name:</label>
               <input
                 type="text"
-                name="stageName"
+                name="codeName"
                 className="form-control"
-                value={formData.stageName}
+                value={formData.codeName}
                 onChange={handleChange}
+                placeholder="Enter code name"
               />
+              {errors.codeName && <span className="error">{errors.codeName}</span>}
             </div>
             <div className="form-group">
               <label htmlFor="email">Email:</label>
@@ -216,129 +254,21 @@ function AdminPage() {
                 className="form-control"
                 value={formData.email}
                 onChange={handleChange}
+                placeholder="Enter email"
               />
               {errors.email && <span className="error">{errors.email}</span>}
             </div>
             <div className="form-group">
-              <label htmlFor="gender">Gender:</label>
-              <select
-                name="gender"
-                className="form-control"
-                value={formData.gender}
-                onChange={handleChange}
-              >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="non-binary">Non-binary</option>
-                <option value="prefer-not-to-say">Prefer not to say</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label htmlFor="age">Age:</label>
-              <input
-                type="number"
-                name="age"
-                className="form-control"
-                value={formData.age}
-                onChange={handleChange}
-                min="18"
-                max="35"
-              />
-              {errors.age && <span className="error">{errors.age}</span>}
-            </div>
-            <div className="form-group">
-              <label htmlFor="nationality">Nationality:</label>
-              <input
-                type="text"
-                name="nationality"
-                className="form-control"
-                value={formData.nationality}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="stateOfOrigin">State of Origin:</label>
-              <input
-                type="text"
-                name="stateOfOrigin"
-                className="form-control"
-                value={formData.stateOfOrigin}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="location">Location:</label>
-              <input
-                type="text"
-                name="location"
-                className="form-control"
-                value={formData.location}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="phone">Phone:</label>
-              <input
-                type="tel"
-                name="phone"
-                className="form-control"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-              {errors.phone && <span className="error">{errors.phone}</span>}
-            </div>
-            <div className="form-group">
-              <label htmlFor="whatsapp">WhatsApp:</label>
-              <input
-                type="tel"
-                name="whatsapp"
-                className="form-control"
-                value={formData.whatsapp}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="instagram">Instagram:</label>
-              <input
-                type="text"
-                name="instagram"
-                className="form-control"
-                value={formData.instagram}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="bio">Bio:</label>
+              <label htmlFor="about">About the Contestant:</label>
               <textarea
-                name="bio"
+                name="about"
                 className="form-control"
                 rows="5"
-                value={formData.bio}
+                value={formData.about}
                 onChange={handleChange}
+                placeholder="Describe the contestant (min 50 characters)"
               />
-              {errors.bio && <span className="error">{errors.bio}</span>}
-            </div>
-            <div className="form-group">
-              <label htmlFor="photo">Photo:</label>
-              <input
-                type="file"
-                name="photo"
-                className="form-control"
-                accept="image/*"
-                onChange={handlePhotoChange}
-              />
-              {photoPreview && (
-                <div className="mt-2">
-                  <img
-                    src={photoPreview}
-                    alt="Preview"
-                    style={{ maxWidth: "200px", maxHeight: "200px" }}
-                    className="img-thumbnail"
-                  />
-                </div>
-              )}
-              {errors.photo && <span className="error">{errors.photo}</span>}
+              {errors.about && <span className="error">{errors.about}</span>}
             </div>
             <button
               type="submit"
@@ -361,9 +291,9 @@ function AdminPage() {
         </div>
       )}
 
-      {(errors.submission || contestantsError || participantsError) && (
+      {(errors.submission || participantsError) && (
         <div className="alert alert-danger mt-3">
-          {errors.submission || contestantsError || participantsError}
+          {errors.submission || participantsError}
         </div>
       )}
 

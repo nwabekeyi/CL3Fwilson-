@@ -1,12 +1,13 @@
 import React from "react";
 import useProductManager from "../../../hooks/useProductManager";
-import useConversionRate from "../../../hooks/useConversionRate"; // Import conversion rate hook
-import "./ProductManager.css"; // External CSS for styling
-import "../../../assets/css/style.css"
-import "../../../assets/css/responsive.css"
+import useConversionRate from "../../../hooks/useConversionRate";
+import "./ProductManager.css";
+import "../../../assets/css/style.css";
+import "../../../assets/css/responsive.css";
+
 const ProductManager = () => {
   const {
-    products,
+    products = [], // Ensure products is always an array
     loading: productLoading,
     error: productError,
     addProductWithImages,
@@ -15,22 +16,30 @@ const ProductManager = () => {
   } = useProductManager();
 
   const {
-    conversionRates,
+    conversionRates = { NGN: 1, USD: 0, EUR: 0 }, // Default rates
     loading: rateLoading,
     error: rateError,
     updateConversionRates,
   } = useConversionRate();
+
+  // Debug products state
+  console.log("Products in ProductManager:", products);
 
   // Handle form submission for adding a product
   const handleAddProduct = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const productData = {
-      name: formData.get("name"),
-      price: parseFloat(formData.get("price")),
-      oldPrice: parseFloat(formData.get("oldPrice")) || null, // Add oldPrice, allow null if empty
-      department: formData.get("department"),
-      variants: [{ _id: "variant1", color: formData.get("variantColor") }],
+      name: formData.get("name")?.trim() || "",
+      price: parseFloat(formData.get("price")) || 0,
+      oldPrice: formData.get("oldPrice") ? parseFloat(formData.get("oldPrice")) : null,
+      department: formData.get("department")?.trim() || "",
+      variants: [
+        {
+          _id: "variant1",
+          color: formData.get("variantColor")?.trim() || "default",
+        },
+      ],
     };
     const photoFiles = {
       main: formData.get("mainImage"),
@@ -42,7 +51,8 @@ const ProductManager = () => {
       alert("Product added successfully!");
       e.target.reset();
     } catch (err) {
-      alert("Failed to add product.");
+      alert(`Failed to add product: ${err.message}`);
+      console.error("Add product error:", err);
     }
   };
 
@@ -53,7 +63,8 @@ const ProductManager = () => {
         await deleteProduct(productId);
         alert("Product deleted successfully!");
       } catch (err) {
-        alert("Failed to delete product.");
+        alert(`Failed to delete product: ${err.message}`);
+        console.error("Delete product error:", err);
       }
     }
   };
@@ -63,15 +74,16 @@ const ProductManager = () => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const newRates = {
-      USD: formData.get("USD"),
-      EUR: formData.get("EUR"),
+      USD: parseFloat(formData.get("USD")) || 0,
+      EUR: parseFloat(formData.get("EUR")) || 0,
     };
 
     try {
       await updateConversionRates(newRates);
       alert("Conversion rates updated successfully!");
     } catch (err) {
-      alert("Failed to update conversion rates.");
+      alert(`Failed to update conversion rates: ${err.message}`);
+      console.error("Update rates error:", err);
     }
   };
 
@@ -79,19 +91,15 @@ const ProductManager = () => {
     <div className="product-manager">
       <h2>Product Manager</h2>
 
-      {/* Product Loading and Error States */}
-      {productLoading && <div className="loading">Loading products...</div>}
-      {productError && <div className="error">{productError}</div>}
-
       {/* Conversion Rates Section */}
       <div className="conversion-rates">
         <h5>Conversion Rates (Against NGN)</h5>
         {rateLoading && <div className="loading">Loading rates...</div>}
         {rateError && <div className="error">{rateError}</div>}
         <div className="current-rates">
-          <p>NGN: {conversionRates.NGN}</p>
-          <p>USD: {conversionRates.USD}</p>
-          <p>EUR: {conversionRates.EUR}</p>
+          <p>NGN: {conversionRates.NGN || 1}</p>
+          <p>USD: {conversionRates.USD || 0}</p>
+          <p>EUR: {conversionRates.EUR || 0}</p>
         </div>
         <div className="update-rates-form">
           <h5>Update Conversion Rates</h5>
@@ -103,7 +111,7 @@ const ProductManager = () => {
                 id="USD"
                 name="USD"
                 step="0.00001"
-                defaultValue={conversionRates.USD}
+                defaultValue={conversionRates.USD || 0}
                 required
               />
             </div>
@@ -114,18 +122,18 @@ const ProductManager = () => {
                 id="EUR"
                 name="EUR"
                 step="0.00001"
-                defaultValue={conversionRates.EUR}
+                defaultValue={conversionRates.EUR || 0}
                 required
               />
             </div>
             <div id="btn">
-            <button
-              type="submit"
-              disabled={rateLoading}
-              className="submit-button"
-            >
-              Update Rates
-            </button>
+              <button
+                type="submit"
+                disabled={rateLoading}
+                className="submit-button"
+              >
+                Update Rates
+              </button>
             </div>
           </form>
         </div>
@@ -133,47 +141,51 @@ const ProductManager = () => {
 
       {/* Product List */}
       <div className="product-list-section">
-      <h5>Product List</h5>
-      <div className="product-list">
-
-        {products.length === 0 && !productLoading && (
-          <p className="no-products">No products found.</p>
-        )}
-        {products.map((product) => (
-          <div key={product.id} className="product-card"
-                style={{maxWidth:"100%", height: "100%"}}>
-            <img
-              src={product.imagePath}
-              alt={product.name}
-              className="product-image"
-            />
-            <div className="product-details">
-              <h3>{product.name}</h3>
-              <p>Price: ${product.price}</p>
-              {product.oldPrice && <p>Old Price: ${product.oldPrice}</p>} {/* Display oldPrice if exists */}
-              <p>Department: {product.department}</p>
-              <div className="variants">
-                {product.variants.map((variant) => (
-                  <div key={variant._id} className="variant">
-                    <span>{variant.color}</span>
-                    <img
-                      src={variant.imagePath}
-                      alt={variant.color || "Variant"}
-                      className="variant-image"
-                    />
-                  </div>
-                ))}
+        <h5>Product List</h5>
+        <div className="product-list">
+          {productLoading && <div className="loading">Loading products...</div>}
+          {productError && <div className="error">{productError}</div>}
+          {!productLoading && !productError && products.length === 0 && (
+            <p className="no-products">No products found.</p>
+          )}
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="product-card"
+              style={{ maxWidth: "100%", height: "100%" }}
+            >
+              <img
+                src={product.imagePath || "https://via.placeholder.com/800x600?text=No+Image"}
+                alt={product.name}
+                className="product-image"
+              />
+              <div className="product-details">
+                <h3>{product.name || "Unnamed Product"}</h3>
+                <p>Price: ${product.price || 0}</p>
+                {product.oldPrice && <p>Old Price: ${product.oldPrice}</p>}
+                <p>Department: {product.department || "N/A"}</p>
+                <div className="variants">
+                  {(product.variants || []).map((variant) => (
+                    <div key={variant._id} className="variant">
+                      <span>{variant.color || "N/A"}</span>
+                      <img
+                        src={variant.imagePath || "https://via.placeholder.com/800x600?text=No+Image"}
+                        alt={variant.color || "Variant"}
+                        className="variant-image"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => handleDelete(product.id)}
+                  className="delete-button"
+                >
+                  Delete
+                </button>
               </div>
-              <button
-                onClick={() => handleDelete(product.id)}
-                className="delete-button"
-              >
-                Delete
-              </button>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
       </div>
 
       {/* Add Product Form */}
