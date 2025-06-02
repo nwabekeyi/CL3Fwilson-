@@ -1,5 +1,7 @@
 // src/components/ContactForm.jsx
 import React, { useState } from "react";
+import Banner1 from "../../assets/images/contact.png";
+
 
 const ContactForm = () => {
   const [formState, setFormState] = useState({
@@ -45,11 +47,20 @@ const ContactForm = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <div className="section_title">
-        <h2>Contact Us</h2>
-        <p>We would love to hear from you!</p>
+    <div className="contact-page">
+          <div
+        className="about-banner"
+        style={{
+          backgroundImage: `url(${Banner1})`,
+        }}
+      >
+        <div className="about-banner-overlay">
+          <h1>Contact Us</h1>
+          <p>we would like to hear from you</p>
+        </div>
       </div>
+      <div className="container mt-4">
+
       <form onSubmit={handleSubmit} className="pageant-form">
         <div className="form-group">
           <label htmlFor="name">Name:</label>
@@ -104,6 +115,10 @@ const ContactForm = () => {
         )}
       </form>
     </div>
+      </div>
+
+    
+    
   );
 };
 

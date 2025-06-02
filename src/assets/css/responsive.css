@@ -333,6 +333,7 @@
   .col-md-10 .shop_now_button{
     width: auto !important;
   }
+
 }
 
 /************
@@ -342,15 +343,6 @@
 @media only screen and (max-width: 959px) {
 }
 
-/************
-8. 880px
-************/
-
-@media only screen and (max-width: 880px) {
-  [data-aos^=fade][data-aos^=fade].aos-animate{
-    margin-top: 100px;
-  }
-}
 
 /************
 9. 768px
@@ -397,7 +389,7 @@
     height: 345px;
   }
   .product {
-    height: 305px;
+    height: auto;
   }
   .grid_sorting_button {
     font-size: 13px;
