@@ -1,29 +1,21 @@
-import {
-  collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  serverTimestamp,
-} from "firebase/firestore";
+import { collection, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { serverTimestamp } from "firebase/firestore";
 
 export const addParticipant = async (db, data) => {
   try {
     const participantData = {
-      fullName: data.fullName || "",
-      codeName: data.codeName || "",
-      email: data.email || "",
-      about: data.about || "",
-      voters: [],
+      fullName: String(data.fullName || ""),
+      codeName: String(data.codeName || ""),
+      email: String(data.email || ""),
+      about: String(data.about || ""),
+      photoURL: String(data.photoURL || "https://via.placeholder.com/800x600?text=No+Image"),
+      voters: Array.isArray(data.voters) ? data.voters : [],
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     };
-    console.log("Adding participant to Firestore with data:", participantData);
-
     const participantsCollection = collection(db, "participants");
-    const participantRef = await addDoc(participantsCollection, participantData);
-    console.log("Participant added with ID:", participantRef.id);
-
-    return participantRef.id;
+    const docRef = await addDoc(participantsCollection, participantData);
+    return docRef.id;
   } catch (error) {
     console.error("Error adding participant:", error);
     throw new Error(`Failed to add participant: ${error.message}`);
@@ -34,13 +26,13 @@ export const updateParticipant = async (db, docId, formData) => {
   try {
     const participantRef = doc(db, "participants", docId);
     await updateDoc(participantRef, {
-      fullName: formData.fullName || "",
-      codeName: formData.codeName || "",
-      email: formData.email || "",
-      about: formData.about || "",
+      fullName: String(formData.fullName || ""),
+      codeName: String(formData.codeName || ""),
+      email: String(formData.email || ""),
+      about: String(formData.about || ""),
+      photoURL: String(formData.photoURL || "https://via.placeholder.com/800x600?text=No+Image"),
       updatedAt: serverTimestamp(),
     });
-    console.log("Participant updated:", docId);
   } catch (error) {
     console.error("Error updating participant:", error);
     throw new Error(`Failed to update participant: ${error.message}`);
@@ -49,11 +41,8 @@ export const updateParticipant = async (db, docId, formData) => {
 
 export const deleteParticipant = async (db, docId, setErrors) => {
   try {
-    console.log("Attempting to delete participant with docId:", docId);
-
     const participantRef = doc(db, "participants", docId);
     await deleteDoc(participantRef);
-    console.log("Participant deleted from participants:", docId);
   } catch (error) {
     console.error("Error deleting participant:", error);
     setErrors((prev) => ({

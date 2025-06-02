@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../../firebase/config";
 import { useAuthAdmin } from "../../hooks/useAuthAdmin";
@@ -7,6 +7,7 @@ import { useParticipantForm } from "../../hooks/useParticipantForm";
 import "../../assets/css/responsive.css";
 import "../../assets/css/style.css";
 import { addParticipant, updateParticipant, deleteParticipant } from "../../utils/firestoreUtils";
+import { uploadImage } from "../../utils/cloudinary";
 import ProductManager from "./productManager";
 
 function AdminPage() {
@@ -26,6 +27,28 @@ function AdminPage() {
   } = useParticipantForm();
   const [editParticipant, setEditParticipant] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [previewImage, setPreviewImage] = useState(null); // State for image preview
+
+  // Clean up preview URL when component unmounts or file changes
+  useEffect(() => {
+    return () => {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+      }
+    };
+  }, [previewImage]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage); // Clean up previous preview
+      }
+      setPreviewImage(URL.createObjectURL(file)); // Set new preview
+    } else {
+      setPreviewImage(null); // Clear preview if no file
+    }
+  };
 
   const handleAddParticipant = async (e) => {
     e.preventDefault();
@@ -39,17 +62,30 @@ function AdminPage() {
     }
 
     try {
+      const form = e.target;
+      const photoFile = form.photo.files[0];
+      let photoURL = "https://via.placeholder.com/800x600?text=No+Image";
+
+      if (photoFile) {
+        photoURL = await uploadImage(photoFile); // Upload to Cloudinary
+      }
+
       await addParticipant(db, {
         fullName: formData.fullName,
         codeName: formData.codeName,
         email: formData.email,
         about: formData.about,
+        photoURL,
+        voters: [],
+        createdAt: new Date(),
       });
       resetForm();
+      form.reset();
+      setPreviewImage(null); // Clear preview
       setSuccessMessage("Participant added successfully!");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
-      setErrors({ ...errors, submission: error.message });
+      setErrors({ ...errors, submission: `Failed to add participant: ${error.message}` });
     } finally {
       setIsSubmitting(false);
     }
@@ -61,11 +97,13 @@ function AdminPage() {
       codeName: String(participant.codeName || ""),
       email: String(participant.email || ""),
       about: String(participant.about || ""),
+      photoURL: String(participant.photoURL || ""),
     };
     console.log("Editing participant:", participant);
     console.log("Setting formData:", newFormData);
     setEditParticipant(participant);
     setFormData(newFormData);
+    setPreviewImage(participant.photoURL || null); // Set initial preview
   };
 
   const handleUpdateParticipant = async (e) => {
@@ -80,14 +118,33 @@ function AdminPage() {
     }
 
     try {
-      console.log("Updating participant with docId:", editParticipant.docId, "data:", formData);
-      await updateParticipant(db, editParticipant.docId, formData);
+      const form = e.target;
+      const photoFile = form.photo.files[0];
+      let photoURL = formData.photoURL || "https://via.placeholder.com/800x600?text=No+Image";
+
+      if (photoFile) {
+        photoURL = await uploadImage(photoFile); // Upload new image
+      }
+
+      const updatedData = {
+        fullName: formData.fullName,
+        codeName: formData.codeName,
+        email: formData.email,
+        about: formData.about,
+        photoURL,
+        updatedAt: new Date(),
+      };
+
+      console.log("Updating participant with docId:", editParticipant.docId, "data:", updatedData);
+      await updateParticipant(db, editParticipant.docId, updatedData);
       setEditParticipant(null);
       resetForm();
+      form.reset();
+      setPreviewImage(null); // Clear preview
       setSuccessMessage("Participant updated successfully!");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
-      setErrors({ ...errors, submission: error.message });
+      setErrors({ ...errors, submission: `Failed to update participant: ${error.message}` });
     } finally {
       setIsSubmitting(false);
     }
@@ -161,6 +218,27 @@ function AdminPage() {
             />
             {errors.about && <span className="error">{errors.about}</span>}
           </div>
+          <div className="form-group">
+            <label htmlFor="photo">Photo:</label>
+            <input
+              type="file"
+              name="photo"
+              className="form-control"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            {previewImage && (
+              <div className="mt-2">
+                <p>Preview:</p>
+                <img
+                  src={previewImage}
+                  alt="Preview"
+                  style={{ width: "100px", height: "100px", objectFit: "cover" }}
+                />
+              </div>
+            )}
+            {errors.photo && <span className="error">{errors.photo}</span>}
+          </div>
           <button
             type="submit"
             className="red_button pageant-submit-button"
@@ -175,7 +253,7 @@ function AdminPage() {
       <div className="mt-4">
         <h5>Contestants</h5>
         {participants.length === 0 ? (
-          <p>No participants yet.</p>
+          <p>No contestants yet.</p>
         ) : (
           <table className="table table-bordered">
             <thead>
@@ -183,6 +261,7 @@ function AdminPage() {
                 <th>Full Name</th>
                 <th>Code Name</th>
                 <th>Email</th>
+                <th>Photo</th>
                 <th>Voters</th>
                 <th>Actions</th>
               </tr>
@@ -193,6 +272,20 @@ function AdminPage() {
                   <td>{participant.fullName || "N/A"}</td>
                   <td>{participant.codeName || "N/A"}</td>
                   <td>{participant.email || "N/A"}</td>
+                  <td>
+                    {participant.photoURL ? (
+                      <img
+                        src={participant.photoURL}
+                        alt={participant.fullName}
+                        style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                        onError={(e) => {
+                          e.target.src = "https://via.placeholder.com/50?text=No+Image";
+                        }}
+                      />
+                    ) : (
+                      "No Image"
+                    )}
+                  </td>
                   <td>{participant.voters?.length || 0}</td>
                   <td>
                     <button
@@ -270,6 +363,40 @@ function AdminPage() {
               />
               {errors.about && <span className="error">{errors.about}</span>}
             </div>
+            <div className="form-group">
+              <label htmlFor="photo">Update Photo:</label>
+              <input
+                type="file"
+                name="photo"
+                className="form-control"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              {previewImage && (
+                <div className="mt-2">
+                  <p>Preview:</p>
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    style={{ width: "100px", height: "100px", objectFit: "cover" }}
+                  />
+                </div>
+              )}
+              {formData.photoURL && !previewImage && (
+                <div className="mt-2">
+                  <p>Current Photo:</p>
+                  <img
+                    src={formData.photoURL}
+                    alt="Current"
+                    style={{ width: "100px", height: "100px", objectFit: "cover" }}
+                    onError={(e) => {
+                      e.target.src = "https://via.placeholder.com/100?text=No+Image";
+                    }}
+                  />
+                </div>
+              )}
+              {errors.photo && <span className="error">{errors.photo}</span>}
+            </div>
             <button
               type="submit"
               className="red_button pageant-submit-button"
@@ -283,6 +410,7 @@ function AdminPage() {
               onClick={() => {
                 setEditParticipant(null);
                 resetForm();
+                setPreviewImage(null);
               }}
             >
               Cancel

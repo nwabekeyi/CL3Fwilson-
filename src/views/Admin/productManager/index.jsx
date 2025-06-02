@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import useProductManager from "../../../hooks/useProductManager";
 import useConversionRate from "../../../hooks/useConversionRate";
 import "./ProductManager.css";
@@ -12,7 +12,6 @@ const ProductManager = () => {
     error: productError,
     addProductWithImages,
     deleteProduct,
-    fetchProducts,
   } = useProductManager();
 
   const {
@@ -22,34 +21,56 @@ const ProductManager = () => {
     updateConversionRates,
   } = useConversionRate();
 
-  // Debug products state
-  console.log("Products in ProductManager:", products);
+  const [imageInputs, setImageInputs] = useState([{ id: Date.now(), file: null, preview: null }]);
+
+  // Handle image selection for a specific input
+  const handleImageChange = (id, event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const preview = URL.createObjectURL(file);
+      setImageInputs((prev) =>
+        prev.map((input) =>
+          input.id === id ? { ...input, file, preview } : input
+        )
+      );
+    }
+  };
+
+  // Add a new image input field
+  const handleAddMoreImages = () => {
+    setImageInputs((prev) => [...prev, { id: Date.now(), file: null, preview: null }]);
+  };
+
+  // Remove an image input field
+  const handleRemoveImageInput = (id) => {
+    setImageInputs((prev) => {
+      const input = prev.find((input) => input.id === id);
+      if (input?.preview) URL.revokeObjectURL(input.preview);
+      return prev.filter((input) => input.id !== id);
+    });
+  };
 
   // Handle form submission for adding a product
-  const handleAddProduct = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
+  const handleAddProduct = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
     const productData = {
-      name: formData.get("name")?.trim() || "",
-      price: parseFloat(formData.get("price")) || 0,
-      oldPrice: formData.get("oldPrice") ? parseFloat(formData.get("oldPrice")) : null,
-      department: formData.get("department")?.trim() || "",
-      variants: [
-        {
-          _id: "variant1",
-          color: formData.get("variantColor")?.trim() || "default",
-        },
-      ],
+      name: formData.get("name"),
+      price: parseFloat(formData.get("price")),
+      department: formData.get("department"),
+      images: [],
     };
-    const photoFiles = {
-      main: formData.get("mainImage"),
-      variants: { variant1: formData.get("variantImage") },
-    };
+
+    const photoFiles = imageInputs.map((input) => input.file).filter((file) => file !== null);
 
     try {
       await addProductWithImages(productData, photoFiles);
       alert("Product added successfully!");
-      e.target.reset();
+      event.target.reset();
+      imageInputs.forEach((input) => {
+        if (input.preview) URL.revokeObjectURL(input.preview);
+      });
+      setImageInputs([{ id: Date.now(), file: null, preview: null }]);
     } catch (err) {
       alert(`Failed to add product: ${err.message}`);
       console.error("Add product error:", err);
@@ -70,12 +91,12 @@ const ProductManager = () => {
   };
 
   // Handle form submission for updating conversion rates
-  const handleUpdateRates = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
+  const handleUpdateRates = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
     const newRates = {
-      USD: parseFloat(formData.get("USD")) || 0,
-      EUR: parseFloat(formData.get("EUR")) || 0,
+      USD: parseFloat(formData.get("USD")),
+      EUR: parseFloat(formData.get("EUR")),
     };
 
     try {
@@ -86,6 +107,9 @@ const ProductManager = () => {
       console.error("Update rates error:", err);
     }
   };
+
+  // Check if the first image input has a file
+  const isFirstImageSelected = imageInputs[0]?.file !== null;
 
   return (
     <div className="product-manager">
@@ -143,9 +167,7 @@ const ProductManager = () => {
       <div className="product-list-section">
         <h5>Product List</h5>
         <div className="product-list">
-          {productLoading && <div className="loading">Loading products...</div>}
-          {productError && <div className="error">{productError}</div>}
-          {!productLoading && !productError && products.length === 0 && (
+          {products.length === 0 && !productLoading && (
             <p className="no-products">No products found.</p>
           )}
           {products.map((product) => (
@@ -154,28 +176,20 @@ const ProductManager = () => {
               className="product-card"
               style={{ maxWidth: "100%", height: "100%" }}
             >
-              <img
-                src={product.imagePath || "https://via.placeholder.com/800x600?text=No+Image"}
-                alt={product.name}
-                className="product-image"
-              />
+              <div className="product-images">
+                {product.images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`${product.name} ${index + 1}`}
+                    className="product-image"
+                  />
+                ))}
+              </div>
               <div className="product-details">
-                <h3>{product.name || "Unnamed Product"}</h3>
-                <p>Price: ${product.price || 0}</p>
-                {product.oldPrice && <p>Old Price: ${product.oldPrice}</p>}
-                <p>Department: {product.department || "N/A"}</p>
-                <div className="variants">
-                  {(product.variants || []).map((variant) => (
-                    <div key={variant._id} className="variant">
-                      <span>{variant.color || "N/A"}</span>
-                      <img
-                        src={variant.imagePath || "https://via.placeholder.com/800x600?text=No+Image"}
-                        alt={variant.color || "Variant"}
-                        className="variant-image"
-                      />
-                    </div>
-                  ))}
-                </div>
+                <h3>{product.name}</h3>
+                <p>Price: ${product.price}</p>
+                <p>Department: {product.department}</p>
                 <button
                   onClick={() => handleDelete(product.id)}
                   className="delete-button"
@@ -215,39 +229,51 @@ const ProductManager = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="oldPrice">Old Price:</label>
-            <input
-              type="number"
-              id="oldPrice"
-              name="oldPrice"
-              step="0.01"
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="mainImage">Main Image:</label>
-            <input
-              type="file"
-              id="mainImage"
-              name="mainImage"
-              accept="image/*"
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="variantColor">Variant Color:</label>
-            <input type="text" id="variantColor" name="variantColor" />
-          </div>
-          <div className="form-group">
-            <label htmlFor="variantImage">Variant Image:</label>
-            <input
-              type="file"
-              id="variantImage"
-              name="variantImage"
-              accept="image/*"
-            />
+            <label>Product Images:</label>
+            {imageInputs.map((input, index) => (
+              <div key={input.id} className="image-input-group">
+                <input
+                  type="file"
+                  id={`image-${input.id}`}
+                  name={`image-${input.id}`}
+                  accept="image/*"
+                  onChange={(event) => handleImageChange(input.id, event)}
+                />
+                {input.preview && (
+                  <div className="image-preview-container">
+                    <img
+                      src={input.preview}
+                      alt={`Preview ${index + 1}`}
+                      className="image-preview"
+                      style={{ maxWidth: "100px", margin: "5px" }}
+                    />
+                    <button
+                      type="button"
+                      className="remove-image-button"
+                      onClick={() => handleRemoveImageInput(input.id)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+            {isFirstImageSelected && (
+              <button
+                type="button"
+                className="add-more-images-button"
+                onClick={handleAddMoreImages}
+              >
+                Add More Images
+              </button>
+            )}
+            <p className="image-count">
+              {imageInputs.filter((input) => input.file).length} image{imageInputs.filter((input) => input.file).length !== 1 ? "s" : ""} selected
+            </p>
           </div>
           <button
             type="submit"
-            disabled={productLoading}
+            disabled={productLoading || !isFirstImageSelected}
             className="submit-button"
           >
             Add Product

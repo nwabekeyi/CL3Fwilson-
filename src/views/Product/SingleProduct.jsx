@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import useConversionRate from "../../hooks/useConversionRate"; // Import the hook
+import useConversionRate from "../../hooks/useConversionRate";
 
 const SingleProduct = ({ product, postCart }) => {
   const location = useLocation();
-  const { conversionRates, loading: rateLoading, error: rateError } = useConversionRate(); // Use hook
+  const { conversionRates, loading: rateLoading, error: rateError } = useConversionRate();
   const [state, setState] = useState({
-    color: "",
-    size: "",
-    pic: "",
-    selectedSize: "",
-    id: "",
+    pic: "", // Current main image
     quantity: 1,
   });
-  const [preferredCurrency, setPreferredCurrency] = useState("NGN"); // Default to NGN
+  const [preferredCurrency, setPreferredCurrency] = useState("NGN");
 
   // Retrieve preferredCurrency from sessionStorage
   useEffect(() => {
@@ -34,37 +30,20 @@ const SingleProduct = ({ product, postCart }) => {
   const convertPrice = (ngnPrice, currency) => {
     if (!ngnPrice || isNaN(ngnPrice)) return 0;
     if (!conversionRates || !conversionRates[currency] || rateLoading) {
-      return currency === "NGN" ? Number(ngnPrice.toFixed(2)) : 0; // Fallback to NGN or 0
+      return currency === "NGN" ? Number(ngnPrice.toFixed(2)) : 0;
     }
     return Number((ngnPrice * conversionRates[currency]).toFixed(2));
   };
 
   // Dummy product for when no product is provided
   const dummyProduct = {
-    _id: "dummy",
-    title: "Product Not Available",
+    id: "dummy",
+    name: "Product Not Available",
     price: 0,
-    oldPrice: null,
-    imagePath: "https://via.placeholder.com/800x600?text=Product+Not+Found",
+    images: ["https://via.placeholder.com/800x600?text=Product+Not+Found"],
     department: "Men",
     category: "Unknown",
     description: "This product is currently unavailable. Please check back later or browse other items.",
-    variants: [
-      {
-        _id: "dummy-v1",
-        size: "M",
-        color: "Grey",
-        price: 0,
-        imagePath: "https://via.placeholder.com/800x600?text=Product+Not+Found",
-      },
-      {
-        _id: "dummy-v2",
-        size: "L",
-        color: "Grey",
-        price: 0,
-        imagePath: "https://via.placeholder.com/800x600?text=Product+Not+Found",
-      },
-    ],
   };
 
   // Use the product prop or dummyProduct
@@ -73,83 +52,46 @@ const SingleProduct = ({ product, postCart }) => {
 
   // Convert prices for display
   const convertedPrice = convertPrice(displayProduct.price, preferredCurrency);
-  const convertedOldPrice = displayProduct.oldPrice
-    ? convertPrice(displayProduct.oldPrice, preferredCurrency)
-    : convertPrice(displayProduct.price * 1.3, preferredCurrency); // 30% markup if no oldPrice
 
-  // Set default variant image when product changes
+  // Set default image when product changes
   useEffect(() => {
-    if (displayProduct.variants?.length > 0 && !state.pic) {
+    if (displayProduct.images?.length > 0 && !state.pic) {
       setState((prev) => ({
         ...prev,
-        pic: displayProduct.variants[0].imagePath,
-        id: displayProduct.variants[0]._id,
-        color: displayProduct.variants[0].color,
-        size: displayProduct.variants[0].size,
-        selectedSize: displayProduct.variants[0].size,
+        pic: displayProduct.images[0],
       }));
     }
   }, [displayProduct, state.pic]);
 
-  const handleThumbnailClick = (item) => {
+  const handleThumbnailClick = (image) => {
     setState((prev) => ({
       ...prev,
-      color: item.color,
-      size: item.size,
-      pic: item.imagePath,
-      selectedSize: item.size,
-      id: item._id,
+      pic: image,
     }));
   };
 
   const onAddClicked = () => {
     if (!isDummy) {
-      const selectedVariant = displayProduct.variants.find((v) => v._id === state.id) || displayProduct.variants[0];
       setState((prev) => ({ ...prev, quantity: prev.quantity + 1 }));
-      postCart({
-        productId: state.id || displayProduct.variants[0]._id,
-        increase: true,
-        variantDetails: {
-          color: selectedVariant.color,
-          imagePath: selectedVariant.imagePath,
-          name: displayProduct.name,
-          currency: preferredCurrency,
-          price: product.price
-        },
-      });
     }
   };
 
   const onRemoveClicked = () => {
     if (!isDummy && state.quantity > 1) {
-      const selectedVariant = displayProduct.variants.find((v) => v._id === state.id) || displayProduct.variants[0];
       setState((prev) => ({ ...prev, quantity: prev.quantity - 1 }));
-      postCart({
-        productId: state.id || displayProduct.variants[0]._id,
-        decrease: true,
-        variantDetails: {
-          color: selectedVariant.color,
-          imagePath: selectedVariant.imagePath,
-          name: displayProduct.name,
-          currency: preferredCurrency,
-          price: product.price,
-        },
-      });
     }
   };
 
   const addToBag = () => {
     if (!isDummy) {
-      const selectedVariant = displayProduct.variants.find((v) => v._id === state.id) || displayProduct.variants[0];
       postCart({
-        productId: state.id || displayProduct.variants[0]._id,
+        productId: displayProduct.id,
+        quantity: state.quantity, // Pass the selected quantity
         variantDetails: {
-          size: selectedVariant.size,
-          color: selectedVariant.color,
-          imagePath: selectedVariant.imagePath,
+          imagePath: state.pic || displayProduct.images[0],
           title: displayProduct.name,
           currency: preferredCurrency,
-          price:product.price
+          price: displayProduct.price,
         },
       })
         .then((res) => {
@@ -160,11 +102,10 @@ const SingleProduct = ({ product, postCart }) => {
         });
     }
   };
-console.log(product)
+
   return (
     <div className="container single_product_container">
       <div>
-        {/* Loading and Error States for Conversion Rates */}
         {rateLoading && <div className="loading">Loading conversion rates...</div>}
         {rateError && <div className="error">{rateError}</div>}
         <div className="row">
@@ -198,12 +139,12 @@ console.log(product)
                 <div className="col-lg-3 thumbnails_col order-lg-1 order-2">
                   <div className="single_product_thumbnails">
                     <ul>
-                      {displayProduct.variants && displayProduct.variants.length > 0 ? (
-                        displayProduct.variants.slice(0, 4).map((item) => (
-                          <li key={item._id} onClick={() => handleThumbnailClick(item)}>
+                      {displayProduct.images && displayProduct.images.length > 0 ? (
+                        displayProduct.images.slice(0, 4).map((image, index) => (
+                          <li key={index} onClick={() => handleThumbnailClick(image)}>
                             <img
-                              src={item.imagePath}
-                              alt={`${item.color} ${item.size}`}
+                              src={image}
+                              alt={`${displayProduct.name} ${index + 1}`}
                               className="img-fluid"
                             />
                           </li>
@@ -211,8 +152,8 @@ console.log(product)
                       ) : (
                         <li>
                           <img
-                            src={displayProduct.imagePath}
-                            alt={displayProduct.title}
+                            src="https://via.placeholder.com/800x600?text=No+Image"
+                            alt={displayProduct.name}
                             className="img-fluid"
                           />
                         </li>
@@ -224,7 +165,7 @@ console.log(product)
                   <div className="single_product_image">
                     <div
                       className="single_product_image_background"
-                      style={{ backgroundImage: `url(${state.pic || displayProduct.imagePath})` }}
+                      style={{ backgroundImage: `url(${state.pic || displayProduct.images[0] || "https://via.placeholder.com/800x600?text=No+Image"})` }}
                     />
                   </div>
                 </div>
@@ -234,11 +175,8 @@ console.log(product)
           <div className="col-lg-5">
             <div className="product_details">
               <div className="product_details_title">
-                <h2>{displayProduct.title}</h2>
+                <h2>{displayProduct.name}</h2>
                 <p>{displayProduct.description}</p>
-              </div>
-              <div className="original_price">
-                {currencySymbol}{convertedOldPrice.toFixed(2)}
               </div>
               <div className="product_price">
                 {currencySymbol}{convertedPrice.toFixed(2)}
@@ -250,22 +188,6 @@ console.log(product)
                 <li><i className="fa fa-star" aria-hidden="true"></i></li>
                 <li><i className="fa fa-star-o" aria-hidden="true"></i></li>
               </ul>
-              <div className="product_color">
-                <span>Select color:</span>
-                <ul>
-                  {displayProduct.variants && displayProduct.variants.length > 0 ? (
-                    displayProduct.variants.map((item) => (
-                      <li
-                        key={item._id}
-                        style={{ background: item.color.toLowerCase() }}
-                        onClick={() => handleThumbnailClick(item)}
-                      ></li>
-                    ))
-                  ) : (
-                    <li style={{ background: "#e54e5d" }}></li>
-                  )}
-                </ul>
-              </div>
               <div className="quantity d-flex flex-column flex-sm-row align-items-sm-center">
                 <span>Quantity:</span>
                 <div className="quantity_selector">
@@ -290,7 +212,6 @@ console.log(product)
                   <i className="far fa-heart"></i>
                 </div>
               </div>
-              {/* Delivery Section */}
               <div className="delivery_info mt-3">
                 <h5>Delivery</h5>
                 <p>

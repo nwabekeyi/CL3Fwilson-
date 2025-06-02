@@ -91,7 +91,7 @@ function HomeBanner() {
     case "/":
       contentToDisplay = homeContent;
       break;
-    case "/about/wilster":
+    case "/wilster":
       contentToDisplay = wilsterContent;
       break;
     case "/workshop":
@@ -115,7 +115,7 @@ function HomeBanner() {
       {contentToDisplay.map((item, index) => {
         // Determine link text based on pathname
         const linkText =
-          location.pathname === "/about/wilster"
+          location.pathname === "/wilster"
             ? "coming soon"
             : location.pathname === "/workshop"
             ? "Register"

@@ -1,5 +1,5 @@
-
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
+import { FaWhatsapp } from "react-icons/fa"; // Import WhatsApp icon from react-icons
 import { login } from "../../ServerRequest";
 import API from "../../axios/API";
 import Auth from "../../modules/Auth";
@@ -17,73 +17,98 @@ import {
   MensSectionTwo,
   WomensSectionTwo
 } from "../../components/homeSection";
+import "./Home.css"; // Ensure the CSS is imported
 
-class Home extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: null,
-      modalShow: false,
-      login: true
-    };
-    this.addToBag = this.addToBag.bind(this);
-  }
+const Home = ({ products, getAllProducts, postCart }) => {
+  const [data, setData] = useState(null);
+  const [modalShow, setModalShow] = useState(false);
+  const [login, setLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  componentDidMount() {
-    if (!this.props.products) {
-      this.props.getAllProducts();
+  useEffect(() => {
+    if (!products) {
+      getAllProducts();
     }
-  }
 
-  showHideModal = () => {
-    this.setState({ modalShow: false });
+    const loaderTimeout = setTimeout(() => {
+      console.log("Timeout triggered: stopping loader");
+      setIsLoading(false);
+    }, 6000); // 10 minutes
+
+    return () => {
+      console.log("Clearing timeout on unmount");
+      clearTimeout(loaderTimeout);
+    };
+  }, [products, getAllProducts]);
+
+  const showHideModal = () => {
+    setModalShow(false);
   };
 
-  loginClicked = () => {
-    this.setState({ modalShow: true, login: true });
-  };
-  registerClicked = () => {
-    this.setState({ modalShow: true, login: false });
+  const loginClicked = () => {
+    setModalShow(true);
+    setLogin(true);
   };
 
-  addToBag = params => {
+  const registerClicked = () => {
+    setModalShow(true);
+    setLogin(false);
+  };
+
+  const addToBag = params => {
     if (
       Auth.getUserDetails() !== undefined &&
       Auth.getUserDetails() !== null &&
       Auth.getToken() !== undefined
     ) {
-      let cart = this.props.postCart(params);
+      let cart = postCart(params);
       cart.then(res => {
         console.log(res);
       });
     } else {
-      this.setState({ modalShow: true });
+      setModalShow(true);
     }
   };
 
-  render() {
-    const { products, departments } = this.props;
+  console.log("isLoading state:", isLoading);
+  if (isLoading) {
     return (
-      <div>
-        <HomeBanner />
-        <MensSection />
-        <WomensSectionOne />
-        <MensSectionTwo />
-        <WomensSectionTwo />
-        <CategoryBanner />
-        <MensProducts home={true}/>
-        <Benefit />
-        <Advertisement />
-        <LoginRegister
-          show={this.state.modalShow}
-          login={this.state.login}
-          registerClicked={() => this.registerClicked()}
-          loginClicked={() => this.loginClicked()}
-          onHide={() => this.showHideModal()}
-        />
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <div className="loader"></div>
       </div>
     );
   }
-}
+
+  return (
+    <div>
+      <HomeBanner />
+      <MensSection />
+      <WomensSectionOne />
+      <MensSectionTwo />
+      <WomensSectionTwo />
+      <CategoryBanner />
+      <MensProducts home={true} />
+      <Benefit />
+      <Advertisement />
+      <LoginRegister
+        show={modalShow}
+        login={login}
+        registerClicked={registerClicked}
+        loginClicked={loginClicked}
+        onHide={showHideModal}
+      />
+      {/* Sticky WhatsApp Icon - Only shown after loading */}
+      <a
+        href="https://wa.me/message/2YZ3Y7ILSIIAJ1"
+        className="whatsapp-icon"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Contact us on WhatsApp"
+      >
+        <FaWhatsapp />
+      </a>
+    </div>
+  );
+};
 
 export default Home;

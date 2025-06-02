@@ -6,32 +6,26 @@ export const useParticipantForm = () => {
     codeName: "",
     email: "",
     about: "",
+    photoURL: "", // Track current photoURL
   });
+
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
     setErrors({ ...errors, [name]: "" });
   };
 
   const validateForm = () => {
     const newErrors = {};
-    // Coerce to string to avoid undefined errors
-    const fullName = String(formData.fullName || "").trim();
-    const email = String(formData.email || "").trim();
-    const about = String(formData.about || "").trim();
-
-    if (!fullName) newErrors.fullName = "Full name is required";
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/))
-      newErrors.email = "Valid email is required";
-    if (!about || about.length < 50)
+    if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
+    if (!formData.codeName.trim()) newErrors.codeName = "Code name is required";
+    if (!formData.email || !formData.email.includes("@")) newErrors.email = "Valid email is required";
+    if (!formData.about || formData.about.length < 50) {
       newErrors.about = "About must be at least 50 characters";
-
+    }
     return newErrors;
   };
 
@@ -41,6 +35,7 @@ export const useParticipantForm = () => {
       codeName: "",
       email: "",
       about: "",
+      photoURL: "",
     });
     setErrors({});
   };

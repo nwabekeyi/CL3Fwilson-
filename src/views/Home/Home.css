@@ -1,0 +1,41 @@
+/* Place this in Home.css or your global stylesheet */
+.loader {
+    width: 45px;
+    aspect-ratio: .75;
+    --c: no-repeat linear-gradient(#000 0 0);
+    background: 
+      var(--c) 0%   50%,
+      var(--c) 50%  50%,
+      var(--c) 100% 50%;
+    background-size: 20% 50%;
+    animation: l6 1s infinite linear;
+  }
+  @keyframes l6 {
+    20% {background-position: 0% 0%  ,50% 50% ,100% 50% }
+    40% {background-position: 0% 100%,50% 0%  ,100% 50% }
+    60% {background-position: 0% 50% ,50% 100%,100% 0%  }
+    80% {background-position: 0% 50% ,50% 50% ,100% 100%}
+  }
+
+
+.whatsapp-icon:hover {
+  transform: scale(1.1); /* Slight zoom on hover */
+  color: green;
+}
+
+/* Ensure the SVG icon scales correctly */
+.whatsapp-icon svg {
+  width: 4vw; /* Increased icon size */
+  height: auto;
+  color: #1e1e27;
+}
+
+.whatsapp-icon svg:hover {
+  color: green;
+}
+
+.whatsapp-icon {
+  position:fixed;
+  bottom: 5vh;
+  right: 5vw;
+}

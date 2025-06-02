@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { postCart } from "../../redux/slices/cartSlice";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
-import useConversionRate from "../../hooks/useConversionRate"; // Import the hook
+import useConversionRate from "../../hooks/useConversionRate";
 
 const currencySymbols = {
   NGN: "₦",
@@ -14,20 +14,14 @@ const currencySymbols = {
 function SingleProduct({ productItem, addToBag, onProductClick }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { conversionRates, loading: rateLoading, error: rateError } = useConversionRate(); // Use hook for conversionRates
+  const { conversionRates, loading: rateLoading, error: rateError } = useConversionRate();
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [preferredCurrency, setPreferredCurrency] = useState("NGN"); // Default to NGN
+  const [preferredCurrency, setPreferredCurrency] = useState("NGN");
   const [convertedPrice, setConvertedPrice] = useState(null);
-  const [convertedOldPrice, setConvertedOldPrice] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState("₦");
 
-  const defaultVariant = productItem.variants?.[0] || {
-    price: productItem.price || 0,
-    imagePath: productItem.imagePath || "",
-  };
-
-  // Retain preferredCurrency logic from sessionStorage
+  // Get preferred currency from sessionStorage
   useEffect(() => {
     const storedCurrency = sessionStorage.getItem("preferredCurrency");
     if (storedCurrency) {
@@ -35,32 +29,26 @@ function SingleProduct({ productItem, addToBag, onProductClick }) {
     }
   }, []);
 
-  // Retain currency conversion logic
+  // Currency conversion logic
   useEffect(() => {
     const validCurrency = ["NGN", "USD", "EUR"].includes(preferredCurrency)
       ? preferredCurrency
       : "NGN";
 
     const basePriceNGN = parseFloat(productItem.price) || 0;
-    const baseOldPriceNGN = parseFloat(productItem.oldPrice) || null; // Use oldPrice from product
     const rate = conversionRates[validCurrency] || 1;
+    const converted = basePriceNGN * rate;
 
-    const converted = +(basePriceNGN * rate).toFixed(2);
-    const old = baseOldPriceNGN
-      ? +(baseOldPriceNGN * rate).toFixed(2)
-      : +(converted + 30).toFixed(2); // Fallback if oldPrice is null
     const symbol = currencySymbols[validCurrency] || "₦";
 
     setConvertedPrice(converted.toFixed(2));
-    setConvertedOldPrice(old.toFixed(2));
     setCurrencySymbol(symbol);
     setLoading(false);
-  }, [preferredCurrency, conversionRates, productItem.price, productItem.oldPrice]);
+  }, [preferredCurrency, conversionRates, productItem.price]);
 
   const handleProductClick = (e) => {
     e.preventDefault();
-    console.log(productItem)
-    sessionStorage.setItem("selectedProduct", JSON.stringify(productItem)); // Retain sessionStorage for product
+    sessionStorage.setItem("selectedProduct", JSON.stringify(productItem));
     onProductClick();
     navigate(`/fashion-cube/single-product/${productItem.id}`);
   };
@@ -69,28 +57,25 @@ function SingleProduct({ productItem, addToBag, onProductClick }) {
     e.stopPropagation();
     setIsLiked(!isLiked);
   };
-console.log(productItem)
+
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    const variant = productItem.variants[0];
     dispatch(
       postCart({
-        productId: variant._id,
+        productId: productItem.id,
         variantDetails: {
-          size: variant.size,
-          color: variant.color,
-          imagePath: variant.imagePath,
-          price: variant.price, // NGN
+          imagePath: productItem.images[0] || "https://via.placeholder.com/800x600?text=No+Image",
+          price: productItem.price, // original price in NGN
           title: productItem.name,
           currency: preferredCurrency,
-          price: productItem.price
         },
       })
     );
-    addToBag(productItem._id);
+    addToBag(productItem.id);
   };
+  console.log(convertedPrice)
 
-  if (loading || rateLoading || convertedPrice === null) {
+  if (loading || rateLoading ) {
     return <div className="loading">Loading...</div>;
   }
 
@@ -103,7 +88,7 @@ console.log(productItem)
       <div className="product discount product_filter" onClick={handleProductClick}>
         <div className="product_image">
           <img
-            src={productItem.imagePath}
+            src={productItem.images[0] || "https://via.placeholder.com/800x600?text=No+Image"}
             alt={productItem.name}
             className="img-fluid"
           />
@@ -117,9 +102,6 @@ console.log(productItem)
           </h6>
           <div className="product_price">
             {currencySymbol} {convertedPrice}
-            {convertedOldPrice && (
-              <span> {currencySymbol} {convertedOldPrice}</span>
-            )}
           </div>
         </div>
       </div>

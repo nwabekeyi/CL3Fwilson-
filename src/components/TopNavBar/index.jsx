@@ -1,4 +1,3 @@
-// components/TopNavBar.jsx
 import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import LoginRegister from "../LoginRegisterModal";
@@ -12,24 +11,27 @@ const TopNavBar = ({ className }) => {
   const [user, setUser] = useState(Auth.getUserDetails());
   const [token, setToken] = useState(Auth.getToken());
   const location = useLocation();
-  const [selectedCurrency, setSelectedCurrency] = useState("NGN");
+  const [selectedCurrency, setSelectedCurrency] = useState(
+    sessionStorage.getItem("preferredCurrency") || "NGN"
+  );
+  const [isCurrencyOpen, setIsCurrencyOpen] = useState(false);
 
   // Sync with Firebase auth state and localStorage
   useEffect(() => {
-    // Firebase auth listener
-    const unsubscribe = auth ? onAuthStateChanged(auth, (firebaseUser) => {
-      const authUser = Auth.getUserDetails();
-      const authToken = Auth.getToken();
-      console.log("TopNavBar Auth State:", {
-        firebaseUser: firebaseUser ? firebaseUser.email : null,
-        authUser,
-        authToken,
-      });
-      setUser(authUser);
-      setToken(authToken);
-    }) : () => console.warn("Firebase auth not initialized in TopNavBar");
+    const unsubscribe = auth
+      ? onAuthStateChanged(auth, (firebaseUser) => {
+          const authUser = Auth.getUserDetails();
+          const authToken = Auth.getToken();
+          console.log("TopNavBar Auth State:", {
+            firebaseUser: firebaseUser ? firebaseUser.email : null,
+            authUser,
+            authToken,
+          });
+          setUser(authUser);
+          setToken(authToken);
+        })
+      : () => console.warn("Firebase auth not initialized in TopNavBar");
 
-    // localStorage listener
     const handleStorageChange = (event) => {
       if (event.key === "auth" || !event.key) {
         const authUser = Auth.getUserDetails();
@@ -41,8 +43,6 @@ const TopNavBar = ({ className }) => {
     };
 
     window.addEventListener("storage", handleStorageChange);
-
-    // Initial check
     handleStorageChange({ key: "auth" });
 
     return () => {
@@ -51,13 +51,21 @@ const TopNavBar = ({ className }) => {
     };
   }, []);
 
-  // Load preferred currency
-  useEffect(() => {
-    const storedCurrency = sessionStorage.getItem("preferredCurrency");
-    if (storedCurrency) {
-      setSelectedCurrency(storedCurrency);
-    }
-  }, []);
+  // Handle currency selection and reload page
+  const handleCurrencyChange = (currency) => {
+    console.log("Selected Currency:", currency);
+    sessionStorage.setItem("preferredCurrency", currency);
+    setSelectedCurrency(currency);
+    setIsCurrencyOpen(false);
+    window.location.reload(); // Reload the page
+  };
+
+  // Toggle currency dropdown
+  const toggleCurrencyDropdown = (e) => {
+    e.preventDefault();
+    console.log("Toggling dropdown, isCurrencyOpen:", !isCurrencyOpen);
+    setIsCurrencyOpen((prev) => !prev);
+  };
 
   const showHideModal = () => setModalShow(false);
   const loginClicked = () => {
@@ -75,21 +83,46 @@ const TopNavBar = ({ className }) => {
       await Auth.logout();
       setUser(null);
       setToken(null);
-      // Removed navigate("/") to stay on current path
     } catch (error) {
       console.error("TopNavBar: Logout error:", error);
     }
-  };
-
-  const handleCurrencyChange = (currency) => {
-    sessionStorage.setItem("preferredCurrency", currency);
-    setSelectedCurrency(currency);
   };
 
   const isAdminPath = location.pathname.toLowerCase().includes("/admin");
 
   return (
     <div className={`top_nav ${className}`}>
+      <style>
+        {`
+          .currency {
+            position: relative;
+            display: inline-block;
+          }
+          .currency_selection {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            min-width: 100px;
+            display: ${isCurrencyOpen ? 'block' : 'none'};
+          }
+          .currency_selection li {
+            list-style: none;
+          }
+          .currency_selection li a {
+            display: block;
+            padding: 8px 12px;
+            color: #333;
+            text-decoration: none;
+          }
+          .currency_selection li a:hover {
+            background: #f0f0f0;
+          }
+        `}
+      </style>
       <div className="container">
         <div className="row">
           <div className="col-md-6">
@@ -99,33 +132,56 @@ const TopNavBar = ({ className }) => {
             <div className="top_nav_right">
               <ul className="top_nav_menu">
                 <li className="currency">
-                  <a href="#">
+                  <a
+                    href="#"
+                    onClick={toggleCurrencyDropdown}
+                    aria-expanded={isCurrencyOpen}
+                    aria-controls="currency-selection"
+                  >
                     {selectedCurrency.toLowerCase()}
                     <i className="fa fa-angle-down"></i>
                   </a>
-                  <ul className="currency_selection">
+                  <ul className="currency_selection" id="currency-selection">
                     <li>
-                      <a href="#" onClick={() => handleCurrencyChange("NGN")}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleCurrencyChange("NGN");
+                        }}
+                      >
                         ngn
                       </a>
                     </li>
                     <li>
-                      <a href="#" onClick={() => handleCurrencyChange("EUR")}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleCurrencyChange("EUR");
+                        }}
+                      >
                         eur
                       </a>
                     </li>
                     <li>
-                      <a href="#" onClick={() => handleCurrencyChange("USD")}>
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleCurrencyChange("USD");
+                        }}
+                      >
                         usd
                       </a>
                     </li>
                   </ul>
                 </li>
 
-                {user && token ? (
+                {token && location.pathname.includes("admin") ? (
                   <li className="account">
                     <a href="#">
-                      {`Welcome ${user.user_name || user.email || "User"}`}
+                      {`Welcome ${user.user_name || user.email || "Admin portal"} `}
                       <i className="fa fa-angle-down"></i>
                     </a>
                     <ul className="account_selection">

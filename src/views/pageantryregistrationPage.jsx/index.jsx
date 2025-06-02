@@ -73,7 +73,7 @@ function PageantRegistrationPage() {
       formDataToSend.append("bio", formData.bio);
 
       // Send to Formspree
-      const response = await fetch("https://formspree.io/f/mblyrwrw", {
+      const response = await fetch("https://formspree.io/f/mdkzodwy", {
         method: "POST",
         body: formDataToSend,
         headers: {
