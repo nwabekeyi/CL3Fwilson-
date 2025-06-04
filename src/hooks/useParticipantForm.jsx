@@ -6,7 +6,8 @@ export const useParticipantForm = () => {
     codeName: "",
     email: "",
     about: "",
-    photoURL: "", // Track current photoURL
+    photoURL: "",
+    votesToAdd: "0",
   });
 
   const [errors, setErrors] = useState({});
@@ -26,6 +27,10 @@ export const useParticipantForm = () => {
     if (!formData.about || formData.about.length < 50) {
       newErrors.about = "About must be at least 50 characters";
     }
+    const votesToAdd = parseInt(formData.votesToAdd);
+    if (isNaN(votesToAdd) || votesToAdd < 0) {
+      newErrors.votesToAdd = "Votes must be a non-negative number";
+    }
     return newErrors;
   };
 
@@ -36,6 +41,7 @@ export const useParticipantForm = () => {
       email: "",
       about: "",
       photoURL: "",
+      votesToAdd: "0",
     });
     setErrors({});
   };

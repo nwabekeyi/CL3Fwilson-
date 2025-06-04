@@ -27,9 +27,8 @@ function AdminPage() {
   } = useParticipantForm();
   const [editParticipant, setEditParticipant] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-  const [previewImage, setPreviewImage] = useState(null); // State for image preview
+  const [previewImage, setPreviewImage] = useState(null);
 
-  // Clean up preview URL when component unmounts or file changes
   useEffect(() => {
     return () => {
       if (previewImage) {
@@ -42,11 +41,11 @@ function AdminPage() {
     const file = e.target.files[0];
     if (file) {
       if (previewImage) {
-        URL.revokeObjectURL(previewImage); // Clean up previous preview
+        URL.revokeObjectURL(previewImage);
       }
-      setPreviewImage(URL.createObjectURL(file)); // Set new preview
+      setPreviewImage(URL.createObjectURL(file));
     } else {
-      setPreviewImage(null); // Clear preview if no file
+      setPreviewImage(null);
     }
   };
 
@@ -67,7 +66,7 @@ function AdminPage() {
       let photoURL = "https://via.placeholder.com/800x600?text=No+Image";
 
       if (photoFile) {
-        photoURL = await uploadImage(photoFile); // Upload to Cloudinary
+        photoURL = await uploadImage(photoFile);
       }
 
       await addParticipant(db, {
@@ -81,7 +80,7 @@ function AdminPage() {
       });
       resetForm();
       form.reset();
-      setPreviewImage(null); // Clear preview
+      setPreviewImage(null);
       setSuccessMessage("Participant added successfully!");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
@@ -98,12 +97,13 @@ function AdminPage() {
       email: String(participant.email || ""),
       about: String(participant.about || ""),
       photoURL: String(participant.photoURL || ""),
+      votesToAdd: "0", // Initialize votesToAdd
     };
     console.log("Editing participant:", participant);
     console.log("Setting formData:", newFormData);
     setEditParticipant(participant);
     setFormData(newFormData);
-    setPreviewImage(participant.photoURL || null); // Set initial preview
+    setPreviewImage(participant.photoURL || null);
   };
 
   const handleUpdateParticipant = async (e) => {
@@ -123,8 +123,13 @@ function AdminPage() {
       let photoURL = formData.photoURL || "https://via.placeholder.com/800x600?text=No+Image";
 
       if (photoFile) {
-        photoURL = await uploadImage(photoFile); // Upload new image
+        photoURL = await uploadImage(photoFile);
       }
+
+      const votesToAdd = parseInt(formData.votesToAdd) || 0;
+      const newVoters = votesToAdd > 0
+        ? Array.from({ length: votesToAdd }, () => `vote_${Date.now()}_${Math.random().toString(36).substring(7)}`)
+        : [];
 
       const updatedData = {
         fullName: formData.fullName,
@@ -132,6 +137,7 @@ function AdminPage() {
         email: formData.email,
         about: formData.about,
         photoURL,
+        voters: [...(editParticipant.voters || []), ...newVoters],
         updatedAt: new Date(),
       };
 
@@ -140,7 +146,7 @@ function AdminPage() {
       setEditParticipant(null);
       resetForm();
       form.reset();
-      setPreviewImage(null); // Clear preview
+      setPreviewImage(null);
       setSuccessMessage("Participant updated successfully!");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
@@ -362,6 +368,20 @@ function AdminPage() {
                 placeholder="Describe the contestant (min 50 characters)"
               />
               {errors.about && <span className="error">{errors.about}</span>}
+            </div>
+            <div className="form-group">
+              <label htmlFor="votesToAdd">Add Votes:</label>
+              <input
+                type="number"
+                name="votesToAdd"
+                className="form-control"
+                value={formData.votesToAdd}
+                onChange={handleChange}
+                placeholder="Enter number of votes to add"
+                min="0"
+              />
+              {errors.votesToAdd && <span className="error">{errors.votesToAdd}</span>}
+              <p>Current Votes: {editParticipant.voters?.length || 0}</p>
             </div>
             <div className="form-group">
               <label htmlFor="photo">Update Photo:</label>

@@ -1,4 +1,4 @@
-import { collection, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, updateDoc, deleteDoc, doc, getDoc } from "firebase/firestore";
 import { serverTimestamp } from "firebase/firestore";
 
 export const addParticipant = async (db, data) => {
@@ -25,12 +25,19 @@ export const addParticipant = async (db, data) => {
 export const updateParticipant = async (db, docId, formData) => {
   try {
     const participantRef = doc(db, "participants", docId);
+    // Fetch current participant to get existing voters
+    const participantDoc = await getDoc(participantRef);
+    const currentVoters = participantDoc.exists() && Array.isArray(participantDoc.data().voters)
+      ? participantDoc.data().voters
+      : [];
+
     await updateDoc(participantRef, {
       fullName: String(formData.fullName || ""),
       codeName: String(formData.codeName || ""),
       email: String(formData.email || ""),
       about: String(formData.about || ""),
       photoURL: String(formData.photoURL || "https://via.placeholder.com/800x600?text=No+Image"),
+      voters: [...currentVoters, ...(formData.voters || [])],
       updatedAt: serverTimestamp(),
     });
   } catch (error) {

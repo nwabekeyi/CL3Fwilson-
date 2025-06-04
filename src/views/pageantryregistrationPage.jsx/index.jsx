@@ -37,8 +37,6 @@ function PageantRegistrationPage() {
       newErrors.email = "Valid email is required";
     if (!formData.age || formData.age < 18 || formData.age > 35)
       newErrors.age = "Age must be between 18 and 35";
-    if (!formData.phone.match(/^\+?[1-9]\d{1,14}$/))
-      newErrors.phone = "Valid phone number is required";
     if (!formData.bio.trim() || formData.bio.length < 50)
       newErrors.bio = "Bio must be at least 50 characters";
 
@@ -310,7 +308,7 @@ function PageantRegistrationPage() {
                 <div className="form-group">
                   <label htmlFor="phone">Phone Number:</label>
                   <input
-                    type="tel"
+                    type="number"
                     id="phone"
                     name="phone"
                     className="form-control"
@@ -324,7 +322,7 @@ function PageantRegistrationPage() {
                 <div className="form-group">
                   <label htmlFor="whatsapp">WhatsApp Number:</label>
                   <input
-                    type="tel"
+                    type="number"
                     id="whatsapp"
                     name="whatsapp"
                     className="form-control"
