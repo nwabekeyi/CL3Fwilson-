@@ -7,7 +7,7 @@ import "../../../assets/css/responsive.css";
 
 const ProductManager = () => {
   const {
-    products,
+    products = [], // Ensure products is always an array
     loading: productLoading,
     error: productError,
     addProductWithImages,
@@ -15,7 +15,7 @@ const ProductManager = () => {
   } = useProductManager();
 
   const {
-    conversionRates,
+    conversionRates = { NGN: 1, USD: 0, EUR: 0 }, // Default rates
     loading: rateLoading,
     error: rateError,
     updateConversionRates,
@@ -72,7 +72,8 @@ const ProductManager = () => {
       });
       setImageInputs([{ id: Date.now(), file: null, preview: null }]);
     } catch (err) {
-      alert("Failed to add product.");
+      alert(`Failed to add product: ${err.message}`);
+      console.error("Add product error:", err);
     }
   };
 
@@ -83,7 +84,8 @@ const ProductManager = () => {
         await deleteProduct(productId);
         alert("Product deleted successfully!");
       } catch (err) {
-        alert("Failed to delete product.");
+        alert(`Failed to delete product: ${err.message}`);
+        console.error("Delete product error:", err);
       }
     }
   };
@@ -101,7 +103,8 @@ const ProductManager = () => {
       await updateConversionRates(newRates);
       alert("Conversion rates updated successfully!");
     } catch (err) {
-      alert("Failed to update conversion rates.");
+      alert(`Failed to update conversion rates: ${err.message}`);
+      console.error("Update rates error:", err);
     }
   };
 
@@ -112,19 +115,15 @@ const ProductManager = () => {
     <div className="product-manager">
       <h2>Product Manager</h2>
 
-      {/* Product Loading and Error States */}
-      {productLoading && <div className="loading">Loading products...</div>}
-      {productError && <div className="error">{productError}</div>}
-
       {/* Conversion Rates Section */}
       <div className="conversion-rates">
         <h5>Conversion Rates (Against NGN)</h5>
         {rateLoading && <div className="loading">Loading rates...</div>}
         {rateError && <div className="error">{rateError}</div>}
         <div className="current-rates">
-          <p>NGN: {conversionRates.NGN}</p>
-          <p>USD: {conversionRates.USD}</p>
-          <p>EUR: {conversionRates.EUR}</p>
+          <p>NGN: {conversionRates.NGN || 1}</p>
+          <p>USD: {conversionRates.USD || 0}</p>
+          <p>EUR: {conversionRates.EUR || 0}</p>
         </div>
         <div className="update-rates-form">
           <h5>Update Conversion Rates</h5>
@@ -136,7 +135,7 @@ const ProductManager = () => {
                 id="USD"
                 name="USD"
                 step="0.00001"
-                defaultValue={conversionRates.USD}
+                defaultValue={conversionRates.USD || 0}
                 required
               />
             </div>
@@ -147,7 +146,7 @@ const ProductManager = () => {
                 id="EUR"
                 name="EUR"
                 step="0.00001"
-                defaultValue={conversionRates.EUR}
+                defaultValue={conversionRates.EUR || 0}
                 required
               />
             </div>

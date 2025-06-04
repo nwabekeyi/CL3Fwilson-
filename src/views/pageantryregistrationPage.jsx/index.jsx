@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import Banner1 from "../../assets/images/workshop4.jpg";
 import HomeBanner from "../../components/HomeBanner";
-import { db } from "../../firebase/config";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { uploadImage } from "../../utils/cloudinary";
 
 function PageantRegistrationPage() {
   const [formData, setFormData] = useState({
@@ -19,48 +16,18 @@ function PageantRegistrationPage() {
     whatsapp: "",
     instagram: "",
     bio: "",
-    photo: null,
   });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
-  const [photoPreview, setPhotoPreview] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: files ? files[0] : value,
+      [name]: value,
     });
     setErrors({ ...errors, [name]: "" });
-  };
-
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Validate file type and size
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    if (!allowedTypes.includes(file.type)) {
-      setErrors({ ...errors, photo: "Only JPG, PNG, or GIF allowed!" });
-      return;
-    }
-
-    if (file.size > maxSize) {
-      setErrors({ ...errors, photo: "Image must be smaller than 5MB!" });
-      return;
-    }
-
-    // Create preview
-    const previewURL = URL.createObjectURL(file);
-    setPhotoPreview(previewURL);
-
-    // Update form data
-    setFormData({ ...formData, photo: file });
-    setErrors({ ...errors, photo: "" });
   };
 
   const validateForm = () => {
@@ -70,11 +37,8 @@ function PageantRegistrationPage() {
       newErrors.email = "Valid email is required";
     if (!formData.age || formData.age < 18 || formData.age > 35)
       newErrors.age = "Age must be between 18 and 35";
-    if (!formData.phone.match(/^\+?[1-9]\d{1,14}$/))
-      newErrors.phone = "Valid phone number is required";
     if (!formData.bio.trim() || formData.bio.length < 50)
       newErrors.bio = "Bio must be at least 50 characters";
-    if (!formData.photo) newErrors.photo = "Profile photo is required";
 
     return newErrors;
   };
@@ -91,33 +55,33 @@ function PageantRegistrationPage() {
     }
 
     try {
-      // Upload photo to Cloudinary
-      let photoURL = "";
-      if (formData.photo) {
-        photoURL = await uploadImage(formData.photo);
+      // Prepare FormData for Formspree
+      const formDataToSend = new FormData();
+      formDataToSend.append("fullName", formData.fullName);
+      formDataToSend.append("stageName", formData.stageName);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("gender", formData.gender);
+      formDataToSend.append("age", formData.age);
+      formDataToSend.append("nationality", formData.nationality);
+      formDataToSend.append("stateOfOrigin", formData.stateOfOrigin);
+      formDataToSend.append("location", formData.location);
+      formDataToSend.append("phone", formData.phone);
+      formDataToSend.append("whatsapp", formData.whatsapp);
+      formDataToSend.append("instagram", formData.instagram);
+      formDataToSend.append("bio", formData.bio);
+
+      // Send to Formspree
+      const response = await fetch("https://formspree.io/f/mdkzodwy", {
+        method: "POST",
+        body: formDataToSend,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit form to Formspree.");
       }
-
-      // Prepare data for Firestore
-      const contestantData = {
-        fullName: formData.fullName,
-        stageName: formData.stageName,
-        email: formData.email,
-        gender: formData.gender,
-        age: Number(formData.age),
-        nationality: formData.nationality,
-        stateOfOrigin: formData.stateOfOrigin,
-        location: formData.location,
-        phone: formData.phone,
-        whatsapp: formData.whatsapp,
-        instagram: formData.instagram,
-        bio: formData.bio,
-        photoURL,
-        createdAt: serverTimestamp(),
-        status: "pending",
-      };
-
-      // Save to Firestore
-      await addDoc(collection(db, "pageantContestants"), contestantData);
 
       setSubmitted(true);
       // Reset form
@@ -134,9 +98,7 @@ function PageantRegistrationPage() {
         whatsapp: "",
         instagram: "",
         bio: "",
-        photo: null,
       });
-      setPhotoPreview(null);
     } catch (error) {
       console.error("Error submitting form:", error);
       setErrors({ ...errors, submission: "Failed to submit form. Please try again." });
@@ -168,7 +130,7 @@ function PageantRegistrationPage() {
             <div className="section_title">
               <h2>About Project Cl3fwilson</h2>
             </div>
-            <p style={{marginTop:'30px'}}>
+            <p style={{ marginTop: "30px" }}>
               Project Cl3fwilson is a semi-annual fashion workshop and competition that creates a platform for fashion designers. It works to educate emerging fashion designers about sustainable theories, fashion business, branding, and marketing.
             </p>
             <p>
@@ -342,50 +304,11 @@ function PageantRegistrationPage() {
                   ></textarea>
                   {errors.bio && <span className="error">{errors.bio}</span>}
                 </div>
-                <div className="form-group">
-                  <label htmlFor="photo">Profile Photo:</label>
-                  <input
-                    type="file"
-                    id="photo"
-                    name="photo"
-                    className="form-control"
-                    accept="image/*"
-                    onChange={handlePhotoChange}
-                    required
-                  />
-                  {/* Image Preview */}
-                  {photoPreview && (
-                    <div className="mt-2">
-                      <img
-                        src={photoPreview}
-                        alt="Preview"
-                        style={{ maxWidth: "200px", maxHeight: "200px" }}
-                        className="img-thumbnail"
-                      />
-                    </div>
-                  )}
-                  {/* Upload Progress Bar */}
-                  {isSubmitting && (
-                    <div className="progress mt-2">
-                      <div
-                        className="progress-bar progress-bar-striped progress-bar-animated"
-                        role="progressbar"
-                        style={{ width: "100%" }}
-                        aria-valuenow="100"
-                        aria-valuemin="0"
-                        aria-valuemax="100"
-                      >
-                        Uploading...
-                      </div>
-                    </div>
-                  )}
-                  {errors.photo && <div className="text-danger">{errors.photo}</div>}
-                </div>
                 <h5 className="my-4">Contact Information</h5>
                 <div className="form-group">
                   <label htmlFor="phone">Phone Number:</label>
                   <input
-                    type="tel"
+                    type="number"
                     id="phone"
                     name="phone"
                     className="form-control"
@@ -399,7 +322,7 @@ function PageantRegistrationPage() {
                 <div className="form-group">
                   <label htmlFor="whatsapp">WhatsApp Number:</label>
                   <input
-                    type="tel"
+                    type="number"
                     id="whatsapp"
                     name="whatsapp"
                     className="form-control"
@@ -460,6 +383,9 @@ function PageantRegistrationPage() {
                     "Submit Application"
                   )}
                 </button>
+                {errors.submission && (
+                  <div className="text-danger mt-2">{errors.submission}</div>
+                )}
               </form>
             )}
           </div>
