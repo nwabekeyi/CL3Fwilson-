@@ -18,24 +18,3 @@
   }
 
 
-.whatsapp-icon:hover {
-  transform: scale(1.1); /* Slight zoom on hover */
-  color: green;
-}
-
-/* Ensure the SVG icon scales correctly */
-.whatsapp-icon svg {
-  width: 7vh; /* Increased icon size */
-  height: auto;
-  color: #1e1e27;
-}
-
-.whatsapp-icon svg:hover {
-  color: green;
-}
-
-.whatsapp-icon {
-  position:fixed;
-  bottom: 5vh;
-  right: 5vw;
-}
