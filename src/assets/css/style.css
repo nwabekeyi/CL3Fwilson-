@@ -3090,7 +3090,7 @@
 
    }
   
-   #pending-contestants,.mt-4{
+   #pending-contestants{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3241,4 +3241,5 @@
   .contestant-details p::-webkit-scrollbar-thumb:hover {
     background-color: #555;
   }
+
   
