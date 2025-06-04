@@ -11,6 +11,11 @@ import {
 } from "firebase/firestore";
 import { uploadImage } from "../utils/cloudinary";
 
+
+
+const cloudinaryApiKey = import.meta.env.VITE_CLOUDINARY_KEY;
+const cloudinarySecret= import.meta.env.VITE_CLOUDINARY_SECRET;
+const cloudinaryName = import.meta.env.VITE_CLOUDINARY_NAME;
 // Initialize Firestore collection
 const productsCollection = collection(db, "products");
 
@@ -37,11 +42,11 @@ const deleteImage = async (imageUrl) => {
     }
 
     // Cloudinary API call to delete the image
-    const response = await fetch("https://api.cloudinary.com/v1_1/<your-cloud-name>/image/destroy", {
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryName}/image/destroy`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Basic ${btoa("<your-api-key>:<your-api-secret>")}`, // Replace with your Cloudinary API key and secret
+        Authorization: `Basic ${btoa(`${cloudinaryApiKey}:${cloudinarySecret}`)}`, // Replace with your Cloudinary API key and secret
       },
       body: JSON.stringify({ public_id: publicId }),
     });

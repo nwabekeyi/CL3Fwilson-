@@ -308,7 +308,7 @@ function PageantRegistrationPage() {
                 <div className="form-group">
                   <label htmlFor="phone">Phone Number:</label>
                   <input
-                    type="number"
+                    type="tel"
                     id="phone"
                     name="phone"
                     className="form-control"
@@ -322,7 +322,7 @@ function PageantRegistrationPage() {
                 <div className="form-group">
                   <label htmlFor="whatsapp">WhatsApp Number:</label>
                   <input
-                    type="number"
+                    type="tel"
                     id="whatsapp"
                     name="whatsapp"
                     className="form-control"
