@@ -7,8 +7,6 @@ import CheckoutDetailsModal from "./modal";
 import { db } from "../../firebase/config";
 import { collection, addDoc } from "firebase/firestore";
 import EmptyCart from "../../assets/images/emptyCart.png";
-import jumpTo from "../../modules/Navigation";
-import "./style.css";
 
 // Currency symbol logic
 const getCurrencySymbol = (currency) => {

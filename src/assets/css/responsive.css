@@ -824,11 +824,10 @@
   }
 
   .contestant-card {
-    margin-bottom: 20px;
   }
 
   .contestant-image {
-    height: 200px;
+    height: 60%;
   }
 
   .contestant-details h4 {
@@ -875,7 +874,7 @@
     padding: 20px 40px;
   }
   .product_image{
-    height: 215px;
+    height: 220px;
   }
 
   .section_title h2 {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,6 +13,8 @@ import PageNotFound from "../views/PageNotFound";
 import Auth from "../modules/Auth";
 import { FaWhatsapp } from "react-icons/fa";
 
+import useConversionRate from '../hooks/useConversionRate';
+
 const isAuthenticated = () =>
   Auth.getUserDetails() !== undefined &&
   Auth.getUserDetails() !== null &&
@@ -22,7 +24,12 @@ const isAuthenticated = () =>
 const WhatsAppWrapper = ({ children }) => {
   const location = useLocation();
   const showWhatsApp = !location.pathname.includes("wilster") && !location.pathname.includes("admin");
-console.log(showWhatsApp)
+
+  const{fetchConversionRates} = useConversionRate();
+
+  useEffect(() => {
+    fetchConversionRates();
+  }, [])
   return (
     <>
       {children}

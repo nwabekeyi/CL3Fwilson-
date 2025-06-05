@@ -19,7 +19,7 @@ const Wilster = lazy(() => import("../views/Wilster/index.jsx"));
 const AdminPage = lazy(() => import("../views/Admin/adminPage.jsx"));
 const LoginForm = lazy(() => import("../components/LoginRegisterModal/LoginForm.jsx"));
 
-// Suspense fallback (can be a spinner or loading UI)
+// Suspense fallback
 const withSuspense = (Component) => (props) => (
   <Suspense fallback={<div>Loading...</div>}>
     <Component {...props} />
@@ -36,6 +36,11 @@ const routes = [
     path: "/admin",
     layout: BaseLayout,
     component: withSuspense(AdminPage),
+  },
+  {
+    path: "/admin/login",
+    layout: BaseLayout,
+    component: () => withSuspense(LoginForm)({ isAdminLogin: true }),
   },
   {
     path: "/home",
