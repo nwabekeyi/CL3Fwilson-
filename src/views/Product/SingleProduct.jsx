@@ -188,7 +188,7 @@ const SingleProduct = ({ product, postCart }) => {
                 <li><i className="fa fa-star" aria-hidden="true"></i></li>
                 <li><i className="fa fa-star-o" aria-hidden="true"></i></li>
               </ul>
-              <div className="quantity d-flex flex-column flex-sm-row align-items-sm-center">
+              <div className="quantity d-flex flex-sm-row align-items-sm-center">
                 <span>Quantity:</span>
                 <div className="quantity_selector">
                   <span
@@ -208,9 +208,7 @@ const SingleProduct = ({ product, postCart }) => {
                 >
                   <a href="#">{isDummy ? "Unavailable" : "add to cart"}</a>
                 </div>
-                <div className="product_favorite d-flex flex-column align-items-center justify-content-center">
-                  <i className="far fa-heart"></i>
-                </div>
+      
               </div>
               <div className="delivery_info mt-3">
                 <h5>Delivery</h5>

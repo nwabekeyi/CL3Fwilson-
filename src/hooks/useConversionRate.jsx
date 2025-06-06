@@ -13,7 +13,7 @@ const useConversionRate = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch from Firestore only if sessionStorage empty
+  // Fetch from Firestore and set sessionStorage
   const fetchConversionRates = async () => {
     setLoading(true);
     setError(null);
@@ -24,9 +24,13 @@ const useConversionRate = () => {
       if (ratesDoc.exists()) {
         const rates = ratesDoc.data();
         setConversionRates(rates);
+        sessionStorage.setItem("conversionRate", JSON.stringify(rates)); // Set sessionStorage after fetch
+        console.log('Fetched conversion rates:', rates);
       } else {
         await setDoc(ratesDocRef, defaultConversionRates);
         setConversionRates(defaultConversionRates);
+        sessionStorage.setItem("conversionRate", JSON.stringify(defaultConversionRates)); // Set sessionStorage after setting default
+        console.log('Set default conversion rates:', defaultConversionRates);
       }
     } catch (err) {
       setError("Failed to fetch conversion rates");
@@ -36,7 +40,7 @@ const useConversionRate = () => {
     }
   };
 
-  // Update Firestore and state
+  // Update Firestore, state, and sessionStorage
   const updateConversionRates = async (newRates) => {
     setLoading(true);
     setError(null);
@@ -55,6 +59,8 @@ const useConversionRate = () => {
 
       await setDoc(ratesDocRef, updatedRates);
       setConversionRates(updatedRates);
+      sessionStorage.setItem("conversionRate", JSON.stringify(updatedRates)); // Set sessionStorage after update
+      console.log('Updated conversion rates:', updatedRates);
       return updatedRates;
     } catch (err) {
       setError("Failed to update conversion rates");
@@ -72,19 +78,15 @@ const useConversionRate = () => {
       try {
         const parsedRates = JSON.parse(storedRates);
         setConversionRates(parsedRates);
+        console.log('Loaded conversion rates from sessionStorage:', parsedRates);
       } catch {
-        // corrupted sessionStorage, fallback to fetch
+        // Corrupted sessionStorage, fallback to fetch
         fetchConversionRates();
       }
     } else {
       fetchConversionRates();
     }
   }, []);
-
-  // Sync conversionRates state into sessionStorage whenever it changes
-  useEffect(() => {
-    sessionStorage.setItem("conversionRate", JSON.stringify(conversionRates));
-  }, [conversionRates]);
 
   return {
     conversionRates,

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { FaWhatsapp } from "react-icons/fa";
-import { useLocation } from "react-router-dom";
 import usePreviousLocation from "../../hooks/usePreviousLocation"; // adjust path
 
 import HomeBanner from "../../components/HomeBanner";
@@ -73,16 +72,7 @@ const Home = ({ products, getAllProducts, postCart }) => {
         loginClicked={loginClicked}
         onHide={showHideModal}
       />
-      {/* Sticky WhatsApp Icon */}
-      <a
-        href="https://wa.me/message/2YZ3Y7ILSIIAJ1"
-        className="whatsapp-icon"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Contact us on WhatsApp"
-      >
-        <FaWhatsapp />
-      </a>
+
 
       {/* Loader Overlay */}
       {isLoading && (

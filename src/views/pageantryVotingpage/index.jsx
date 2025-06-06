@@ -264,6 +264,9 @@ function PageantVotingPage() {
                 className="col-md-4 contestant-card"
                 data-aos="fade-up"
                 data-aos-delay={index * 100}
+                style={{
+                  marginBottom: 0
+                }}
               >
                 <div className="contestant-image">
                   <img
@@ -300,7 +303,7 @@ function PageantVotingPage() {
             month.
           </p>
           <div className="red_button shop_now_button">
-            <a href="/pageant">Learn More</a>
+            <a href="/workshop">Learn More</a>
           </div>
         </div>
       </div>

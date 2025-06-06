@@ -466,6 +466,9 @@
 ************/
 
 @media only screen and (max-width: 539px) {
+  .product_name {
+    margin: 4px 0 0 0;
+  }
 }
 
 /************
@@ -569,9 +572,7 @@
   .product_name a {
     font-size: 12px;
   }
-  .add_to_cart_button {
-    margin-top: 20px;
-  }
+  
   .deal_ofthe_week_img {
     height: 400px;
   }
@@ -739,6 +740,10 @@
     table td:last-child {
       border-bottom: 0;
     }
+
+    .product-details .quantity {
+      flex-direction: row !important;
+    }
   }
   
 
@@ -819,11 +824,10 @@
   }
 
   .contestant-card {
-    margin-bottom: 20px;
   }
 
   .contestant-image {
-    height: 200px;
+    height: 60%;
   }
 
   .contestant-details h4 {
@@ -864,7 +868,13 @@
   }
 
   .products-container {
-    padding: 20px 15px;
+    padding: 20px 40px;
+  }
+  .products-container .row {
+    padding: 20px 40px;
+  }
+  .product_image{
+    height: 220px;
   }
 
   .section_title h2 {

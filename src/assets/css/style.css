@@ -1098,7 +1098,7 @@
  }
  .product_image {
    width: 100%;
-   height: 500px;
+   height: 600px;
    display: flex;
    justify-content: center;
  }
@@ -1811,7 +1811,7 @@
  *********************************/
  
  footer.footer {
-   margin-top: 200px;
+   margin-top: 300px;
    background: #f2f2f28a;
  }
  
@@ -2889,12 +2889,12 @@
 }
 
 .contestant-card {
-  margin-bottom: 30px;
   background: #ffffff;
   border: 1px solid #ebebeb;
   border-radius: 5px;
   overflow: hidden;
   transition: all 0.3s ease;
+  margin-top: 0 !important;
 }
 
 .contestant-card:hover {
@@ -2903,13 +2903,12 @@
 
 .contestant-image {
   width: 100%;
-  height: 250px;
   overflow: hidden;
 }
 
 .contestant-image img {
   width: 100%;
-  height: 100%;
+  height: 100% !important;
   object-fit: cover;
 }
 
@@ -3066,6 +3065,7 @@
 
 [data-aos^=fade][data-aos^=fade].aos-animate{
   margin-bottom: 70px;
+  margin-top: 300px;
 }
 
 .section_title{
@@ -3192,15 +3192,21 @@
 }
 
   .pageant-voting-page .row{
-    gap: 20px;
+    gap: 40px;
   }
 
-  .contestant-card{
+  .row .contestant-card:hover{
+    transform: scale(1.05) !important;
+  }
+
+  .row .contestant-card{
     border: 1px solid darkgrey !important;
     padding: 10px;
     border-radius: 15px !important;
     word-wrap: break-word;
     transition: 0.5s ease-in-out !important;
+    margin-bottom: 0;
+    cursor: pointer;
   }
 
   .contestant-card:hover{
@@ -3209,10 +3215,12 @@
   }
 
   .contestant-image img {
-    width: 100%;
-    object-fit: cover;
+    width: 100%; /* or any size you prefer */
+    height: auto !important;
+    object-fit: contain;
     border-radius: 15px !important;
   }
+  
 
   .email-input-box{
     border:1px solid lightgrey;
@@ -3242,4 +3250,26 @@
     background-color: #555;
   }
 
+
+  /* whatsapp icon  */
+  .whatsapp-icon:hover {
+    transform: scale(1.1); /* Slight zoom on hover */
+    color: green;
+  }
   
+  /* Ensure the SVG icon scales correctly */
+  .whatsapp-icon svg {
+    width: 7vh; /* Increased icon size */
+    height: auto;
+    color: #1e1e27;
+  }
+  
+  .whatsapp-icon svg:hover {
+    color: green;
+  }
+  
+  .whatsapp-icon {
+    position:fixed;
+    bottom: 5vh;
+    right: 5vw;
+  }

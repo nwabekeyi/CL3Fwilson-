@@ -3,13 +3,14 @@ import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { setSelectedProduct } from "../../redux/slices/productSlice";
 import SingleProduct from "./SingleProduct";
-import useProductManager from "../../hooks/useProductManager"; // Import product hook
-import useConversionRate from "../../hooks/useConversionRate"; // Import conversion rate hook
+import useProductManager from "../../hooks/useProductManager";
+import useConversionRate from "../../hooks/useConversionRate";
 
 function MensProducts({ home = false }) {
   const dispatch = useDispatch();
-  const { products, loading, error } = useProductManager(); // Use product hook
-  const { conversionRates, loading: rateLoading, error: rateError } = useConversionRate(); // Use conversion rate hook
+  const { products, loading, error } = useProductManager();
+  const { conversionRates, loading: rateLoading, error: rateError } = useConversionRate();
+
   const addToBag = (id) => {
     console.log(`Added product ${id} to cart`);
   };
@@ -18,9 +19,7 @@ function MensProducts({ home = false }) {
     dispatch(setSelectedProduct(product));
   };
 
-  // Filter products for Men's department
   const mensProducts = products.filter((product) => product.department === "cl3fwilson");
-  // Decide which products to display based on home prop
   const displayedProducts = home ? mensProducts.slice(0, 9) : mensProducts;
 
   return (
@@ -64,8 +63,8 @@ function MensProducts({ home = false }) {
           <div className="row">
             {displayedProducts.map((product) => (
               <div
-                key={product.id} // Use id from Firestore
-                className="col-lg-4 col-md-6 col-sm-12"
+                key={product.id}
+                className="col-lg-4 col-md-6 col-6" // Changed to col-6 for 2 per row on mobile
                 data-aos="fade-up"
                 data-aos-delay={displayedProducts.indexOf(product) * 100}
               >
@@ -73,7 +72,7 @@ function MensProducts({ home = false }) {
                   productItem={product}
                   addToBag={addToBag}
                   onProductClick={() => handleProductClick(product)}
-                  conversionRates={conversionRates} // Pass conversionRates
+                  conversionRates={conversionRates}
                 />
               </div>
             ))}
