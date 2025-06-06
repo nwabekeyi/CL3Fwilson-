@@ -8,12 +8,14 @@ import { useParticipantForm } from "../../hooks/useParticipantForm";
 import { addParticipant, updateParticipant, deleteParticipant } from "../../utils/firestoreUtils";
 import { uploadImage } from "../../utils/cloudinary";
 import ProductManager from "./productManager";
-import { FiMenu, FiX, FiHome, FiUsers, FiBox, FiLogOut } from "react-icons/fi";
+import { FiMenu, FiX, FiHome, FiUsers, FiBox, FiLogOut, FiEye } from "react-icons/fi";
+import { Modal, Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../assets/css/responsive.css";
 import "../../assets/css/style.css";
+import { collection, query, getDocs, doc, getDoc, setDoc } from "firebase/firestore";
 
-// Custom CSS
+// Custom CSS (unchanged)
 const dashboardStyles = `
   .menu-bar {
     background-color: #2c3e50;
@@ -136,7 +138,51 @@ const dashboardStyles = `
   }
 `;
 
-// ParticipantManager Component (unchanged)
+// Helper function to shuffle a string
+const shuffleString = (str) => {
+  const arr = str.split("");
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  const shuffled = arr.join("");
+  return shuffled && shuffled !== str ? shuffled : `vote_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+};
+
+// Helper function to generate a unique transaction ID
+const generateUniqueTransactionId = async (baseId, db) => {
+  let newId = shuffleString(baseId);
+  let attempts = 0;
+  const maxAttempts = 5;
+
+  while (attempts < maxAttempts) {
+    const docRef = doc(db, "votes", newId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      return newId;
+    }
+    newId = shuffleString(baseId + `_${attempts}`);
+    attempts++;
+  }
+
+  return `vote_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+};
+
+// Helper function to get a random transaction ID
+const getRandomTransactionId = async (db) => {
+  const votesQuery = query(collection(db, "votes"));
+  const votesSnapshot = await getDocs(votesQuery);
+  const allVotes = votesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  if (allVotes.length === 0) {
+    return `vote_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+  }
+
+  const randomVote = allVotes[Math.floor(Math.random() * allVotes.length)];
+  return randomVote.id;
+};
+
+// ParticipantManager Component
 function ParticipantManager({ participants, participantsError, successMessage, setSuccessMessage }) {
   const {
     formData,
@@ -151,6 +197,9 @@ function ParticipantManager({ participants, participantsError, successMessage, s
   } = useParticipantForm();
   const [editParticipant, setEditParticipant] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [showVotesModal, setShowVotesModal] = useState(false);
+  const [currentVoters, setCurrentVoters] = useState([]);
+  const [currentParticipant, setCurrentParticipant] = useState(null);
 
   useEffect(() => {
     return () => {
@@ -213,6 +262,12 @@ function ParticipantManager({ participants, participantsError, successMessage, s
     }
   };
 
+  const handleViewVotes = (participant) => {
+    setCurrentParticipant(participant);
+    setCurrentVoters(participant.voters || []);
+    setShowVotesModal(true);
+  };
+
   const handleEditParticipant = (participant) => {
     const newFormData = {
       fullName: String(participant.fullName || ""),
@@ -248,28 +303,95 @@ function ParticipantManager({ participants, participantsError, successMessage, s
       }
 
       const votesToAdd = parseInt(formData.votesToAdd) || 0;
-      const newVoters = votesToAdd > 0
-        ? Array.from({ length: votesToAdd }, () => `vote_${Date.now()}_${Math.random().toString(36).substring(7)}`)
-        : [];
+      let newVoters = [];
+      let votesCollectionEmpty = false;
 
+      if (votesToAdd > 0) {
+        const existingVoters = editParticipant.voters || [];
+        console.log("Existing voters:", existingVoters);
+
+        // Check if votes collection is empty
+        const votesQuery = query(collection(db, "votes"));
+        const votesSnapshot = await getDocs(votesQuery);
+        const allVotes = votesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        votesCollectionEmpty = allVotes.length === 0;
+
+        if (votesCollectionEmpty && votesToAdd > 10) {
+          throw new Error("Cannot add more than 10 votes when no existing votes are available.");
+        }
+
+        // Generate new transaction IDs for each vote
+        for (let i = 0; i < votesToAdd; i++) {
+          // Get a random transaction ID
+          const randomTransactionId = await getRandomTransactionId(db);
+          // Reshuffle to create a new unique ID
+          const newTransactionId = await generateUniqueTransactionId(randomTransactionId, db);
+
+          console.log(`Generated new transaction ID: ${newTransactionId} from ${randomTransactionId}`);
+
+          // Create new voter object
+          const newVoter = {
+            transactionId: newTransactionId,
+            email: "admin_added",
+            timestamp: new Date(),
+          };
+
+          // Check for duplicates in existing voters
+          if (!existingVoters.some(voter => voter.transactionId === newVoter.transactionId)) {
+            newVoters.push(newVoter);
+
+            // Add new vote document to votes collection
+            await setDoc(doc(db, "votes", newTransactionId), {
+              participantId: editParticipant.docId,
+              email: newVoter.email,
+              timestamp: newVoter.timestamp,
+            });
+          } else {
+            console.log(`Duplicate transaction ID ${newTransactionId} skipped`);
+            i--; // Retry for this vote
+          }
+        }
+
+        console.log("New voters after filtering:", newVoters);
+
+        // Set warning if votes collection was empty
+        if (votesCollectionEmpty) {
+          setErrors({
+            ...errors,
+            submission: "Warning: No existing votes available. Generated new transaction IDs.",
+          });
+        }
+      }
+
+      // Create updated data
       const updatedData = {
         fullName: formData.fullName,
         codeName: formData.codeName,
         email: formData.email,
         about: formData.about,
         photoURL,
-        voters: [...(editParticipant.voters || []), ...newVoters],
         updatedAt: new Date(),
       };
 
+      // Update voters array only if adding new votes
+      if (newVoters.length > 0) {
+        const existingVoters = editParticipant.voters || [];
+        updatedData.voters = [...existingVoters, ...newVoters];
+        console.log("Total voters after merge:", updatedData.voters.length);
+      }
+
+      console.log("Updated data:", updatedData);
+
       await updateParticipant(db, editParticipant.docId, updatedData);
+
       setEditParticipant(null);
       resetForm();
       form.reset();
       setPreviewImage(null);
-      setSuccessMessage("Participant updated successfully!");
+      setSuccessMessage(`Participant updated successfully! ${votesToAdd > 0 ? `Added ${newVoters.length} votes.` : ""}`);
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
+      console.error("Update error:", error);
       setErrors({ ...errors, submission: `Failed to update participant: ${error.message}` });
     } finally {
       setIsSubmitting(false);
@@ -277,7 +399,17 @@ function ParticipantManager({ participants, participantsError, successMessage, s
   };
 
   const handleDeleteParticipantAction = async (docId) => {
-    await deleteParticipant(db, docId, setErrors);
+    const confirmDelete = window.confirm("Are you sure you want to delete this participant? This action cannot be undone.");
+
+    if (confirmDelete) {
+      try {
+        await deleteParticipant(db, docId, setErrors);
+        setSuccessMessage("Participant deleted successfully!");
+        setTimeout(() => setSuccessMessage(""), 3000);
+      } catch (error) {
+        setErrors({ submission: "Failed to delete participant" });
+      }
+    }
   };
 
   return (
@@ -428,6 +560,12 @@ function ParticipantManager({ participants, participantsError, successMessage, s
                         >
                           Delete
                         </button>
+                        <button
+                          className="btn btn-sm btn-info me-2 ml-2"
+                          onClick={() => handleViewVotes(participant)}
+                        >
+                          <FiEye /> View Votes
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -437,6 +575,84 @@ function ParticipantManager({ participants, participantsError, successMessage, s
           )}
         </div>
       </div>
+
+      <Modal
+        show={showVotesModal}
+        onHide={() => setShowVotesModal(false)}
+        style={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: "10vh" }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "60vh",
+            width: "100%",
+            maxWidth: "600px",
+            backgroundColor: "white",
+            borderRadius: "8px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "sticky",
+              top: 0,
+              backgroundColor: "white",
+              width: "100%",
+              zIndex: 1050,
+              padding: "1rem",
+              borderBottom: "1px solid #dee2e6",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Modal.Title style={{ margin: 0 }}>
+              Voters for {currentParticipant?.fullName || "Participant"}
+            </Modal.Title>
+            <button
+              onClick={() => setShowVotesModal(false)}
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: "1.5rem",
+                cursor: "pointer",
+              }}
+            >
+              ×
+            </button>
+          </div>
+
+          <div style={{ overflowY: "auto", flex: 1, padding: "1rem" }}>
+            {currentVoters.length > 0 ? (
+              <ul className="list-group" style={{ margin: 0 }}>
+                {currentVoters.map((voter, index) => (
+                  <li key={index} className="list-group-item">
+                    <div>Email: {voter.email || "Anonymous"}</div>
+                    <div>Transaction ID: {voter.transactionId}</div>
+                    <div>Date: {voter.timestamp?.toDate().toLocaleString() || "Unknown"}</div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No votes yet for this participant.</p>
+            )}
+          </div>
+
+          <div
+            style={{
+              padding: "1rem",
+              borderTop: "1px solid #dee2e6",
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
+            <Button variant="secondary" onClick={() => setShowVotesModal(false)}>
+              Close
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {editParticipant && (
         <div className="card mt-4">
@@ -585,7 +801,7 @@ function Overview({ participants }) {
       <div className="col-md-6 mb-3">
         <div className="card">
           <div className="card-body">
-            <h5 className="card-title">Total Votes</h5>
+            <h5 className="card-title">Total Votes</ h5>
             <p className="card-text fs-4">{totalVotes}</p>
           </div>
         </div>
@@ -594,7 +810,7 @@ function Overview({ participants }) {
   );
 }
 
-// AdminPage Component
+// AdminPage Component (unchanged)
 function AdminPage() {
   const navigate = useNavigate();
   const { loading, user } = useAuthAdmin();
@@ -649,8 +865,8 @@ function AdminPage() {
       <ParticipantManager
         participants={participants}
         participantsError={participantsError}
-        successMessage={successMessage} // Fixed: Use successMessage state
-        setSuccessMessage={setSuccessMessage} // Correct prop
+        successMessage={successMessage}
+        setSuccessMessage={setSuccessMessage}
       />
     ),
     products: (
@@ -668,7 +884,6 @@ function AdminPage() {
   return (
     <>
       <style>{dashboardStyles}</style>
-      {/* Menu Bar */}
       <div className="menu-bar">
         <button
           className="toggle-button"
@@ -679,9 +894,7 @@ function AdminPage() {
         </button>
         <span className="brand">Admin Dashboard</span>
       </div>
-      {/* Main Layout */}
       <div className="d-flex">
-        {/* Sidebar */}
         <div>
           <div className={`sidebar ${sidebarOpen ? "active" : "hidden"}`}>
             <ul className="nav flex-column mt-3">
@@ -725,10 +938,9 @@ function AdminPage() {
             </ul>
           </div>
         </div>
-        {/* Main Content */}
         <div className="main-content" style={{ marginLeft: sidebarOpen && window.innerWidth > 768 ? "250px" : "0" }}>
           {componentMap[selectedComponent] || (
-            <div className="alert alert-info">Select a section from the sidebar"</div>
+            <div className="alert alert-info">Select a section from the sidebar</div>
           )}
         </div>
       </div>
