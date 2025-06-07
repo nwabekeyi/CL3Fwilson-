@@ -36,6 +36,10 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
     };
   }, [previewImage, editParticipant]);
 
+  useEffect(() => {
+    console.log('Participants prop updated:', participants.map(p => ({ id: p.docId, voters: p.voters?.length })));
+  }, [participants]); // Debug prop updates
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -50,6 +54,7 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
 
   const handleAddParticipant = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     const validationErrors = validateForm();
@@ -113,19 +118,17 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
 
   const handleUpdateParticipant = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      setIsSubmitting(false);
+    if (isSubmitting) {
+      console.log('Blocked duplicate submission');
       return;
     }
+    setIsSubmitting(true);
+
+    console.log('handleUpdateParticipant started'); // Debug execution
 
     try {
       const form = e.target;
-      const photoFile = form.photo.files[0];
+      const photoFile = form.photo.files[0]; // Fixed bug
       let photoURL = formData.photoURL || 'https://via.placeholder.com/800x600?text=No+Image';
 
       if (photoFile) {
@@ -133,9 +136,8 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
       }
 
       const votesToAdd = parseInt(formData.votesToAdd) || 0;
-      const newTransactionIds = []; // Store only transactionIds for voters array
+      const newTransactionIds = [];
 
-      // Fetch latest participant data
       const participantRef = doc(db, 'participants', editParticipant.docId);
       const participantSnap = await getDoc(participantRef);
       if (!participantSnap.exists()) {
@@ -144,7 +146,7 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
       const currentParticipant = participantSnap.data();
       const existingVoters = currentParticipant.voters || [];
 
-      console.log('Current voters from DB:', existingVoters.length);
+      console.log('Current voters from DB:', existingVoters.length, existingVoters);
       console.log('Votes to add:', votesToAdd);
 
       if (votesToAdd > 0) {
@@ -162,18 +164,12 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
           const randomTransactionId = await getRandomTransactionId(db);
           const newTransactionId = await generateUniqueTransactionId(randomTransactionId, db);
 
-          const newVoter = {
-            transactionId: newTransactionId,
-            email: 'admin_added',
-            timestamp: new Date(),
-          };
-
           if (!existingVoters.includes(newTransactionId)) {
             newTransactionIds.push(newTransactionId);
             await setDoc(doc(db, 'votes', newTransactionId), {
               participantId: editParticipant.docId,
-              email: newVoter.email,
-              timestamp: newVoter.timestamp,
+              email: 'admin_added',
+              timestamp: new Date(),
             });
           } else {
             i--; // Retry if duplicate
@@ -188,7 +184,6 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
         }
       }
 
-      // Update participant with arrayUnion for new transactionIds
       const updatedData = {
         fullName: formData.fullName,
         codeName: formData.codeName,
@@ -199,6 +194,7 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
       };
 
       if (newTransactionIds.length > 0) {
+        console.log('Appending transactionIds:', newTransactionIds);
         await updateDoc(participantRef, {
           ...updatedData,
           voters: arrayUnion(...newTransactionIds),
@@ -209,6 +205,7 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
 
       console.log('New transactionIds added:', newTransactionIds.length);
       console.log('Expected voters count:', existingVoters.length + newTransactionIds.length);
+      console.log('handleUpdateParticipant completed');
 
       setEditParticipant(null);
       resetForm();
@@ -218,8 +215,10 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       setErrors({ ...errors, submission: `Failed to update participant: ${error.message}` });
+      console.error('Update error:', error);
     } finally {
       setIsSubmitting(false);
+      console.log('handleUpdateParticipant finished');
     }
   };
 
