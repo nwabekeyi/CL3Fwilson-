@@ -11,10 +11,8 @@ import {
 } from "firebase/firestore";
 import { uploadImage } from "../utils/cloudinary";
 
-
-
 const cloudinaryApiKey = import.meta.env.VITE_CLOUDINARY_KEY;
-const cloudinarySecret= import.meta.env.VITE_CLOUDINARY_SECRET;
+const cloudinarySecret = import.meta.env.VITE_CLOUDINARY_SECRET;
 const cloudinaryName = import.meta.env.VITE_CLOUDINARY_NAME;
 // Initialize Firestore collection
 const productsCollection = collection(db, "products");
@@ -46,7 +44,7 @@ const deleteImage = async (imageUrl) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Basic ${btoa(`${cloudinaryApiKey}:${cloudinarySecret}`)}`, // Replace with your Cloudinary API key and secret
+        Authorization: `Basic ${btoa(`${cloudinaryApiKey}:${cloudinarySecret}`)}`,
       },
       body: JSON.stringify({ public_id: publicId }),
     });
@@ -63,8 +61,6 @@ const deleteImage = async (imageUrl) => {
 };
 
 const useProductManager = () => {
-
-
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -135,7 +131,7 @@ const useProductManager = () => {
   };
 
   // Update product with Cloudinary uploads
-  const updateProductWithImages = async (productId, productData, photoFiles) => {
+  const updateProduct = async (productId, productData, photoFiles) => {
     setLoading(true);
     setError(null);
     try {
@@ -145,29 +141,42 @@ const useProductManager = () => {
         throw new Error("Product not found");
       }
 
-      // Upload new images if provided, preserve existing images if no new ones
-      let imageUrls = productData.images || [];
-      if (photoFiles?.length > 0) {
-        // Delete old images from Cloudinary if new images are provided
-        const oldImages = productSnap.data().images || [];
+      const oldImages = productSnap.data().images || [];
+      const newImages = productData.images || []; // Images to keep
+      // Identify images to delete (in oldImages but not in newImages)
+      const imagesToDelete = oldImages.filter(
+        (imageUrl) => !newImages.includes(imageUrl) && !imageUrl.includes("placeholder")
+      );
+
+      // Delete removed images from Cloudinary
+      if (imagesToDelete.length > 0) {
         await Promise.all(
-          oldImages.map(async (imageUrl) => {
-            if (imageUrl && !imageUrl.includes("placeholder")) {
-              await deleteImage(imageUrl);
+          imagesToDelete.map(async (imageUrl) => {
+            const deleted = await deleteImage(imageUrl);
+            if (!deleted) {
+              console.warn(`Failed to delete image: ${imageUrl}`);
             }
           })
         );
+      }
 
-        // Upload new images
-        imageUrls = await Promise.all(
+      // Upload new images if provided
+      let newImageUrls = [];
+      if (photoFiles?.length > 0) {
+        newImageUrls = await Promise.all(
           photoFiles.map(async (file) => await uploadImage(file))
         );
       }
 
+      // Combine kept images and new images
+      const updatedImages = [...newImages, ...newImageUrls].length > 0
+        ? [...newImages, ...newImageUrls]
+        : ["https://via.placeholder.com/800x600?text=No+Image"];
+
       // Prepare updated product data
       const updatedProductData = {
         ...productData,
-        images: imageUrls.length > 0 ? imageUrls : productData.images || ["https://via.placeholder.com/800x600?text=No+Image"],
+        images: updatedImages,
         updatedAt: new Date().toISOString(),
       };
 
@@ -179,7 +188,7 @@ const useProductManager = () => {
       );
       return updatedProduct;
     } catch (error) {
-      setError("Failed to update product");
+      setError(`Failed to update product: ${error.message}`);
       console.error("Error updating product:", error);
       throw error;
     } finally {
@@ -232,7 +241,7 @@ const useProductManager = () => {
     loading,
     error,
     addProductWithImages,
-    updateProductWithImages,
+    updateProduct,
     deleteProduct: deleteProductHandler,
     fetchProducts,
   };

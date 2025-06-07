@@ -168,6 +168,7 @@
   .main_slider_content {
     width: 100%;
     padding-right: 15px;
+    height: 100% !important;
   }
   .banner_item {
     height: 160px;
@@ -196,6 +197,7 @@
     width: 100%;
     height: 100%;
   }
+
   .deal_ofthe_week_content {
     position: relative;
     top: auto;
@@ -420,6 +422,10 @@
     width: 100% !important;
     max-width: 0 !important;
   }
+
+  .view-more-link{
+    margin-top: -1px !important;
+   }
 }
 
 /************
@@ -885,4 +891,41 @@
     width: 60px !important;
     margin-left: -10px;
   }
+
+  .product-list-section .product-list {
+    display: flex !important;
+    flex-wrap: wrap;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 799px) {
+  .carousel-inner{
+    height: 52vh !important;
+  }
+
+  .main_slider{
+    height: 100%;
+  }
+
+  .product-item .add_to_cart_button {
+    position: absolute;
+    bottom:-360px;
+  }
+
+}
+
+@media (min-width: 800px) and (max-width: 991px) {
+  .carousel-inner{
+    height: 43.9vh !important;
+  }
+
+  .main_slider{
+    height: 100%;
+  }
+
+  .product-item .add_to_cart_button {
+    position: absolute;
+    bottom:-360px;
+  }
+
 }

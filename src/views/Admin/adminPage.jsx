@@ -316,8 +316,10 @@ function ParticipantManager({ participants, participantsError, successMessage, s
         const allVotes = votesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         votesCollectionEmpty = allVotes.length === 0;
 
-        if (votesCollectionEmpty && votesToAdd > 10) {
-          throw new Error("Cannot add more than 10 votes when no existing votes are available.");
+        if (votesCollectionEmpty && votesToAdd > 20) {
+          alert("Cannot add more than 20 votes when no existing votes are available.");
+          throw new Error("Cannot add more than 20 votes when no existing votes are available.");
+          return
         }
 
         // Generate new transaction IDs for each vote
