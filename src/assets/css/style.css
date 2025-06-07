@@ -3259,6 +3259,11 @@
     background-color: #555;
   }
 
+  .list-group-item{
+    margin-top: 10px;
+    box-shadow: 1px 1px 10px lightgray;
+  }
+
 
   /* whatsapp icon  */
   .whatsapp-icon:hover {
