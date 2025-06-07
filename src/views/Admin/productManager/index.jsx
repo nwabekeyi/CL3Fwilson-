@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Modal, Button } from "react-bootstrap";
 import useProductManager from "../../../hooks/useProductManager";
 import useConversionRate from "../../../hooks/useConversionRate";
 import "./ProductManager.css";
@@ -12,6 +13,7 @@ const ProductManager = () => {
     error: productError,
     addProductWithImages,
     deleteProduct,
+    updateProduct, // Assume this exists in useProductManager
   } = useProductManager();
 
   const {
@@ -22,8 +24,17 @@ const ProductManager = () => {
   } = useConversionRate();
 
   const [imageInputs, setImageInputs] = useState([{ id: Date.now(), file: null, preview: null }]);
+  const [editProduct, setEditProduct] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    price: "",
+    department: "",
+  });
+  const [editImageInputs, setEditImageInputs] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [showEditModal, setShowEditModal] = useState(false);
 
-  // Handle image selection for a specific input
+  // Handle image selection for add product
   const handleImageChange = (id, event) => {
     const file = event.target.files[0];
     if (file) {
@@ -36,12 +47,12 @@ const ProductManager = () => {
     }
   };
 
-  // Add a new image input field
+  // Add a new image input field for add product
   const handleAddMoreImages = () => {
     setImageInputs((prev) => [...prev, { id: Date.now(), file: null, preview: null }]);
   };
 
-  // Remove an image input field
+  // Remove an image input field for add product
   const handleRemoveImageInput = (id) => {
     setImageInputs((prev) => {
       const input = prev.find((input) => input.id === id);
@@ -108,7 +119,94 @@ const ProductManager = () => {
     }
   };
 
-  // Check if the first image input has a file
+  // Open edit modal and initialize form
+  const handleEdit = (product) => {
+    setEditProduct(product);
+    setEditFormData({
+      name: product.name || "",
+      price: product.price || "",
+      department: product.department || "",
+    });
+    setExistingImages(product.images || []);
+    setEditImageInputs([{ id: Date.now(), file: null, preview: null }]);
+    setShowEditModal(true);
+  };
+
+  // Handle image selection for edit product
+  const handleEditImageChange = (id, event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const preview = URL.createObjectURL(file);
+      setEditImageInputs((prev) =>
+        prev.map((input) =>
+          input.id === id ? { ...input, file, preview } : input
+        )
+      );
+    }
+  };
+
+  // Add a new image input field for edit product
+  const handleAddMoreEditImages = () => {
+    setEditImageInputs((prev) => [...prev, { id: Date.now(), file: null, preview: null }]);
+  };
+
+  // Remove an image input field for edit product
+  const handleRemoveEditImageInput = (id) => {
+    setEditImageInputs((prev) => {
+      const input = prev.find((input) => input.id === id);
+      if (input?.preview) URL.revokeObjectURL(input.preview);
+      return prev.filter((input) => input.id !== id);
+    });
+  };
+
+  // Remove an existing image
+  const handleRemoveExistingImage = (imageUrl) => {
+    setExistingImages((prev) => prev.filter((url) => url !== imageUrl));
+  };
+
+  // Handle form submission for updating a product
+  const handleUpdateProduct = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const updatedData = {
+      name: formData.get("name"),
+      price: parseFloat(formData.get("price")),
+      department: formData.get("department"),
+      images: existingImages, // Start with existing images
+    };
+
+    const newPhotoFiles = editImageInputs.map((input) => input.file).filter((file) => file !== null);
+
+    try {
+      await updateProduct(editProduct.id, updatedData, newPhotoFiles);
+      alert("Product updated successfully!");
+      setShowEditModal(false);
+      setEditProduct(null);
+      setEditFormData({ name: "", price: "", department: "" });
+      editImageInputs.forEach((input) => {
+        if (input.preview) URL.revokeObjectURL(input.preview);
+      });
+      setEditImageInputs([]);
+      setExistingImages([]);
+    } catch (err) {
+      alert(`Failed to update product: ${err.message}`);
+      console.error("Update product error:", err);
+    }
+  };
+
+  // Clean up previews on unmount
+  useEffect(() => {
+    return () => {
+      imageInputs.forEach((input) => {
+        if (input.preview) URL.revokeObjectURL(input.preview);
+      });
+      editImageInputs.forEach((input) => {
+        if (input.preview) URL.revokeObjectURL(input.preview);
+      });
+    };
+  }, [imageInputs, editImageInputs]);
+
+  // Check if the first image input has a file for add product
   const isFirstImageSelected = imageInputs[0]?.file !== null;
 
   return (
@@ -167,6 +265,8 @@ const ProductManager = () => {
       <div className="product-list-section">
         <h5>Product List</h5>
         <div className="product-list">
+          {productLoading && <div className="loading">Loading products...</div>}
+          {productError && <div className="error">{productError}</div>}
           {products.length === 0 && !productLoading && (
             <p className="no-products">No products found.</p>
           )}
@@ -190,6 +290,13 @@ const ProductManager = () => {
                 <h3>{product.name}</h3>
                 <p>Price: ₦{product.price}</p>
                 <p>Department: {product.department}</p>
+                <button
+                  onClick={() => handleEdit(product)}
+                  className="edit-button"
+                  style={{ marginRight: "10px" }}
+                >
+                  Edit
+                </button>
                 <button
                   onClick={() => handleDelete(product.id)}
                   className="delete-button"
@@ -268,7 +375,8 @@ const ProductManager = () => {
               </button>
             )}
             <p className="image-count">
-              {imageInputs.filter((input) => input.file).length} image{imageInputs.filter((input) => input.file).length !== 1 ? "s" : ""} selected
+              {imageInputs.filter((input) => input.file).length} image
+              {imageInputs.filter((input) => input.file).length !== 1 ? "s" : ""} selected
             </p>
           </div>
           <button
@@ -280,6 +388,139 @@ const ProductManager = () => {
           </button>
         </form>
       </div>
+
+      {/* Edit Product Modal */}
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered 
+        style={{height:'70vh',overflowY:'auto',marginTop:'70px'}}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Product</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={handleUpdateProduct}>
+            <div className="form-group">
+              <label htmlFor="edit-department">Department:</label>
+              <select
+                id="edit-department"
+                name="department"
+                value={editFormData.department}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, department: e.target.value })
+                }
+                required
+              >
+                <option value="">Select a Department</option>
+                <option value="cl3fwilson">cl3fwilson</option>
+                <option value="wilster">wilster</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="edit-name">Name:</label>
+              <input
+                type="text"
+                id="edit-name"
+                name="name"
+                value={editFormData.name}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, name: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="edit-price">Price:</label>
+              <input
+                type="number"
+                id="edit-price"
+                name="price"
+                step="0.01"
+                value={editFormData.price}
+                onChange={(e) =>
+                  setEditFormData({ ...editFormData, price: e.target.value })
+                }
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Existing Images:</label>
+              {existingImages.length > 0 ? (
+                existingImages.map((image, index) => (
+                  <div key={index} className="image-preview-container">
+                    <img
+                      src={image}
+                      alt={`Existing ${index + 1}`}
+                      className="image-preview"
+                      style={{ maxWidth: "100px", margin: "5px" }}
+                    />
+                    <button
+                      type="button"
+                      className="remove-image-button"
+                      onClick={() => handleRemoveExistingImage(image)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p>No existing images.</p>
+              )}
+            </div>
+            <div className="form-group">
+              <label>Add New Images:</label>
+              {editImageInputs.map((input, index) => (
+                <div key={input.id} className="image-input-group">
+                  <input
+                    type="file"
+                    id={`edit-image-${input.id}`}
+                    name={`edit-image-${input.id}`}
+                    accept="image/*"
+                    onChange={(event) => handleEditImageChange(input.id, event)}
+                  />
+                  {input.preview && (
+                    <div className="image-preview-container">
+                      <img
+                        src={input.preview}
+                        alt={`Preview ${index + 1}`}
+                        className="image-preview"
+                        style={{ maxWidth: "100px", margin: "5px" }}
+                      />
+                      <button
+                        type="button"
+                        className="remove-image-button"
+                        onClick={() => handleRemoveEditImageInput(input.id)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                className="add-more-images-button"
+                onClick={handleAddMoreEditImages}
+              >
+                Add More Images
+              </button>
+              <p className="image-count">
+                {editImageInputs.filter((input) => input.file).length} new image
+                {editImageInputs.filter((input) => input.file).length !== 1 ? "s" : ""} selected
+              </p>
+            </div>
+            <div className="modal-footer">
+              <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={productLoading}
+              >
+                Update Product
+              </Button>
+            </div>
+          </form>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
