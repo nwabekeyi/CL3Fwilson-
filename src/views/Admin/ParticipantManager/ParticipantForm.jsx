@@ -13,134 +13,134 @@ const ParticipantForm = ({
   resetForm,
   setEditParticipant,
   setPreviewImage,
-}) => (
-  <div className="card mb-4">
-    <div className="card-header">
-      <h5>{isEditing ? 'Edit Participant' : 'Add New Participant'}</h5>
-    </div>
-    <div className="card-body">
-      <form className="pageant-form" onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="fullName" className="form-label">Full Name:</label>
-          <input
-            type="text"
-            name="fullName"
-            className="form-control"
-            value={formData.fullName}
-            onChange={handleChange}
-            placeholder="Enter full name"
-          />
-          {errors.fullName && <span className="error">{errors.fullName}</span>}
-        </div>
-        <div className="mb-3">
-          <label htmlFor="codeName" className="form-label">Code Name:</label>
-          <input
-            type="text"
-            name="codeName"
-            className="form-control"
-            value={formData.codeName}
-            onChange={handleChange}
-            placeholder="Enter code name"
-          />
-          {errors.codeName && <span className="error">{errors.codeName}</span>}
-        </div>
-        <div className="mb-3">
-          <label htmlFor="email" className="form-label">Email:</label>
-          <input
-            type="email"
-            name="email"
-            className="form-control"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter email"
-          />
-          {errors.email && <span className="error">{errors.email}</span>}
-        </div>
-        <div className="mb-3">
-          <label htmlFor="about" className="form-label">About the Contestant:</label>
-          <textarea
-            name="about"
-            className="form-control"
-            rows="5"
-            value={formData.about}
-            onChange={handleChange}
-            placeholder="Describe the contestant (min 50 characters)"
-          />
-          {errors.about && <span className="error">{errors.about}</span>}
-        </div>
-        {isEditing && (
+}) => {
+  return (
+    <div className="card mb-4">
+      <div className="card-header">
+        <h5>{isEditing ? 'Edit Participant' : 'Add New Participant'}</h5>
+      </div>
+      <div className="card-body">
+        <form onSubmit={handleSubmit} noValidate>
           <div className="mb-3">
-            <label htmlFor="votesToAdd" className="form-label">Add Votes:</label>
+            <label htmlFor="fullName" className="form-label">Full Name</label>
             <input
-              type="number"
-              name="votesToAdd"
-              className="form-control"
-              value={formData.votesToAdd}
+              type="text"
+              className={`form-control ${errors.fullName ? 'is-invalid' : ''}`}
+              id="fullName"
+              name="fullName"
+              value={formData.fullName}
               onChange={handleChange}
-              placeholder="Enter number of votes to add"
-              min="0"
+              required
             />
-            {errors.votesToAdd && <span className="error">{errors.votesToAdd}</span>}
-            <p>Current Votes: {editParticipant?.voters?.length || 0}</p>
+            {errors.fullName && <div className="invalid-feedback">{errors.fullName}</div>}
           </div>
-        )}
-        <div className="mb-3">
-          <label htmlFor="photo" className="form-label">{isEditing ? 'Update Photo' : 'Photo'}:</label>
-          <input
-            type="file"
-            name="photo"
-            className="form-control"
-            accept="image/*"
-            onChange={handleFileChange}
-          />
-          {previewImage && (
-            <div className="mt-2">
-              <p>Preview:</p>
+
+          <div className="mb-3">
+            <label htmlFor="codeName" className="form-label">Code Name</label>
+            <input
+              type="text"
+              className={`form-control ${errors.codeName ? 'is-invalid' : ''}`}
+              id="codeName"
+              name="codeName"
+              value={formData.codeName}
+              onChange={handleChange}
+              required
+            />
+            {errors.codeName && <div className="invalid-feedback">{errors.codeName}</div>}
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">Email</label>
+            <input
+              type="email"
+              className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+            {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="about" className="form-label">About</label>
+            <textarea
+              className={`form-control ${errors.about ? 'is-invalid' : ''}`}
+              id="about"
+              name="about"
+              value={formData.about}
+              onChange={handleChange}
+              required
+            />
+            {errors.about && <div className="invalid-feedback">{errors.about}</div>}
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="photo" className="form-label">Photo</label>
+            <input
+              type="file"
+              className={`form-control ${errors.photo ? 'is-invalid' : ''}`}
+              id="photo"
+              name="photo"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            {errors.photo && <div className="invalid-feedback">{errors.photo}</div>}
+            {previewImage && (
               <img
                 src={previewImage}
                 alt="Preview"
-                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                style={{ maxWidth: '100px', marginTop: '10px' }}
               />
-            </div>
+            )}
+          </div>
+
+          {isEditing && (
+            <>
+              <div className="mb-3">
+                <label htmlFor="votesToAdd" className="form-label">Add Votes</label>
+                <input
+                  type="number"
+                  className={`form-control ${errors.votesToAdd ? 'is-invalid' : ''}`}
+                  id="votesToAdd"
+                  name="votesToAdd"
+                  value={formData.votesToAdd}
+                  onChange={handleChange}
+                  min="0"
+                />
+                {errors.votesToAdd && <div className="invalid-feedback">{errors.votesToAdd}</div>}
+              </div>
+              <p>Current Votes: {editParticipant?.voters?.length || 0}</p>
+            </>
           )}
-          {isEditing && formData.photoURL && !previewImage && (
-            <div className="mt-2">
-              <p>Current Photo:</p>
-              <img
-                src={formData.photoURL}
-                alt="Current"
-                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/100?text=No+Image';
+
+          <div className="d-flex gap-2">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Participant' : 'Add Participant')}
+            </button>
+            {isEditing && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => {
+                  resetForm();
+                  setEditParticipant(null);
+                  setPreviewImage(null);
                 }}
-              />
-            </div>
-          )}
-          {errors.photo && <span className="error">{errors.photo}</span>}
-        </div>
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (isEditing ? 'Updating...' : 'Adding...') : (isEditing ? 'Update Participant' : 'Add Participant')}
-        </button>
-        {isEditing && (
-          <button
-            type="button"
-            className="btn btn-secondary ms-2"
-            onClick={() => {
-              setEditParticipant(null);
-              resetForm();
-              setPreviewImage(null);
-            }}
-          >
-            Cancel
-          </button>
-        )}
-      </form>
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default ParticipantForm;
