@@ -1,0 +1,119 @@
+.menu-bar {
+    background-color: #2c3e50;
+    color: #fff;
+    height: 60px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .menu-bar .toggle-button {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 10px;
+  }
+  .menu-bar .toggle-button:hover {
+    color: #3498db;
+  }
+  .menu-bar .brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  .sidebar {
+    background-color: #2c3e50;
+    color: #fff;
+    width: 250px;
+    min-height: calc(100vh - 60px);
+    position: fixed;
+    top: 60px;
+    left: 0;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    display: block !important;
+  }
+  .sidebar.hidden {
+    transform: translateX(-250px);
+  }
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  .sidebar .nav-link {
+    color: #dfe6e9;
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+  }
+  .sidebar .nav-link:hover,
+  .sidebar .nav-link.active {
+    background-color: #3498db;
+    color: #fff;
+  }
+  .sidebar .nav-link svg {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+  }
+  .main-content {
+    padding: 20px;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    margin-top: 60px;
+    transition: margin-left 0.3s ease;
+    width: 100%;
+  }
+  .card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  .card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #e9ecef;
+    font-weight: 600;
+    color: #495057;
+  }
+  .table th {
+    background-color: #e9ecef;
+    color: #495057;
+  }
+  .btn-primary {
+    background-color: #3498db;
+    border-color: #3498db;
+  }
+  .btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+  }
+  .error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    display: block;
+    margin-top: 5px;
+  }
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateX(-250px);
+    }
+    .sidebar.active {
+      transform: translateX(0);
+    }
+    .main-content {
+      margin-left: 0 !important;
+    }
+  }
