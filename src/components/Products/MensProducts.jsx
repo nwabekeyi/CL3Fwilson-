@@ -20,7 +20,7 @@ function MensProducts({ home = false }) {
   };
 
   const mensProducts = products.filter((product) => product.department === "cl3fwilson");
-  const displayedProducts = home ? mensProducts.slice(0, 9) : mensProducts;
+  const displayedProducts = mensProducts.slice(0, 12);
 
   return (
     <div className="mens-products-page">
@@ -64,7 +64,7 @@ function MensProducts({ home = false }) {
             {displayedProducts.map((product) => (
               <div
                 key={product.id}
-                className="col-lg-4 col-md-6 col-6" // Changed to col-6 for 2 per row on mobile
+                className="product-con col-lg-4 col-md-6 col-6"
                 data-aos="fade-up"
                 data-aos-delay={displayedProducts.indexOf(product) * 100}
               >
@@ -79,7 +79,7 @@ function MensProducts({ home = false }) {
           </div>
         )}
 
-        {home && mensProducts.length > 9 && (
+        {home && mensProducts.length > 12 && (
           <div className="view-more-link" style={{ marginTop: "2rem", textAlign: "center" }}>
             <Link
               to="/mensProduct"

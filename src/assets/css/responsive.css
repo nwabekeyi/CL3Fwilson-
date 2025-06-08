@@ -883,7 +883,9 @@
   .product_image{
     height: 220px;
   }
-
+  .product_name div{
+    font-size: 0.7em;
+  }
   .section_title h2 {
     font-size: 1.5rem;
   }

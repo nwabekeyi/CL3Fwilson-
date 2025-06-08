@@ -22,7 +22,7 @@ function WomensProducts({ wilster = false }) {
   const womensProducts = products.filter((product) => product.department === "wilster");
   console.log(womensProducts)
   // Decide which products to display based on home prop
-  const displayedProducts = wilster ? womensProducts.slice(0, 9) : mensProducts;
+  const displayedProducts = wilster ? womensProducts.slice(0, 12) : womensProducts;
 
   return (
     <div className="mens-products-page">
@@ -70,7 +70,7 @@ function WomensProducts({ wilster = false }) {
           </div>
         )}
 
-        {wilster && womensProducts.length > 9 && (
+        {wilster && womensProducts.length > 12 && (
           <div className="view-more-link" style={{ marginTop: "2rem", textAlign: "center" }}>
             <Link
               to="/womensProduct"

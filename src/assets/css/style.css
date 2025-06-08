@@ -1427,7 +1427,7 @@
  *********************************/
  
  .benefit {
-   margin-top: 200px;
+   margin-top: 100px;
  }
  .benefit_row {
    background-color: #f3f3f3;
@@ -1550,9 +1550,7 @@
    height: 527px;
  }
 
- .view-more-link{
-  margin-top: 20rem !important;
- }
+
  .single_product_image_background {
    position: absolute;
    top: 0;
@@ -3072,9 +3070,8 @@
   display: block;
 }
 
-[data-aos^=fade][data-aos^=fade].aos-animate{
-  margin-bottom: 70px;
-  margin-top: 300px;
+.product-con{
+  margin-bottom: 370px;
 }
 
 .section_title{
