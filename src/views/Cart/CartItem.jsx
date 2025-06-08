@@ -1,11 +1,10 @@
-
 function CartItem({ items, handleClick }) {
   return (
     <div style={{ marginTop: 30 }}>
       {items !== undefined &&
         items !== null &&
         Object.keys(items).map(id => (
-          <div className="row shopping--cart--item" data-aos="fade-up">
+          <div className="row shopping--cart--item" data-aos="fade-up" key={id}>
             <div className="col-sm-2">
               <div className="cart--item--img">
                 <img
@@ -32,8 +31,10 @@ function CartItem({ items, handleClick }) {
                 className="basket--item--price"
                 style={{ marginTop: 10, marginBottom: 10 }}
               >
-                {" "}
-                Price: <span>₹{items[id].price}</span>
+                Price:{" "}
+                <span>
+                  ₦{Number(items[id].price).toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                </span>
               </div>
             </div>
             <div className="col-sm-5">

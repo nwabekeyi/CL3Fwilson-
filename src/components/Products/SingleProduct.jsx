@@ -29,7 +29,7 @@ function SingleProduct({ productItem, addToBag, onProductClick }) {
     }
   }, []);
 
-  // Currency conversion logic
+  // Currency conversion and formatting logic
   useEffect(() => {
     const validCurrency = ["NGN", "USD", "EUR"].includes(preferredCurrency)
       ? preferredCurrency
@@ -41,7 +41,10 @@ function SingleProduct({ productItem, addToBag, onProductClick }) {
 
     const symbol = currencySymbols[validCurrency] || "₦";
 
-    setConvertedPrice(converted.toFixed(2));
+    // Format the price with comma separators (rounded to whole number)
+    const formattedPrice = Math.round(converted).toLocaleString();
+
+    setConvertedPrice(formattedPrice);
     setCurrencySymbol(symbol);
     setLoading(false);
   }, [preferredCurrency, conversionRates, productItem.price]);
@@ -73,9 +76,8 @@ function SingleProduct({ productItem, addToBag, onProductClick }) {
     );
     addToBag(productItem.id);
   };
-  console.log(convertedPrice)
 
-  if (loading || rateLoading ) {
+  if (loading || rateLoading) {
     return <div className="loading">Loading...</div>;
   }
 

@@ -106,8 +106,8 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
         .map(doc => ({
           id: doc.id,
           ...doc.data(),
-          email: doc.data().email || 'anonymous@example.com',
-          fullName: doc.data().fullName || 'Anonymous Voter',
+          email: doc.data().email || 'kenNnam@outlook.com',
+          fullName: doc.data().fullName || 'Ken Nnam',
           timestamp: doc.data().timestamp || new Date()
         }));
   
@@ -161,8 +161,8 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
         const allVotes = votesSnapshot.docs.map(doc => ({ 
           id: doc.id, 
           ...doc.data(),
-          email: doc.data().email || 'anonymous@example.com',
-          fullName: doc.data().fullName || 'Anonymous Voter'
+          email: doc.data().email || 'kenNnam@outlook.com',
+          fullName: doc.data().fullName || 'Ken nnam'
         }));
 
         if (allVotes.length === 0 && votesToAdd > 20) {

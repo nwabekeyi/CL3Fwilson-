@@ -22,6 +22,12 @@ const getCurrencySymbol = (currency) => {
   }
 };
 
+// Format price as 100,000,000 (no decimals)
+const formatPrice = (amount) => {
+  if (typeof amount !== "number") return amount;
+  return amount.toLocaleString(undefined, { maximumFractionDigits: 0 });
+};
+
 // Sanitize data to replace undefined with null
 const sanitizeData = (data) => {
   if (Array.isArray(data)) {
@@ -55,9 +61,9 @@ const HomeCartView = (props) => {
   const convertPrice = (ngnPrice, currency) => {
     if (!ngnPrice || isNaN(ngnPrice)) return 0;
     if (!conversionRates || !conversionRates[currency] || rateLoading) {
-      return currency === "NGN" ? Number(ngnPrice.toFixed(2)) : 0;
+      return currency === "NGN" ? ngnPrice : 0;
     }
-    return Number((ngnPrice * conversionRates[currency]).toFixed(2));
+    return ngnPrice * conversionRates[currency];
   };
 
   const totalPrice = items.reduce((total, item) => {
@@ -72,16 +78,15 @@ const HomeCartView = (props) => {
   const paystackKey = import.meta.env.VITE_PAYSTACK_KEY || "";
 
   const handlePay = (userDetails) => {
-    setIsPaystackLoading(true); // Show loader
+    setIsPaystackLoading(true);
     const handler = window.PaystackPop.setup({
       key: paystackKey,
       email: userDetails.email,
-      amount: totalPrice * 100, // Amount is in kobo
+      amount: totalPrice * 100, // amount in kobo
       currency: firstCurrency,
       callback: (response) => {
         (async () => {
           try {
-            // Sanitize items array
             const sanitizedItems = items.map((item) => ({
               productId: item.productId || "",
               title: item.title || "",
@@ -90,7 +95,6 @@ const HomeCartView = (props) => {
               currency: item.currency || firstCurrency,
               imagePath: item.imagePath || "",
             }));
-            // Prepare and sanitize order data
             const orderData = sanitizeData({
               userDetails,
               items: sanitizedItems,
@@ -102,19 +106,19 @@ const HomeCartView = (props) => {
             console.log("Sanitized order data:", JSON.stringify(orderData, null, 2));
             await addDoc(collection(db, "orders"), orderData);
             alert("Payment successful and order saved!");
-            dispatch(clearCart()); // Clear the cart
-            setShowDetailsModal(false); // Close CheckoutDetailsModal
-            props.onHide(); // Close HomeCartView modal
+            dispatch(clearCart());
+            setShowDetailsModal(false);
+            props.onHide();
           } catch (err) {
-            console.error("Error saving order to Firestore:", err.message, err.stack, err.code);
+            console.error("Error saving order to Firestore:", err);
             alert("Payment succeeded but order saving failed.");
           } finally {
-            setIsPaystackLoading(false); // Hide loader
+            setIsPaystackLoading(false);
           }
         })();
       },
       onClose: () => {
-        setIsPaystackLoading(false); // Hide loader
+        setIsPaystackLoading(false);
         alert("Payment was cancelled.");
       },
     });
@@ -165,7 +169,7 @@ const HomeCartView = (props) => {
                       Quantity: <span>{item.quantity}</span>
                     </div>
                     <div className="basket--item--price">
-                      Price: <span>{getCurrencySymbol(itemCurrency)}{convertedPrice.toFixed(2)}</span>
+                      Price: <span>{getCurrencySymbol(itemCurrency)}{formatPrice(convertedPrice)}</span>
                     </div>
                     <button
                       className="btn btn-sm log-btn"
@@ -184,7 +188,7 @@ const HomeCartView = (props) => {
           {items.length > 0 && (
             <div className="total--price-container">
               <h3 style={{ textAlign: "center" }}>
-                Total: <span style={{ color: "#FE4C50" }}>{symbol}{totalPrice.toFixed(2)}</span>
+                Total: <span style={{ color: "#FE4C50" }}>{symbol}{formatPrice(totalPrice)}</span>
               </h3>
               <button
                 className="btn btn-wide log-btn"
