@@ -932,3 +932,11 @@
   }
 
 }
+
+
+@media (max-width: 360px) {
+  .product_image{
+    height: 180px;
+  }
+ 
+}

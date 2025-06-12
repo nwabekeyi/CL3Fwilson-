@@ -1,7 +1,8 @@
+// src/components/AdminPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthAdmin } from '../../hooks/useAuthAdmin';
-import { useFirestoreCollection } from '../../hooks/useFirestoreCollection';
+import useApi from '../../hooks/useApi';
 import MenuBar from './MenuBar';
 import Sidebar from './Sidebar';
 import MainContent from './MainContent';
@@ -12,15 +13,17 @@ import '../../assets/css/Dashboard.css';
 import '../../assets/css/responsive.css';
 import '../../assets/css/style.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {db} from '../../firebase/config'
 
 const AdminPage = () => {
   const navigate = useNavigate();
   const { loading, user } = useAuthAdmin();
-  const { data: participants, error: participantsError } = useFirestoreCollection(db, 'participants');
+  const { request, error: apiError } = useApi();
+  const [participants, setParticipants] = useState([]);
+  const [participantsError, setParticipantsError] = useState('');
   const [selectedComponent, setSelectedComponent] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
+  const [contestId, setContestId] = useState(null);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -35,8 +38,31 @@ const AdminPage = () => {
     console.log('Navigated to component:', component);
   };
 
+  // Fetch participants when contestId changes
   useEffect(() => {
-    console.log('AdminPage auth state:', { loading, user: user ? user.email : null });
+    if (contestId) {
+      const fetchParticipants = async () => {
+        try {
+          const data = await request({
+            url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${contestId}/participants`,
+            method: 'GET',
+          });
+          setParticipants(data);
+          setParticipantsError('');
+        } catch (err) {
+          setParticipantsError('Failed to fetch participants. Please select a contest.');
+          setParticipants([]);
+        }
+      };
+      fetchParticipants();
+    } else {
+      setParticipants([]);
+      setParticipantsError('No contest selected. Please create or select a contest.');
+    }
+  }, [contestId, request]);
+
+  useEffect(() => {
+    console.log('AdminPage auth state:', { loading, user: 'contest_id' });
   }, [loading, user]);
 
   if (loading || !user) {
@@ -54,12 +80,13 @@ const AdminPage = () => {
 
   const componentMap = {
     overview: <Overview participants={participants} />,
-    participants: (
+    contest: (
       <ParticipantManager
         participants={participants}
-        participantsError={participantsError}
+        participantsError={participantsError || apiError}
         successMessage={successMessage}
         setSuccessMessage={setSuccessMessage}
+        contestId={contestId}
       />
     ),
     products: (

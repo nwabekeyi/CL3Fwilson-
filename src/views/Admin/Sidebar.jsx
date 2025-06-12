@@ -1,3 +1,4 @@
+// src/components/Sidebar.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
@@ -26,10 +27,10 @@ const Sidebar = ({ sidebarOpen, selectedComponent, handleNavigation }) => {
         </li>
         <li className="nav-item">
           <button
-            className={`nav-link ${selectedComponent === 'participants' ? 'active' : ''}`}
-            onClick={() => handleNavigation('participants')}
+            className={`nav-link ${selectedComponent === 'contest' ? 'active' : ''}`}
+            onClick={() => handleNavigation('contest')}
           >
-            <FiUsers /> Participants
+            <FiUsers /> Contest
           </button>
         </li>
         <li className="nav-item">

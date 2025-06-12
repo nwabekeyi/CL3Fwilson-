@@ -70,9 +70,6 @@ function AboutUsPage() {
             <p>
             Project cl3fwilson is a Workshop that educates emerging fashion designers on Fashion Business, Branding, and Marketing.
             </p>
-            <div className="red_button shop_now_button">
-              <Link to='/workshop'>Explore workshop</Link>
-            </div>
           </div>
         </div>
       </div>

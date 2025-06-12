@@ -1,15 +1,13 @@
+// src/components/ParticipantManager/ParticipantManager.jsx
 import React, { useState, useEffect } from 'react';
 import { useParticipantForm } from '../../../hooks/useParticipantForm';
-import { addParticipant, deleteParticipant } from '../../../utils/firestoreUtils';
-import { uploadImage } from '../../../utils/cloudinary';
-import { generateUniqueTransactionId, getRandomTransactionId } from '../../../utils/VotesUtils';
+import useApi from '../../../hooks/useApi';
 import ParticipantForm from './ParticipantForm';
 import ParticipantTable from './ParticipantTable';
 import VotesModal from './VotesModal';
-import { db } from '../../../firebase/config';
-import { collection, query, getDocs, setDoc, doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import ContestManager from '../ContestManager';
 
-const ParticipantManager = ({ participants, participantsError, successMessage, setSuccessMessage }) => {
+const ParticipantManager = ({ successMessage, setSuccessMessage, contestId: externalContestId }) => {
   const {
     formData,
     errors,
@@ -21,12 +19,46 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
     resetForm,
     setFormData,
   } = useParticipantForm();
+  const { request, loading, error: apiError } = useApi();
+  const [participants, setParticipants] = useState([]);
+  const [participantsError, setParticipantsError] = useState('');
   const [editParticipant, setEditParticipant] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [showVotesModal, setShowVotesModal] = useState(false);
   const [currentVotes, setCurrentVotes] = useState([]);
   const [currentParticipant, setCurrentParticipant] = useState(null);
+  const [contestId, setContestId] = useState(externalContestId || null); // Local contestId state
 
+  // Sync local contestId with externalContestId if provided
+  useEffect(() => {
+    setContestId(externalContestId || null);
+  }, [externalContestId]);
+
+  // Fetch participants when contestId changes
+  useEffect(() => {
+    if (contestId) {
+      fetchParticipants();
+    } else {
+      setParticipants([]);
+      setParticipantsError('No contest selected. Please select a contest.');
+    }
+  }, [contestId]);
+
+  const fetchParticipants = async () => {
+    try {
+      const data = await request({
+        url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/participants/${contestId}`,
+        method: 'GET',
+      });
+      setParticipants(data);
+      setParticipantsError('');
+    } catch (error) {
+      setParticipantsError('Failed to fetch participants');
+      setParticipants([]);
+    }
+  };
+
+  // Cleanup preview image
   useEffect(() => {
     return () => {
       if (previewImage) URL.revokeObjectURL(previewImage);
@@ -38,14 +70,17 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
     if (file) {
       if (previewImage) URL.revokeObjectURL(previewImage);
       setPreviewImage(URL.createObjectURL(file));
+      setFormData((prev) => ({ ...prev, photo: file }));
+      setErrors((prev) => ({ ...prev, photo: '' }));
     } else {
       setPreviewImage(null);
+      setFormData((prev) => ({ ...prev, photo: null }));
     }
   };
 
-  const handleAddParticipant = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || !contestId) return;
     setIsSubmitting(true);
 
     const validationErrors = validateForm();
@@ -55,29 +90,46 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
       return;
     }
 
+    const formDataToSend = new FormData();
+    formDataToSend.append('fullName', formData.fullName);
+    formDataToSend.append('email', formData.email);
+    formDataToSend.append('about', formData.about);
+    if (formData.photo) formDataToSend.append('photo', formData.photo);
+    if (editParticipant) {
+      formDataToSend.append('votesToAdd', formData.votesToAdd);
+      formDataToSend.append('contestId', contestId);
+    }
+
     try {
-      const form = e.target;
-      const photoFile = form.photo.files[0];
-      let photoURL = 'https://via.placeholder.com/800x600?text=No+Image';
+      const url = editParticipant
+        ? `${import.meta.env.VITE_CONTEST_ENDPOINT}/participants/${editParticipant.codeName}`
+        : `${import.meta.env.VITE_CONTEST_ENDPOINT}/participants/${contestId}`;
 
-      if (photoFile) photoURL = await uploadImage(photoFile);
-
-      await addParticipant(db, {
-        fullName: formData.fullName,
-        codeName: formData.codeName,
-        email: formData.email,
-        about: formData.about,
-        photoURL,
-        voters: [],
-        createdAt: new Date(),
+      const response = await fetch(url, {
+        method: editParticipant ? 'PUT' : 'POST',
+        body: formDataToSend,
       });
+
+      const contentType = response.headers.get('content-type');
+      const isJson = contentType && contentType.includes('application/json');
+      const result = isJson ? await response.json() : await response.text();
+
+      if (!response.ok) {
+        throw new Error(result?.error || result || 'Failed to submit form');
+      }
+
       resetForm();
-      form.reset();
+      setEditParticipant(null);
       setPreviewImage(null);
-      setSuccessMessage('Participant added successfully!');
+      setSuccessMessage(
+        editParticipant
+          ? `Participant updated successfully!${formData.votesToAdd > 0 ? ` Added ${formData.votesToAdd} votes.` : ''}`
+          : 'Participant added successfully!'
+      );
+      fetchParticipants();
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      setErrors({ ...errors, submission: `Failed to add participant: ${error.message}` });
+      setErrors({ ...errors, submission: error.message });
     } finally {
       setIsSubmitting(false);
     }
@@ -86,35 +138,14 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
   const handleViewVotes = async (participant) => {
     try {
       setCurrentParticipant(participant);
-      
-      // Initialize empty array if voters is undefined
-      const voterIds = Array.isArray(participant.voters) ? participant.voters : [];
-      
-      if (voterIds.length === 0) {
-        setCurrentVotes([]);
-        setShowVotesModal(true);
-        return;
-      }
-  
-      // Fetch all votes at once instead of individual documents
-      const votesQuery = query(collection(db, 'votes'));
-      const votesSnapshot = await getDocs(votesQuery);
-      
-      // Filter votes that belong to this participant and have valid IDs
-      const votes = votesSnapshot.docs
-        .filter(doc => voterIds.includes(doc.id))
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          email: doc.data().email || 'kenNnam@outlook.com',
-          fullName: doc.data().fullName || 'Ken Nnam',
-          timestamp: doc.data().timestamp || new Date()
-        }));
-  
-      setCurrentVotes(votes);
+      const response = await request({
+        url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${contestId}/participants/${participant.codeName}/votes`,
+        method: 'GET',
+      });
+      setCurrentVotes(response || []);
       setShowVotesModal(true);
     } catch (error) {
-      console.error('Error fetching votes:', error);
+      setErrors({ submission: 'Failed to fetch votes' });
       setCurrentVotes([]);
       setShowVotesModal(true);
     }
@@ -123,114 +154,26 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
   const handleEditParticipant = (participant) => {
     const newFormData = {
       fullName: String(participant.fullName || ''),
-      codeName: String(participant.codeName || ''),
       email: String(participant.email || ''),
       about: String(participant.about || ''),
-      photoURL: String(participant.photoURL || ''),
+      photo: null,
       votesToAdd: '0',
     };
     setEditParticipant(participant);
     setFormData(newFormData);
-    setPreviewImage(participant.photoURL || null);
+    setPreviewImage(participant.photo || null);
   };
 
-  const handleUpdateParticipant = async (e) => {
-    e.preventDefault();
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-
-    try {
-      const form = e.target;
-      const photoFile = form.photo.files[0];
-      let photoURL = formData.photoURL || 'https://via.placeholder.com/800x600?text=No+Image';
-
-      if (photoFile) photoURL = await uploadImage(photoFile);
-
-      const votesToAdd = parseInt(formData.votesToAdd) || 0;
-      const newTransactionIds = [];
-
-      const participantRef = doc(db, 'participants', editParticipant.docId);
-      const participantSnap = await getDoc(participantRef);
-      if (!participantSnap.exists()) throw new Error('Participant not found');
-      
-      const existingVoters = participantSnap.data().voters || [];
-
-      if (votesToAdd > 0) {
-        const votesQuery = query(collection(db, 'votes'));
-        const votesSnapshot = await getDocs(votesQuery);
-        const allVotes = votesSnapshot.docs.map(doc => ({ 
-          id: doc.id, 
-          ...doc.data(),
-          email: doc.data().email || 'kenNnam@outlook.com',
-          fullName: doc.data().fullName || 'Ken nnam'
-        }));
-
-        if (allVotes.length === 0 && votesToAdd > 20) {
-          alert('Cannot add more than 20 votes when no existing votes are available.');
-          throw new Error('Cannot add more than 20 votes when no existing votes are available.');
-        }
-
-        for (let i = 0; i < votesToAdd; i++) {
-          const randomVote = allVotes[Math.floor(Math.random() * allVotes.length)];
-          const newTransactionId = await generateUniqueTransactionId(randomVote.id, db);
-
-          if (!existingVoters.includes(newTransactionId)) {
-            newTransactionIds.push(newTransactionId);
-            
-            await setDoc(doc(db, 'votes', newTransactionId), {
-              participantId: editParticipant.docId,
-              participantName: editParticipant.fullName,
-              participantCodeName: editParticipant.codeName,
-              email: randomVote.email, // Original voter's email
-              fullName: randomVote.fullName, // Original voter's name
-              timestamp: new Date(),
-              originalTransactionId: randomVote.id,
-              isReshuffled: true
-            });
-          } else {
-            i--; // Retry if duplicate
-          }
-        }
-      }
-
-      const updatedData = {
-        fullName: formData.fullName,
-        codeName: formData.codeName,
-        email: formData.email,
-        about: formData.about,
-        photoURL,
-        updatedAt: new Date(),
-      };
-
-      if (newTransactionIds.length > 0) {
-        await updateDoc(participantRef, {
-          ...updatedData,
-          voters: arrayUnion(...newTransactionIds),
-        });
-      } else {
-        await updateDoc(participantRef, updatedData);
-      }
-
-      setEditParticipant(null);
-      resetForm();
-      form.reset();
-      setPreviewImage(null);
-      setSuccessMessage(`Participant updated successfully! ${votesToAdd > 0 ? `Added ${newTransactionIds.length} votes.` : ''}`);
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (error) {
-      setErrors({ ...errors, submission: `Failed to update participant: ${error.message}` });
-      console.error('Update error:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDeleteParticipant = async (docId) => {
+  const handleDeleteParticipant = async (codeName) => {
     const confirmDelete = window.confirm('Are you sure you want to delete this participant? This action cannot be undone.');
     if (confirmDelete) {
       try {
-        await deleteParticipant(db, docId, setErrors);
+        await request({
+          url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/participants/${codeName}`,
+          method: 'DELETE',
+        });
         setSuccessMessage('Participant deleted successfully!');
+        fetchParticipants();
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (error) {
         setErrors({ submission: 'Failed to delete participant' });
@@ -239,41 +182,50 @@ const ParticipantManager = ({ participants, participantsError, successMessage, s
   };
 
   return (
-    <>
+    <div className="container-fluid">
+      {/* Contest Management Section */}
+      <div className="mb-4">
+        <h4>Contest Management</h4>
+        <ContestManager setContestId={setContestId} />
+      </div>
+
+      {/* Existing Participant Management Content */}
       {successMessage && <div className="alert alert-success">{successMessage}</div>}
       {participantsError && <div className="alert alert-danger">{participantsError}</div>}
-      {errors.submission && <div className="alert alert-danger">{errors.submission}</div>}
-      
+      {(errors.submission || apiError) && (
+        <div className="alert alert-danger">{errors.submission || apiError}</div>
+      )}
+
       <ParticipantTable
         participants={participants}
         handleEditParticipant={handleEditParticipant}
         handleDeleteParticipant={handleDeleteParticipant}
         handleViewVotes={handleViewVotes}
-        isSubmitting={isSubmitting}
+        isSubmitting={isSubmitting || loading}
       />
-      
+
       <ParticipantForm
         formData={formData}
         errors={errors}
-        isSubmitting={isSubmitting}
+        isSubmitting={isSubmitting || loading}
         handleChange={handleChange}
         handleFileChange={handleFileChange}
         previewImage={previewImage}
-        handleSubmit={editParticipant ? handleUpdateParticipant : handleAddParticipant}
+        handleSubmit={handleSubmit}
         isEditing={!!editParticipant}
         editParticipant={editParticipant}
         resetForm={resetForm}
         setEditParticipant={setEditParticipant}
         setPreviewImage={setPreviewImage}
       />
-      
+
       <VotesModal
         show={showVotesModal}
         onHide={() => setShowVotesModal(false)}
         participant={currentParticipant}
         votes={currentVotes}
       />
-    </>
+    </div>
   );
 };
 

@@ -36,20 +36,6 @@ const ParticipantForm = ({
           </div>
 
           <div className="mb-3">
-            <label htmlFor="codeName" className="form-label">Code Name</label>
-            <input
-              type="text"
-              className={`form-control ${errors.codeName ? 'is-invalid' : ''}`}
-              id="codeName"
-              name="codeName"
-              value={formData.codeName}
-              onChange={handleChange}
-              required
-            />
-            {errors.codeName && <div className="invalid-feedback">{errors.codeName}</div>}
-          </div>
-
-          <div className="mb-3">
             <label htmlFor="email" className="form-label">Email</label>
             <input
               type="email"
