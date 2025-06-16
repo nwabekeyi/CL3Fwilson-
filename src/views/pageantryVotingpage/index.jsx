@@ -1,98 +1,199 @@
-import React, { useEffect, useState } from "react";
-import {
-  collection,
-  getDocs,
-  doc,
-  updateDoc,
-  arrayUnion,
-  addDoc,
-  getDoc,
-} from "firebase/firestore";
-import "../../assets/css/style.css";
-import "../../assets/css/responsive.css";
-import { db } from "../../firebase/config";
-import bgImage from "../../assets/images/voting.png";
+import React, { useEffect, useState } from 'react';
+import useApi from '../../hooks/useApi';
+import bgImage from '../../assets/images/voting.png';
+import { v4 as uuidv4 } from 'uuid';
 
 function PageantVotingPage() {
-  const [participants, setParticipants] = useState([]);
-  const [message, setMessage] = useState("");
+  const { request, loading: apiLoading, error: apiError } = useApi();
+  const [contests, setContests] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [message, setMessage] = useState(null);
   const [userVotes, setUserVotes] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
+  const [selectedContestId, setSelectedContestId] = useState(null);
   const [voterDetails, setVoterDetails] = useState({
-    fullName: "",
-    email: "",
+    voterName: '',
+    email: '',
+    voteCount: 1,
   });
   const [formErrors, setFormErrors] = useState({});
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [paystackLoaded, setPaystackLoaded] = useState(false);
 
-  // Fetch participants from Firestore
-  const fetchParticipants = async () => {
-    setLoading(true);
+  // Check if Paystack script is loaded
+  useEffect(() => {
+    const checkPaystack = () => {
+      if (window.PaystackPop) {
+        setPaystackLoaded(true);
+        console.log('Paystack loaded');
+      } else {
+        setTimeout(checkPaystack, 100);
+      }
+    };
+    checkPaystack();
+  }, []);
+
+  // Fetch contests and participants
+  const fetchContestsAndParticipants = async () => {
+    setIsLoading(true);
+    console.log('VITE_CONTEST_ENDPOINT:', import.meta.env.VITE_CONTEST_ENDPOINT);
+    console.log('Starting fetchContestsAndParticipants');
     try {
-      const snapshot = await getDocs(collection(db, "participants"));
-      const data = snapshot.docs.map((doc) => {
-        const participantData = {
-          firestoreDocId: doc.id,
-          docId: doc.id,
-          ...doc.data(),
-          // Normalize fields with defaults
-          uid: doc.data().uid || doc.id, // Use doc.id if uid is missing
-          stageName: doc.data().stageName || doc.data().codeName || "Unknown",
-          bio: doc.data().bio || doc.data().about || "No bio available",
-          photoURL: doc.data().photoURL || "https://via.placeholder.com/800x600?text=No+Image",
-          voters: Array.isArray(doc.data().voters) ? doc.data().voters : [],
-        };
-        return participantData;
+      const response = await request({
+        url: import.meta.env.VITE_CONTEST_ENDPOINT, // e.g., http://localhost:3000/contests
+        method: 'GET',
       });
-      console.log("Fetched participants:", JSON.stringify(data, null, 3));
-      setParticipants(data); // Include all participants, no status filter
-      if (data.length === 0) {
-        setMessage("No participants found in the collection.");
+      console.log('Raw API response:', JSON.stringify(response, null, 2));
+
+      // Handle unexpected response structure
+      const data = Array.isArray(response) ? response : response?.contests || [];
+      console.log('Processed contests:', JSON.stringify(data, null, 2));
+
+      const contestsWithParticipants = [];
+      for (const contest of data) {
+        console.log(`Fetching participants for contest ${contest.id}`);
+        try {
+          const participantsData = await request({
+            url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${contest.id}/participants`,
+            method: 'GET',
+          });
+          console.log(`Participants for contest ${contest.id}:`, participantsData);
+
+          // Filter participants to only include those with evicted: false
+          const formattedParticipants = (Array.isArray(participantsData) ? participantsData : [])
+            .filter((participant) => participant.evicted === false)
+            .map((participant) => ({
+              codeName: participant.codeName || '',
+              fullName: participant.fullName || 'Unknown',
+              about: participant.about || 'No bio available',
+              photo: participant.photo || 'https://via.placeholder.com/800x600?text=No+Image',
+              votes: Array.isArray(participant.votes) ? participant.votes : [],
+            }));
+
+          contestsWithParticipants.push({
+            ...contest,
+            participants: formattedParticipants,
+          });
+        } catch (err) {
+          console.error(`Error fetching participants for contest ${contest.id}:`, err);
+          contestsWithParticipants.push({
+            ...contest,
+            participants: [],
+            error: 'participants cannot be fetched, something went wrong',
+          });
+        }
+      }
+
+      // Filter active contests (endDate >= current date)
+      const currentDate = new Date();
+      const activeContests = contestsWithParticipants.filter(
+        (contest) => new Date(contest.endDate) >= currentDate
+      );
+      console.log('Active contests:', JSON.stringify(activeContests, null, 2));
+
+      setContests(activeContests);
+      if (activeContests.length === 0) {
+        setMessage('No active contests found.');
       }
     } catch (err) {
-      console.error("Error fetching participants:", err);
-      setMessage(`Failed to load participants: ${err.message}`);
+      console.error('Error fetching contests:', err);
+      setMessage('participants cannot be fetched, something went wrong');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
+      console.log('Finished fetchContestsAndParticipants, isLoading:', false);
     }
   };
 
   useEffect(() => {
-    fetchParticipants();
-  }, []);
+    fetchContestsAndParticipants();
+  }, [request]);
 
-  // Handle modal open
-  const openVoteModal = (participant) => {
+  const openVoteModal = (participant, contestId) => {
     setSelectedParticipant(participant);
-    setVoterDetails({ fullName: "", email: "" });
+    setSelectedContestId(contestId);
+    setVoterDetails({ voterName: '', email: '', voteCount: 1 });
     setFormErrors({});
     setShowModal(true);
   };
 
-  // Handle modal form input changes
   const handleVoterInputChange = (e) => {
     const { name, value } = e.target;
     setVoterDetails({
       ...voterDetails,
-      [name]: value,
+      [name]: name === 'voteCount' ? parseInt(value) || '' : value,
     });
-    setFormErrors({ ...formErrors, [name]: "" });
+    setFormErrors({ ...formErrors, [name]: '' });
   };
 
-  // Validate modal form
   const validateVoterForm = () => {
     const errors = {};
-    if (!voterDetails.fullName.trim()) {
-      errors.fullName = "Full name is required";
+    if (!voterDetails.voterName.trim()) {
+      errors.voterName = 'Full name is required';
     }
-    if (!voterDetails.email || !voterDetails.email.includes("@")) {
-      errors.email = "Valid email is required";
+    if (!voterDetails.email || !voterDetails.email.includes('@')) {
+      errors.email = 'Valid email is required';
+    }
+    if (
+      !voterDetails.voteCount ||
+      isNaN(voterDetails.voteCount) ||
+      voterDetails.voteCount < 1
+    ) {
+      errors.voteCount = 'Vote count must be a positive integer';
     }
     return errors;
   };
 
-  // Handle voting + Paystack payment
+  const saveVote = async (
+    response,
+    voterName,
+    email,
+    voteCount,
+    participant,
+    contestId
+  ) => {
+    console.log('Saving vote:', { voterName, email, voteCount, participant, contestId });
+    try {
+      await request({
+        url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${contestId}/votes`,
+        method: 'POST',
+        data: {
+          participantCodeName: participant.codeName,
+          voteCount,
+          email,
+          voterName,
+          paymentReference: response.reference,
+        },
+      });
+      console.log('Vote saved successfully');
+
+      setContests((prev) =>
+        prev.map((contest) =>
+          contest.id === contestId
+            ? {
+                ...contest,
+                participants: contest.participants.map((p) =>
+                  p.codeName === participant.codeName
+                    ? {
+                        ...p,
+                        votes: [
+                          ...p.votes,
+                          { voterName, voteCount, paymentReference: response.reference },
+                        ],
+                      }
+                    : p
+                ),
+              }
+            : contest
+        )
+      );
+      setUserVotes((prev) => ({ ...prev, [participant.codeName]: true }));
+      setMessage('Thank you for voting!');
+    } catch (error) {
+      console.error('Error saving vote:', error);
+      setMessage('participants cannot be fetched, something went wrong');
+    }
+  };
+
   const handleVote = async (e) => {
     e.preventDefault();
     const errors = validateVoterForm();
@@ -101,140 +202,71 @@ function PageantVotingPage() {
       return;
     }
 
-    const { fullName, email } = voterDetails;
+    if (!selectedParticipant || !selectedContestId) {
+      setMessage('Invalid participant or contest selected.');
+      return;
+    }
+
+    const { voterName, email, voteCount } = voterDetails;
     const participant = selectedParticipant;
+    const contestId = selectedContestId;
 
-    if (!window.PaystackPop) {
-      console.error("PaystackPop is not defined. Ensure the Paystack script is loaded.");
-      setMessage("Paystack failed to load. Please refresh the page.");
+    if (userVotes[participant.codeName]) {
+      setMessage('You’ve already voted for this contestant today.');
       return;
     }
 
-    if (userVotes[participant.uid]) {
-      setMessage("You've already voted for this contestant today.");
+    if (!paystackLoaded || !window.PaystackPop) {
+      console.error('PaystackPop is not loaded.');
+      setMessage('Paystack failed to load. Please refresh the page.');
       return;
     }
 
-    if (!participant.firestoreDocId) {
-      console.error("Invalid participant: firestoreDocId is undefined", participant);
-      setMessage("Invalid participant data. Please contact support.");
-      return;
-    }
+    const reference = `VOTE_${uuidv4()}`;
+    console.log('Initiating Paystack payment:', { reference, email, amount: voteCount * 50 * 100 });
 
-    const processVote = async (response) => {
-      const voteData = {
-        fullName,
+    try {
+      const handler = window.PaystackPop.setup({
+        key: import.meta.env.VITE_PAYSTACK_KEY,
         email,
-        contestantId: participant.uid,
-        timestamp: new Date(),
-        transactionId: response.reference,
-      };
-
-      try {
-        // Save vote
-        await addDoc(collection(db, "votes"), voteData);
-
-        // Update participant voters array
-        const participantRef = doc(db, "participants", participant.firestoreDocId);
-        const participantDoc = await getDoc(participantRef);
-
-        if (participantDoc.exists()) {
-          const participantData = participantDoc.data();
-          console.log("Participant data:", JSON.stringify(participantData, null, 3));
-
-          // Ensure voters is an array
-          if (!Array.isArray(participantData.voters)) {
-            console.log("Voters field is not an array, initializing as empty array");
-            await updateDoc(participantRef, {
-              voters: [],
-            });
-          }
-
-          // Perform the arrayUnion operation
-          await updateDoc(participantRef, {
-            voters: arrayUnion(email),
-          });
-
-          // Update the participants state
-          setParticipants((prevParticipants) =>
-            prevParticipants.map((p) =>
-              p.firestoreDocId === participant.firestoreDocId
-                ? {
-                    ...p,
-                    voters: Array.isArray(p.voters) && !p.voters.includes(email)
-                      ? [...p.voters, email]
-                      : [email],
-                  }
-                : p
-            )
-          );
-
-          setUserVotes({ ...userVotes, [participant.uid]: true });
-          setMessage("Thank you for voting!");
+        amount: voteCount * 50 * 100, // 50 Naira per vote, in kobo
+        currency: 'NGN',
+        ref: reference,
+        metadata: {
+          contestId,
+          participantCodeName: participant.codeName,
+          voteCount,
+          voterName,
+        },
+        callback: (response) => {
+          console.log('Paystack callback:', response);
+          saveVote(response, voterName, email, voteCount, participant, contestId);
           setShowModal(false);
-          setTimeout(() => setMessage(""), 3000);
-        } else {
-          setMessage("Participant not found. Please contact support.");
-          console.error("Document does not exist:", participant.firestoreDocId);
-          await addDoc(collection(db, "failed_votes"), {
-            fullName,
-            email,
-            contestantId: participant.uid,
-            transactionId: response.reference,
-            error: "Participant document not found",
-            timestamp: new Date(),
-          });
-        }
-      } catch (error) {
-        console.error("Vote save error:", error);
-        setMessage("Payment went through, but vote wasn't recorded. Contact support.");
-        await addDoc(collection(db, "failed_votes"), {
-          fullName,
-          email,
-          contestantId: participant.uid,
-          transactionId: response.reference,
-          error: error.message,
-          timestamp: new Date(),
-        });
-      }
-    };
+          setTimeout(() => setMessage(null), 3000);
+        },
+        onClose: () => {
+          console.log('Paystack payment canceled');
+          setMessage('Payment was canceled.');
+          setShowModal(false);
+          setTimeout(() => setMessage(null), 3000);
+        },
+      });
 
-    const paystackKey = import.meta.env.VITE_PAYSTACK_KEY;
-    if (!paystackKey) {
-      console.error("Paystack key is not defined in environment variables.");
-      setMessage("Payment configuration error. Please contact support.");
-      return;
+      handler.openIframe();
+    } catch (error) {
+      console.error('Payment initiation error:', error);
+      setMessage('participants cannot be fetched, something went wrong');
     }
-
-    const handler = window.PaystackPop.setup({
-      key: paystackKey,
-      email: email,
-      amount: 5000,
-      currency: "NGN",
-      ref: `VOTE-${new Date().getTime()}`,
-      callback: function (response) {
-        console.log("Paystack callback response:", response);
-        processVote(response);
-      },
-      onClose: function () {
-        setMessage("Payment was canceled.");
-        setShowModal(false);
-        setTimeout(() => setMessage(""), 3000);
-      },
-    });
-
-    handler.openIframe();
   };
 
   return (
     <div className="pageant-voting-page">
-      {/* Fixed Background Banner */}
       <div
         className="voting-banner"
         style={{
           backgroundImage: `url(${bgImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
         }}
       >
         <div className="voting-banner-overlay">
@@ -243,64 +275,85 @@ function PageantVotingPage() {
         </div>
       </div>
 
-      {/* Voting Section */}
       <div className="container voting-container" data-aos="fade-up">
         <div className="section_voting_title">
-          <h2>Meet the Contestants</h2>
+          <h2>Active Contests</h2>
         </div>
 
-        {loading && <div className="loading">Loading contestants...</div>}
+        {(isLoading || apiLoading) && <div className="loading">Loading contests...</div>}
         {message && <div className="vote-message">{message}</div>}
+        {/* Remove direct apiError display */}
+        {/* {apiError && <div className="vote-message">{apiError}</div>} */}
 
-        <div className="row">
-          {participants.length === 0 && !loading && (
-            <p>No contestants found. Please check back later.</p>
-          )}
-          {participants.map((participant, index) => {
-            console.log("Rendering participant:", participant);
-            return (
-              <div
-                key={participant.uid}
-                className="col-md-4 contestant-card"
-                data-aos="fade-up"
-                data-aos-delay={index * 100}
-                style={{
-                  marginBottom: 0
-                }}
-              >
-                <div className="contestant-image">
-                  <img
-                    src={participant.photoURL}
-                    alt={participant.stageName}
-                    onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/800x600?text=No+Image";
-                    }}
-                  />
-                </div>
-                <div className="contestant-details">
-                  <h4>{participant.stageName}</h4>
-                  <p>{participant.bio}</p>
-                  <div className="vote-count">
-                    <span>{participant.voters?.length || 0} Votes</span>
-                  </div>
-                  <button
-                    className="red_button vote-button"
-                    onClick={() => openVoteModal(participant)}
-                    disabled={loading}
-                  >
-                    Vote Now
-                  </button>
-                </div>
+        {!isLoading && contests.length === 0 && (
+          <p>No active contests found. Please check back later.</p>
+        )}
+
+        {!isLoading && contests.length > 0 && (
+          <div>
+            {contests.map((contest) => (
+              <div key={contest.id} className="contest-section mb-5">
+                <h3 className="contest-title">{contest.name}</h3>
+                {contest.error && (
+                  <div className="text-danger">{contest.error}</div>
+                )}
+                {Array.isArray(contest.participants) && contest.participants.length === 0 && !contest.error ? (
+                  <p>No active participants found for this contest.</p>
+                ) : (
+                  Array.isArray(contest.participants) && (
+                    <div className="row">
+                      {contest.participants.map((participant, index) => (
+                        <div
+                          key={participant.codeName}
+                          className="col-md-4 contestant-card"
+                          data-aos="fade-up"
+                          data-aos-delay={index * 100}
+                          style={{ marginBottom: '20px' }}
+                        >
+                          <div className="contestant-image">
+                            <img
+                              src={participant.photo}
+                              alt={participant.fullName}
+                              onError={(e) => {
+                                e.target.src =
+                                  'https://via.placeholder.com/800x600?text=No+Image';
+                              }}
+                            />
+                          </div>
+                          <div className="contestant-details">
+                            <h4>{participant.fullName}</h4>
+                            <p>{participant.about}</p>
+                            <div className="vote-count">
+                              <span>
+                                {participant.votes.reduce(
+                                  (sum, vote) => sum + (vote.voteCount || 0),
+                                  0
+                                )}{' '}
+                                Votes
+                              </span>
+                            </div>
+                            <button
+                              className="red_button vote-button"
+                              onClick={() => openVoteModal(participant, contest.id)}
+                              disabled={apiLoading || !paystackLoaded}
+                            >
+                              Vote Now
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                )}
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
 
         <div className="voting-info">
           <p>
-            Voting is open daily until the end of the month. You can vote multiple
-            times — each vote costs ₦50. Results will be announced on the 1st of next
-            month.
+            Voting is open daily until the end of each contest. Each vote costs ₦50.
+            Results will be announced after each contest ends.
           </p>
           <div className="red_button shop_now_button">
             <a href="/workshop">Learn More</a>
@@ -308,12 +361,11 @@ function PageantVotingPage() {
         </div>
       </div>
 
-      {/* Voting Modal */}
       {showModal && (
         <div
           className="modal fade show"
-          style={{ display: "block" }}
-          tabIndex="-1"
+          style={{ display: 'block' }}
+          tabIndex={-1}
           role="dialog"
           aria-labelledby="voteModalLabel"
           aria-hidden="false"
@@ -322,7 +374,7 @@ function PageantVotingPage() {
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title" id="voteModalLabel">
-                  Vote for {selectedParticipant?.stageName || "Contestant"}
+                  Vote for {selectedParticipant?.fullName || 'Contestant'}
                 </h5>
                 <button
                   type="button"
@@ -336,18 +388,18 @@ function PageantVotingPage() {
               <div className="modal-body">
                 <form onSubmit={handleVote}>
                   <div className="form-group">
-                    <label htmlFor="fullName">Full Name</label>
+                    <label htmlFor="voterName">Full Name</label>
                     <input
                       type="text"
                       className="form-control"
-                      id="fullName"
-                      name="fullName"
-                      value={voterDetails.fullName}
+                      id="voterName"
+                      name="voterName"
+                      value={voterDetails.voterName}
                       onChange={handleVoterInputChange}
                       placeholder="Enter your full name"
                     />
-                    {formErrors.fullName && (
-                      <span className="error">{formErrors.fullName}</span>
+                    {formErrors.voterName && (
+                      <span className="error">{formErrors.voterName}</span>
                     )}
                   </div>
                   <div className="form-group">
@@ -365,6 +417,22 @@ function PageantVotingPage() {
                       <span className="error">{formErrors.email}</span>
                     )}
                   </div>
+                  <div className="form-group">
+                    <label htmlFor="voteCount">Number of Votes</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      id="voteCount"
+                      name="voteCount"
+                      value={voterDetails.voteCount}
+                      onChange={handleVoterInputChange}
+                      placeholder="Enter number of votes"
+                      min="1"
+                    />
+                    {formErrors.voteCount && (
+                      <span className="error">{formErrors.voteCount}</span>
+                    )}
+                  </div>
                   <div className="modal-footer">
                     <button
                       type="button"
@@ -376,7 +444,7 @@ function PageantVotingPage() {
                     <button
                       type="submit"
                       className="red_button vote-button"
-                      disabled={loading}
+                      disabled={apiLoading || !paystackLoaded}
                     >
                       Vote
                     </button>

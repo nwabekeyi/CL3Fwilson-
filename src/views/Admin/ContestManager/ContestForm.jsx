@@ -16,14 +16,12 @@ const ContestForm = ({
   setShowForm,
 }) => {
   return (
-    <form onSubmit={handleContestSubmit} noValidate className="mb-4">
-      <div className="mb-3">
-        <label htmlFor="name" className="form-label">
-          Contest Name
-        </label>
+    <form onSubmit={handleContestSubmit} noValidate className="form">
+      <div className="form-group">
+        <label htmlFor="name">Contest Name</label>
         <input
           type="text"
-          className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+          className={errors.name ? 'error' : ''}
           id="name"
           name="name"
           value={formData.name}
@@ -31,45 +29,54 @@ const ContestForm = ({
           required
           disabled={isSubmitting || loading}
         />
-        {errors.name && <div className="invalid-feedback">{errors.name}</div>}
+        {errors.name && <div className="error-feedback">{errors.name}</div>}
       </div>
 
-      <div className="mb-3">
-        <label className="form-label">Start Date</label>
+      <div className="form-group">
+        <label>Start Date</label>
         <DatePicker
           selected={formData.startDate}
           onChange={(date) => handleDateChange('startDate', date)}
-          className={`form-control ${errors.startDate ? 'is-invalid' : ''}`}
+          className={errors.startDate ? 'error' : ''}
           placeholderText="Select start date"
           dateFormat="yyyy-MM-dd"
           disabled={isSubmitting || loading}
         />
-        {errors.startDate && <div className="invalid-feedback">{errors.startDate}</div>}
+        {errors.startDate && <div className="error-feedback">{errors.startDate}</div>}
       </div>
 
-      <div className="mb-3">
-        <label className="form-label">End Date</label>
+      <div className="form-group">
+        <label>End Date</label>
         <DatePicker
           selected={formData.endDate}
           onChange={(date) => handleDateChange('endDate', date)}
-          className={`form-control ${errors.endDate ? 'is-invalid' : ''}`}
+          className={errors.endDate ? 'error' : ''}
           placeholderText="Select end date"
           dateFormat="yyyy-MM-dd"
           disabled={isSubmitting || loading}
         />
-        {errors.endDate && <div className="invalid-feedback">{errors.endDate}</div>}
+        {errors.endDate && <div className="error-feedback">{errors.endDate}</div>}
       </div>
 
-      <div className="d-flex gap-2">
-        <button type="submit" className="btn btn-primary" disabled={isSubmitting || loading}>
-          {isSubmitting || loading ? 'Saving...' : editContest ? 'Update Contest' : 'Create Contest'}
+      <div className="button-group">
+        <button
+          type="submit"
+          className="btn-primary"
+          disabled={isSubmitting || loading}
+        >
+          {isSubmitting || loading ? 'Saving...' : editContest ? 'Update Workshop' : 'Create Workshop'}
         </button>
-        <button type="button" className="btn btn-secondary" onClick={handleResetContest} disabled={isSubmitting || loading}>
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={handleResetContest}
+          disabled={isSubmitting || loading}
+        >
           Reset
         </button>
         <button
           type="button"
-          className="btn btn-outline-secondary"
+          className="btn-outline"
           onClick={() => {
             setShowForm(false);
             handleResetContest();

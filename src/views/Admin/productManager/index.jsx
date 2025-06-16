@@ -1,3 +1,4 @@
+// src/components/productManager/ProductManager.jsx
 import React, { useState, useEffect } from "react";
 import { Modal, Button } from "react-bootstrap";
 import useProductManager from "../../../hooks/useProductManager";
@@ -33,6 +34,7 @@ const ProductManager = () => {
   const [editImageInputs, setEditImageInputs] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // Add state for search input
 
   // Handle image selection for add product
   const handleImageChange = (id, event) => {
@@ -82,6 +84,7 @@ const ProductManager = () => {
         if (input.preview) URL.revokeObjectURL(input.preview);
       });
       setImageInputs([{ id: Date.now(), file: null, preview: null }]);
+      setSearchQuery(""); // Reset search query after adding product
     } catch (err) {
       alert(`Failed to add product: ${err.message}`);
       console.error("Add product error:", err);
@@ -188,11 +191,23 @@ const ProductManager = () => {
       });
       setEditImageInputs([]);
       setExistingImages([]);
+      setSearchQuery(""); // Reset search query after updating product
     } catch (err) {
       alert(`Failed to update product: ${err.message}`);
       console.error("Update product error:", err);
     }
   };
+
+  // Handle search input change
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  // Filter products based on search query
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.department.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Clean up previews on unmount
   useEffect(() => {
@@ -261,16 +276,26 @@ const ProductManager = () => {
         </div>
       </div>
 
-      {/* Product List */}
+      {/* Product List Section */}
       <div className="product-list-section">
         <h5>Product List</h5>
+        {/* Search Input */}
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder="Search by name or department..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="search-input"
+          />
+        </div>
         <div className="product-list">
           {productLoading && <div className="loading">Loading products...</div>}
           {productError && <div className="error">{productError}</div>}
-          {products.length === 0 && !productLoading && (
+          {filteredProducts.length === 0 && !productLoading && (
             <p className="no-products">No products found.</p>
           )}
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <div
               key={product.id}
               className="product-card"

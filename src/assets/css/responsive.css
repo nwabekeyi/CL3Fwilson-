@@ -866,6 +866,10 @@
     height: 200px;
   }
 
+  .container-fluid, .contest-manager, .card-body{
+    padding: 0 !important;
+  }
+
   .products-banner-overlay h1 {
     font-size: 2rem;
   }
@@ -906,6 +910,11 @@
     height: 52vh !important;
   }
 
+  .btn-danger{
+    width: 100%;
+    border-radius: 5pX;
+  }
+
   .main_slider{
     height: 100%;
   }
@@ -939,4 +948,23 @@
     height: 180px;
   }
  
+}
+
+
+/* ProductManager.css */
+.search-container {
+  margin-bottom: 20px;
+}
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+}
+.search-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }

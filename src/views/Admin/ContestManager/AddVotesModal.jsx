@@ -1,9 +1,10 @@
 // src/components/ContestManager/AddVotesModal.jsx
 import React from 'react';
+import { FiX } from 'react-icons/fi';
 
 const AddVotesModal = ({
   showAddVotesModal,
-  voteFormData = { voteCount: '' }, // Default to prevent undefined error
+  voteFormData = { voteCount: '', voterName: '' },
   errors = {},
   isSubmitting = false,
   loading = false,
@@ -12,15 +13,17 @@ const AddVotesModal = ({
   handleResetVotes = () => {},
   setShowAddVotesModal = () => {},
 }) => {
+  console.log('AddVotesModal rendered:', { showAddVotesModal });
+
   return (
     <div
-      className={`modal fade ${showAddVotesModal ? 'show d-block' : ''}`}
+      className={`modal ${showAddVotesModal ? 'show' : ''}`}
+      style={{ display: showAddVotesModal ? 'flex' : 'none' }}
       tabIndex="-1"
       aria-labelledby="addVotesModalLabel"
       aria-hidden={!showAddVotesModal}
-      style={{ backgroundColor: showAddVotesModal ? 'rgba(0,0,0,0.5)' : 'transparent' }}
     >
-      <div className="modal-dialog">
+      <div className="modal-dialog modal-lg">
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title" id="addVotesModalLabel">
@@ -28,20 +31,38 @@ const AddVotesModal = ({
             </h5>
             <button
               type="button"
-              className="btn-close"
-              onClick={() => setShowAddVotesModal(false)}
+              className="close-icon"
+              onClick={() => {
+                console.log('Close AddVotesModal clicked');
+                setShowAddVotesModal(false);
+              }}
               disabled={isSubmitting || loading}
-            ></button>
+              aria-label="Close modal"
+            >
+              <FiX />
+            </button>
           </div>
           <div className="modal-body">
             <form onSubmit={handleVoteSubmit} noValidate>
-              <div className="mb-3">
-                <label htmlFor="voteCount" className="form-label">
-                  Vote Count
-                </label>
+              <div className="form-group">
+                <label htmlFor="voterName">Voter Name</label>
+                <input
+                  type="text"
+                  className={errors.voterName ? 'error' : ''}
+                  id="voterName"
+                  name="voterName"
+                  value={voteFormData.voterName}
+                  onChange={handleVoteChange}
+                  required
+                  disabled={isSubmitting || loading}
+                />
+                {errors.voterName && <div className="error-feedback">{errors.voterName}</div>}
+              </div>
+              <div className="form-group">
+                <label htmlFor="voteCount">Vote Count</label>
                 <input
                   type="number"
-                  className={`form-control ${errors.voteCount ? 'is-invalid' : ''}`}
+                  className={errors.voteCount ? 'error' : ''}
                   id="voteCount"
                   name="voteCount"
                   value={voteFormData.voteCount}
@@ -50,15 +71,20 @@ const AddVotesModal = ({
                   disabled={isSubmitting || loading}
                   min="1"
                 />
-                {errors.voteCount && <div className="invalid-feedback">{errors.voteCount}</div>}
+                {errors.voteCount && <div className="error-feedback">{errors.voteCount}</div>}
               </div>
-              <div className="d-flex gap-2">
-                <button type="submit" className="btn btn-primary" disabled={isSubmitting || loading}>
+              {errors.submission && <div className="alert-error">{errors.submission}</div>}
+              <div className="button-group">
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={isSubmitting || loading}
+                >
                   {isSubmitting || loading ? 'Saving...' : 'Add Votes'}
                 </button>
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn-secondary"
                   onClick={handleResetVotes}
                   disabled={isSubmitting || loading}
                 >
@@ -66,7 +92,7 @@ const AddVotesModal = ({
                 </button>
                 <button
                   type="button"
-                  className="btn btn-outline-secondary"
+                  className="btn-outline"
                   onClick={() => setShowAddVotesModal(false)}
                   disabled={isSubmitting || loading}
                 >

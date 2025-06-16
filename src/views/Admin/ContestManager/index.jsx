@@ -9,6 +9,7 @@ import AddVotesModal from './AddVotesModal';
 
 const ContestManager = ({ setContestId }) => {
   const {
+    handleDeleteParticipant,
     contests,
     formData,
     participantFormData,
@@ -47,88 +48,113 @@ const ContestManager = ({ setContestId }) => {
     handleAddParticipant,
     handleViewParticipants,
     handleAddVotes,
+    handleEvictParticipant, // Add this
   } = useContestManager(setContestId);
 
+  console.log('ContestManager modals:', { showAddParticipantModal, showAddVotesModal, showViewParticipantsModal });
+
   return (
-    <div className="card mb-4">
-      <div className="card-header">
-        <h5>{editContest ? 'Edit Contest' : 'Create Contest'}</h5>
-      </div>
-      <div className="card-body">
-        {successMessage && <div className="alert alert-success">{successMessage}</div>}
-        {(errors.submission || errors.fetch || errors.fetchParticipants || apiError) && (
-          <div className="alert alert-danger">
-            {errors.submission || errors.fetch || errors.fetchParticipants || apiError}
-          </div>
-        )}
+    <div className="contest-manager">
+      <div className="card">
+        <div className="card-header">
+          <h5>{editContest ? 'Edit Workshop' : 'Create Workshop'}</h5>
+        </div>
+        <div className="card-body">
+          {successMessage && <div className="alert-success">{successMessage}</div>}
+          {(errors.submission || errors.fetch || errors.fetchParticipants || apiError) && (
+            <div className="alert-error">
+              {errors.submission || errors.fetch || errors.fetchParticipants || apiError}
+            </div>
+          )}
 
-        {!showForm && (
-          <div className="mb-3">
-            <button className="btn btn-primary" onClick={handleAddContest} disabled={isSubmitting || loading}>
-              Add Contest
-            </button>
-          </div>
-        )}
+          {!showForm && (
+            <div style={{ marginBottom: '16px' }}>
+              <button
+                className="add-workshop-btn"
+                onClick={handleAddContest}
+                disabled={isSubmitting || loading}
+                aria-label="Add new workshop"
+              >
+                <svg
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Add Workshop
+              </button>
+            </div>
+          )}
 
-        {showForm && (
-          <ContestForm
-            formData={formData}
+          {showForm && (
+            <ContestForm
+              formData={formData}
+              errors={errors}
+              isSubmitting={isSubmitting}
+              loading={loading}
+              editContest={editContest}
+              handleChange={handleChange}
+              handleDateChange={handleDateChange}
+              handleContestSubmit={handleContestSubmit}
+              handleResetContest={handleResetContest}
+              setShowForm={setShowForm}
+            />
+          )}
+
+          <ContestList
+            contests={contests}
+            isSubmitting={isSubmitting}
+            loading={loading}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
+            handleSelectContest={handleSelectContest}
+            handleAddParticipant={handleAddParticipant}
+            handleViewParticipants={handleViewParticipants}
+          />
+
+          <AddParticipantModal
+            showAddParticipantModal={showAddParticipantModal}
+            participantFormData={participantFormData}
             errors={errors}
             isSubmitting={isSubmitting}
             loading={loading}
-            editContest={editContest}
-            handleChange={handleChange}
-            handleDateChange={handleDateChange}
-            handleContestSubmit={handleContestSubmit}
-            handleResetContest={handleResetContest}
-            setShowForm={setShowForm}
+            handleParticipantChange={handleParticipantChange}
+            handleParticipantSubmit={handleParticipantSubmit}
+            handleReset OSA Participant={handleResetParticipant}
+            setShowAddParticipantModal={setShowAddParticipantModal}
           />
-        )}
 
-        <ContestList
-          contests={contests}
-          isSubmitting={isSubmitting}
-          loading={loading}
-          handleEdit={handleEdit}
-          handleDelete={handleDelete}
-          handleSelectContest={handleSelectContest}
-          handleAddParticipant={handleAddParticipant}
-          handleViewParticipants={handleViewParticipants}
-        />
+          <ViewParticipantsModal
+                  handleDeleteParticipant={handleDeleteParticipant}
+            showViewParticipantsModal={showViewParticipantsModal}
+            participants={participants}
+            isSubmitting={isSubmitting}
+            loading={loading}
+            setShowViewParticipantsModal={setShowViewParticipantsModal}
+            handleAddVotes={handleAddVotes}
+            selectedContestId={selectedContestId}
+            handleEvictParticipant={handleEvictParticipant} // Pass the handler
+          />
 
-        <AddParticipantModal
-          showAddParticipantModal={showAddParticipantModal}
-          participantFormData={participantFormData}
-          errors={errors}
-          isSubmitting={isSubmitting}
-          loading={loading}
-          handleParticipantChange={handleParticipantChange}
-          handleParticipantSubmit={handleParticipantSubmit}
-          handleResetParticipant={handleResetParticipant}
-          setShowAddParticipantModal={setShowAddParticipantModal}
-        />
-
-        <ViewParticipantsModal
-          showViewParticipantsModal={showViewParticipantsModal}
-          participants={participants}
-          isSubmitting={isSubmitting}
-          loading={loading}
-          setShowViewParticipantsModal={setShowViewParticipantsModal}
-          handleAddVotes={handleAddVotes}
-          selectedContestId={selectedContestId}
-        />
-
-        <AddVotesModal
-          showAddVotesModal={showAddVotesModal}
-          voteFormData={voteFormData}
-          errors={errors}
-          isSubmitting={isSubmitting}
-          loading={loading}
-          handleVoteChange={handleVoteChange}
-          handleVoteSubmit={handleVoteSubmit}
-          handleResetVotes={handleResetVotes}
-          setShowAddVotesModal={setShowAddVotesModal}
-        />
+          <AddVotesModal
+            showAddVotesModal={showAddVotesModal}
+            voteFormData={voteFormData}
+            errors={errors}
+            isSubmitting={isSubmitting}
+            loading={loading}
+            handleVoteChange={handleVoteChange}
+            handleVoteSubmit={handleVoteSubmit}
+            handleResetVotes={handleResetVotes}
+            setShowAddVotesModal={setShowAddVotesModal}
+          />
+        </div>
       </div>
     </div>
   );

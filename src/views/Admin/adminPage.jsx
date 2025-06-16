@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthAdmin } from '../../hooks/useAuthAdmin';
 import useApi from '../../hooks/useApi';
+import { useContestManager } from '../../hooks/useContestManager';
 import MenuBar from './MenuBar';
 import Sidebar from './Sidebar';
 import MainContent from './MainContent';
@@ -16,15 +17,20 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 const AdminPage = () => {
   const navigate = useNavigate();
-  const { loading, user } = useAuthAdmin();
+  const { loading: authLoading, user } = useAuthAdmin();
   const { request, error: apiError } = useApi();
-  const [participants, setParticipants] = useState([]);
-  const [participantsError, setParticipantsError] = useState('');
+  const [contestId, setContestId] = useState(null);
+  const {
+    contests,
+    fetchContests,
+    loading: contestsLoading,
+    apiError: contestsError,
+    participants
+  } = useContestManager(setContestId);
+  const [allParticipants, setAllParticipants] = useState([]);
   const [selectedComponent, setSelectedComponent] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
-  const [contestId, setContestId] = useState(null);
-
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
     console.log('Sidebar toggled, new state:', !sidebarOpen);
@@ -38,34 +44,36 @@ const AdminPage = () => {
     console.log('Navigated to component:', component);
   };
 
-  // Fetch participants when contestId changes
+  // Fetch contests and aggregate participants
   useEffect(() => {
-    if (contestId) {
-      const fetchParticipants = async () => {
-        try {
-          const data = await request({
-            url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${contestId}/participants`,
-            method: 'GET',
-          });
-          setParticipants(data);
-          setParticipantsError('');
-        } catch (err) {
-          setParticipantsError('Failed to fetch participants. Please select a contest.');
-          setParticipants([]);
-        }
-      };
-      fetchParticipants();
-    } else {
-      setParticipants([]);
-      setParticipantsError('No contest selected. Please create or select a contest.');
-    }
-  }, [contestId, request]);
+    const fetchData = async () => {
+      try {
+        await fetchContests();
+      } catch (err) {
+        setAllParticipants([]);
+      }
+    };
+
+    fetchData();
+  }, [fetchContests]);
+
+  // Update allParticipants when contests change
+  useEffect(() => {
+    const allParticipantsData = contests.flatMap(contest =>
+      (contest.participants || []).map(p => ({
+        ...p,
+        contestId: contest.id,
+      }))
+    );
+    setAllParticipants(allParticipantsData);
+  }, [contests]);
+
 
   useEffect(() => {
-    console.log('AdminPage auth state:', { loading, user: 'contest_id' });
-  }, [loading, user]);
+    console.log('AdminPage auth state:', { authLoading, user: user ? 'logged_in' : 'not_logged_in' });
+  }, [authLoading, user]);
 
-  if (loading || !user) {
+  if (authLoading || !user) {
     return (
       <div>
         <MenuBar sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
@@ -79,11 +87,17 @@ const AdminPage = () => {
   }
 
   const componentMap = {
-    overview: <Overview participants={participants} />,
+    overview: (
+      <Overview
+        participants={participants}
+        contests={contests}
+        contestsLoading={contestsLoading}
+        contestsError={contestsError}
+      />
+    ),
     contest: (
       <ParticipantManager
         participants={participants}
-        participantsError={participantsError || apiError}
         successMessage={successMessage}
         setSuccessMessage={setSuccessMessage}
         contestId={contestId}

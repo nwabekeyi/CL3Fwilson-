@@ -19,7 +19,7 @@ export const uploadImage = async (file) => {
     throw new Error('Unsupported file type');
   }
 
-  if (file.size > 10 * 1024 * 1024) { // 10MB limit
+  if (file.size > 10 * 1024 * 1024) {
     console.error('File too large:', file.size);
     throw new Error('File size exceeds 10MB');
   }
@@ -38,7 +38,13 @@ export const uploadImage = async (file) => {
         },
       }
     );
-    return response.data.secure_url;
+
+    const originalUrl = response.data.secure_url;
+
+    // Insert optimization parameters after '/upload'
+    const optimizedUrl = originalUrl.replace('/upload/', '/upload/f_auto,q_auto/');
+
+    return optimizedUrl;
   } catch (error) {
     console.error('Error uploading image:', error.response?.data || error.message);
     throw new Error(`Upload failed: ${error.response?.data?.error?.message || error.message}`);

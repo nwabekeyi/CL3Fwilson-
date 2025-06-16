@@ -1,5 +1,6 @@
 // src/components/ContestManager/AddParticipantModal.jsx
 import React from 'react';
+import { FiX } from 'react-icons/fi';
 
 const AddParticipantModal = ({
   showAddParticipantModal,
@@ -12,15 +13,17 @@ const AddParticipantModal = ({
   handleResetParticipant,
   setShowAddParticipantModal,
 }) => {
+  console.log('AddParticipantModal rendered:', { showAddParticipantModal });
+
   return (
     <div
-      className={`modal fade ${showAddParticipantModal ? 'show d-block' : ''}`}
+      className={`modal ${showAddParticipantModal ? 'show' : ''}`}
+      style={{ display: showAddParticipantModal ? 'flex' : 'none' }}
       tabIndex="-1"
       aria-labelledby="addParticipantModalLabel"
       aria-hidden={!showAddParticipantModal}
-      style={{ backgroundColor: showAddParticipantModal ? 'rgba(0,0,0,0.5)' : 'transparent' }}
     >
-      <div className="modal-dialog">
+      <div className="modal-dialog modal-lg">
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title" id="addParticipantModalLabel">
@@ -28,20 +31,24 @@ const AddParticipantModal = ({
             </h5>
             <button
               type="button"
-              className="btn-close"
-              onClick={() => setShowAddParticipantModal(false)}
+              className="close-icon"
+              onClick={() => {
+                console.log('Close AddParticipantModal clicked');
+                setShowAddParticipantModal(false);
+              }}
               disabled={isSubmitting || loading}
-            ></button>
+              aria-label="Close modal"
+            >
+              <FiX />
+            </button>
           </div>
           <div className="modal-body">
             <form onSubmit={handleParticipantSubmit} noValidate>
-              <div className="mb-3">
-                <label htmlFor="fullName" className="form-label">
-                  Full Name
-                </label>
+              <div className="form-group">
+                <label htmlFor="fullName">Full Name</label>
                 <input
                   type="text"
-                  className={`form-control ${errors.fullName ? 'is-invalid' : ''}`}
+                  className={errors.fullName ? 'error' : ''}
                   id="fullName"
                   name="fullName"
                   value={participantFormData.fullName}
@@ -49,15 +56,13 @@ const AddParticipantModal = ({
                   required
                   disabled={isSubmitting || loading}
                 />
-                {errors.fullName && <div className="invalid-feedback">{errors.fullName}</div>}
+                {errors.fullName && <div className="error-feedback">{errors.fullName}</div>}
               </div>
-              <div className="mb-3">
-                <label htmlFor="email" className="form-label">
-                  Email
-                </label>
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
                 <input
                   type="email"
-                  className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                  className={errors.email ? 'error' : ''}
                   id="email"
                   name="email"
                   value={participantFormData.email}
@@ -65,14 +70,12 @@ const AddParticipantModal = ({
                   required
                   disabled={isSubmitting || loading}
                 />
-                {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+                {errors.email && <div className="error-feedback">{errors.email}</div>}
               </div>
-              <div className="mb-3">
-                <label htmlFor="about" className="form-label">
-                  About
-                </label>
+              <div className="form-group">
+                <label htmlFor="about">About</label>
                 <textarea
-                  className={`form-control ${errors.about ? 'is-invalid' : ''}`}
+                  className={errors.about ? 'error' : ''}
                   id="about"
                   name="about"
                   value={participantFormData.about}
@@ -80,29 +83,33 @@ const AddParticipantModal = ({
                   required
                   disabled={isSubmitting || loading}
                 />
-                {errors.about && <div className="invalid-feedback">{errors.about}</div>}
+                {errors.about && <div className="error-feedback">{errors.about}</div>}
               </div>
-              <div className="mb-3">
-                <label htmlFor="photo" className="form-label">
-                  Photo (Optional)
-                </label>
+              <div className="form-group">
+                <label htmlFor="photo">Photo</label>
                 <input
                   type="file"
-                  className="form-control"
+                  className="file-input"
                   id="photo"
                   name="photo"
                   accept="image/*"
                   onChange={handleParticipantChange}
                   disabled={isSubmitting || loading}
                 />
+                {errors.photo && <div className="error-feedback">{errors.photo}</div>}
               </div>
-              <div className="d-flex gap-2">
-                <button type="submit" className="btn btn-primary" disabled={isSubmitting || loading}>
+              {errors.submission && <div className="alert-error">{errors.submission}</div>}
+              <div className="button-group">
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={isSubmitting || loading}
+                >
                   {isSubmitting || loading ? 'Saving...' : 'Add Participant'}
                 </button>
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn-secondary"
                   onClick={handleResetParticipant}
                   disabled={isSubmitting || loading}
                 >
@@ -110,7 +117,7 @@ const AddParticipantModal = ({
                 </button>
                 <button
                   type="button"
-                  className="btn btn-outline-secondary"
+                  className="btn-outline"
                   onClick={() => setShowAddParticipantModal(false)}
                   disabled={isSubmitting || loading}
                 >

@@ -2,9 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParticipantForm } from '../../../hooks/useParticipantForm';
 import useApi from '../../../hooks/useApi';
-import ParticipantForm from './ParticipantForm';
-import ParticipantTable from './ParticipantTable';
-import VotesModal from './VotesModal';
+
 import ContestManager from '../ContestManager';
 
 const ParticipantManager = ({ successMessage, setSuccessMessage, contestId: externalContestId }) => {
@@ -184,10 +182,7 @@ const ParticipantManager = ({ successMessage, setSuccessMessage, contestId: exte
   return (
     <div className="container-fluid">
       {/* Contest Management Section */}
-      <div className="mb-4">
-        <h4>Contest Management</h4>
         <ContestManager setContestId={setContestId} />
-      </div>
 
       {/* Existing Participant Management Content */}
       {successMessage && <div className="alert alert-success">{successMessage}</div>}
@@ -195,36 +190,6 @@ const ParticipantManager = ({ successMessage, setSuccessMessage, contestId: exte
       {(errors.submission || apiError) && (
         <div className="alert alert-danger">{errors.submission || apiError}</div>
       )}
-
-      <ParticipantTable
-        participants={participants}
-        handleEditParticipant={handleEditParticipant}
-        handleDeleteParticipant={handleDeleteParticipant}
-        handleViewVotes={handleViewVotes}
-        isSubmitting={isSubmitting || loading}
-      />
-
-      <ParticipantForm
-        formData={formData}
-        errors={errors}
-        isSubmitting={isSubmitting || loading}
-        handleChange={handleChange}
-        handleFileChange={handleFileChange}
-        previewImage={previewImage}
-        handleSubmit={handleSubmit}
-        isEditing={!!editParticipant}
-        editParticipant={editParticipant}
-        resetForm={resetForm}
-        setEditParticipant={setEditParticipant}
-        setPreviewImage={setPreviewImage}
-      />
-
-      <VotesModal
-        show={showVotesModal}
-        onHide={() => setShowVotesModal(false)}
-        participant={currentParticipant}
-        votes={currentVotes}
-      />
     </div>
   );
 };

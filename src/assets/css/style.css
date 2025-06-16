@@ -3284,3 +3284,638 @@
     bottom: 5vh;
     right: 5vw;
   }
+
+
+
+/* ContestManager.css */
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.contest-manager {
+  margin: 0 auto;
+  padding: 16px;
+  font-family: Arial, sans-serif;
+  position: relative;
+  z-index: 1;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  z-index: 2;
+}
+
+.card-header {
+  background: linear-gradient(to right, #2563eb, #3b82f6);
+  color: #ffffff;
+  padding: 16px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.card-body {
+  padding: 16px;
+}
+
+.alert-success {
+  background: #dcfce7;
+  border-left: 4px solid #16a34a;
+  color: #16a34a;
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 4px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.alert-error {
+  background: #fee2e2;
+  border-left: 4px solid #dc2626;
+  color: #dc2626;
+  padding: 12px;
+  margin-bottom: 16px;
+  border-radius: 4px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.add-workshop-btn {
+  background: #2563eb;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.add-workshop-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.add-workshop-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.add-workshop-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.contest-list-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.participants-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.participant-card {
+  display: flex;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 100%;
+  max-width: 600px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.participant-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.participant-image {
+  flex: 0 0 200px;
+  overflow: hidden;
+}
+
+.participant-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.participant-details {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.participant-details h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.participant-details p {
+  margin: 0;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.view-votes-btn {
+  margin-top: 8px;
+  align-self: flex-start;
+}
+
+.vote-details-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.vote-card {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  width: 100%;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.vote-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.vote-card p {
+  margin: 0;
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 8px;
+}
+
+.vote-card p strong {
+  color: #374151;
+}
+
+.action-icon {
+  font-size: 20px;
+  margin-right: 12px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  pointer-events: auto;
+  z-index: 4;
+  transition: color 0.2s, transform 0.1s;
+}
+
+.action-icon:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.action-icon:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background-color: #f0f0f0;
+}
+
+.edit-icon {
+  color: #2563eb;
+}
+
+.edit-icon:hover:not(:disabled) {
+  color: #1d4ed8;
+}
+
+.delete-icon {
+  color: #dc2626;
+}
+
+.delete-icon:hover:not(:disabled) {
+  color: #b91c1c;
+}
+
+
+.add-participant-icon {
+  color: #1e40af;
+}
+
+.add-participant-icon:hover:not(:disabled) {
+  color: #1e3a8a;
+}
+
+.view-participants-icon {
+  color: #4b5563;
+}
+
+.view-participants-icon:hover:not(:disabled) {
+  color: #374151;
+}
+
+.form {
+  margin-bottom: 16px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group .react-datepicker-wrapper input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group .react-datepicker-wrapper input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  outline: none;
+}
+
+.form-group input.error,
+.form-group textarea.error,
+.form-group .react-datepicker-wrapper input.error {
+  border-color: #dc2626;
+}
+
+.error-feedback {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #6b7280;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #4b5563;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* MODAL: Backdrop & Wrapper */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000000 !important;
+  animation: fadeIn 0.3s ease-in;
+  pointer-events: auto;
+  padding: 16px;
+}
+
+.modal.show {
+  display: flex !important;
+}
+
+.modal-dialog {
+  display: grid;
+  width: 100%;
+  max-width: 800px !important;
+  place-content: center;
+  height: 50vh;
+}
+
+/* MODAL CONTENT */
+.modal-content {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 800px;
+  padding: 24px;
+  z-index: 10001;
+  pointer-events: auto;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* MODAL HEADER */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* MODAL BODY */
+.modal-body {
+  padding-top: 16px;
+}
+
+/* MODAL FOOTER */
+.modal-footer {
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* CLOSE ICON */
+.close-icon {
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  transition: color 0.2s, transform 0.1s;
+}
+
+.close-icon:hover:not(:disabled) {
+  color: #374151;
+  transform: scale(1.1);
+}
+
+.close-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Add to ContestManager.css */
+.about-container {
+  margin: 0;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.about-container strong {
+  color: #374151;
+}
+
+.about-text {
+  width: 50%;
+  height: 100px; /* Fixed height */
+  overflow-y: auto; /* Vertical scroll */
+  padding: 8px;
+  border: 1px solid #e5e7eb; /* Subtle border */
+  border-radius: 4px;
+  background: #f9fafb; /* Light background */
+  font-size: 14px;
+  color: #4b5563;
+}
+
+/* FILE INPUT */
+.file-input {
+  font-size: 14px;
+  color: #374151;
+  width: 100%;
+  padding: 8px;
+}
+
+.file-input::-webkit-file-upload-button {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 16px;
+  transition: background 0.2s;
+}
+
+.file-input::-webkit-file-upload-button:hover {
+  background: #1d4ed8;
+}
+
+.btn-danger{
+  border-radius: 5pX;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+
+/* src/components/ContestManager/ViewParticipantsModal.css */
+.action-icons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-icon {
+  position: relative;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.action-icon::after {
+  content: attr(data-tooltip-content);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  z-index: 10;
+  margin-bottom: 4px;
+}
+
+.action-icon:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.action-icon.primary {
+  color: #007bff;
+}
+
+.action-icon.primary:hover {
+  background-color: #e7f1ff;
+}
+
+.action-icon.danger {
+  color: #dc3545;
+}
+
+.action-icon.danger:hover {
+  background-color: #f8d7da;
+}
+
+.action-icon.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-icon.disabled::after {
+  display: none;
+}
+
+.evicted-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.evicted-label {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+  .contest-manager {
+    padding: 8px;
+  }
+  .about-text{
+    width: 100%;
+  }
+
+  .participant-card {
+    flex-direction: column;
+    max-width: 100%;
+  }
+
+  .participant-image {
+    flex: 0 0 200px;
+    width: 100%;
+  }
+
+  .participant-details {
+    padding: 12px;
+  }
+
+  .action-buttons {
+    flex-wrap: wrap;
+  }
+
+  .view-votes-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .vote-card {
+    max-width: 100%;
+  }
+
+  .modal-dialog {
+    height: 65vh;
+  }
+  .modal-content {
+    margin: 0 auto;
+    max-width: 90%;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-outline {
+    width: 100%;
+    text-align: center;
+  }
+}
