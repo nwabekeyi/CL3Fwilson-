@@ -25,6 +25,9 @@ export const useContestManager = (setContestId) => {
   const [selectedParticipantCodeName, setSelectedParticipantCodeName] = useState(null);
   const [participants, setParticipants] = useState([]);
 
+  // Validate ObjectId (24-character hexadecimal string)
+  const isValidObjectId = (id) => /^[0-9a-fA-F]{24}$/.test(id);
+
   useEffect(() => {
     fetchContests();
   }, []);
@@ -35,10 +38,19 @@ export const useContestManager = (setContestId) => {
         url: `${import.meta.env.VITE_CONTEST_ENDPOINT}`,
         method: 'GET',
       });
-      setContests(data);
+      // Transform _id to id for consistency in frontend
+      const transformedContests = data.map((contest) => ({
+        ...contest,
+        id: contest._id, // Map _id to id
+      }));
+      setContests(transformedContests);
 
       const allParticipants = [];
-      for (const contest of data) {
+      for (const contest of transformedContests) {
+        if (!isValidObjectId(contest.id)) {
+          console.warn(`Invalid contestId: ${contest.id}`);
+          continue;
+        }
         try {
           const participantData = await request({
             url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${contest.id}/participants`,
@@ -48,6 +60,7 @@ export const useContestManager = (setContestId) => {
             ...participantData.map((p) => ({
               ...p,
               contestId: contest.id,
+              id: p._id, // Map participant's _id to id
             }))
           );
         } catch (err) {
@@ -60,8 +73,14 @@ export const useContestManager = (setContestId) => {
       }
       setParticipants(allParticipants);
 
-      if (data.length > 0 && !editContest) {
-        setContestId(data[0].id);
+      if (transformedContests.length > 0 && !editContest) {
+        const validContest = transformedContests.find((c) => isValidObjectId(c.id));
+        if (validContest) {
+          setContestId(validContest.id);
+        } else {
+          setContestId(null);
+          setErrors({ fetch: 'No valid contests found' });
+        }
       }
     } catch (err) {
       console.error('Fetch contests error:', err);
@@ -71,12 +90,16 @@ export const useContestManager = (setContestId) => {
 
   const fetchParticipants = useCallback(
     async (contestId) => {
+      if (!contestId || !isValidObjectId(contestId)) {
+        setErrors({ fetchParticipants: 'Valid contestId is required' });
+        return;
+      }
       try {
         const data = await request({
           url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${contestId}/participants`,
           method: 'GET',
         });
-        setParticipants(data.map((p) => ({ ...p, contestId })));
+        setParticipants(data.map((p) => ({ ...p, contestId, id: p._id })));
       } catch (err) {
         console.error('Fetch participants error:', err);
         setErrors({ fetchParticipants: err.message || 'Failed to fetch participants' });
@@ -132,12 +155,15 @@ export const useContestManager = (setContestId) => {
       setIsSubmitting(true);
       try {
         const formattedData = {
-          ...formData,
+          name: formData.name,
           startDate: formData.startDate.toISOString(),
           endDate: formData.endDate.toISOString(),
         };
 
         if (editContest) {
+          if (!isValidObjectId(editContest.id)) {
+            throw new Error('Invalid contestId for update');
+          }
           await request({
             url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${editContest.id}`,
             method: 'PUT',
@@ -151,7 +177,7 @@ export const useContestManager = (setContestId) => {
             data: formattedData,
           });
           setSuccessMessage('Contest created successfully!');
-          setContestId(newContest.id);
+          setContestId(newContest._id);
         }
 
         setFormData({ name: '', startDate: null, endDate: null });
@@ -175,6 +201,11 @@ export const useContestManager = (setContestId) => {
       e.preventDefault();
       if (isSubmitting) return;
 
+      if (!selectedContestId || !isValidObjectId(selectedContestId)) {
+        setErrors({ submission: 'Valid contestId is required' });
+        return;
+      }
+
       const validationErrors = validateParticipantForm();
       if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
@@ -191,7 +222,7 @@ export const useContestManager = (setContestId) => {
           formDataToSend.append('photo', participantFormData.photo);
         }
 
-        await request({
+        const newParticipant = await request({
           url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${selectedContestId}/participants`,
           method: 'POST',
           data: formDataToSend,
@@ -217,6 +248,15 @@ export const useContestManager = (setContestId) => {
       e.preventDefault();
       if (isSubmitting) return;
 
+      if (!selectedContestId || !isValidObjectId(selectedContestId)) {
+        setErrors({ submission: 'Valid contestId is required' });
+        return;
+      }
+      if (!selectedParticipantCodeName) {
+        setErrors({ submission: 'Participant codeName is required' });
+        return;
+      }
+
       const validationErrors = validateVoteForm();
       if (Object.keys(validationErrors).length > 0) {
         setErrors(validationErrors);
@@ -225,6 +265,16 @@ export const useContestManager = (setContestId) => {
 
       setIsSubmitting(true);
       try {
+        // Fetch participant to get participantId
+        const participant = await request({
+          url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${selectedContestId}/participants/${selectedParticipantCodeName}`,
+          method: 'GET',
+        });
+
+        if (!participant || !participant._id) {
+          throw new Error('Participant not found');
+        }
+
         await request({
           url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${selectedContestId}/participants/${selectedParticipantCodeName}/votes`,
           method: 'POST',
@@ -259,8 +309,12 @@ export const useContestManager = (setContestId) => {
 
   const handleEvictParticipant = useCallback(
     async (contestId, codeName) => {
-      if (!contestId || !codeName) {
-        setErrors({ submission: 'Contest ID and participant code name are required' });
+      if (!contestId || !isValidObjectId(contestId)) {
+        setErrors({ submission: 'Valid contestId is required' });
+        return;
+      }
+      if (!codeName) {
+        setErrors({ submission: 'Participant code name is required' });
         return;
       }
 
@@ -295,8 +349,12 @@ export const useContestManager = (setContestId) => {
 
   const handleDeleteParticipant = useCallback(
     async (contestId, codeName) => {
-      if (!contestId || !codeName) {
-        setErrors({ submission: 'Contest ID and participant code name are required' });
+      if (!contestId || !isValidObjectId(contestId)) {
+        setErrors({ submission: 'Valid contestId is required' });
+        return;
+      }
+      if (!codeName) {
+        setErrors({ submission: 'Participant code name is required' });
         return;
       }
 
@@ -379,6 +437,10 @@ export const useContestManager = (setContestId) => {
 
   const handleEdit = useCallback(
     (contest) => {
+      if (!isValidObjectId(contest.id)) {
+        setErrors({ submission: 'Invalid contestId for editing' });
+        return;
+      }
       setFormData({
         name: contest.name,
         startDate: new Date(contest.startDate),
@@ -394,6 +456,11 @@ export const useContestManager = (setContestId) => {
 
   const handleDelete = useCallback(
     async (contestId) => {
+      if (!contestId || !isValidObjectId(contestId)) {
+        setErrors({ submission: 'Valid contestId is required' });
+        return;
+      }
+
       if (window.confirm('Are you sure you want to delete this contest?')) {
         try {
           await request({
@@ -402,7 +469,8 @@ export const useContestManager = (setContestId) => {
           });
           setSuccessMessage('Contest deleted successfully!');
           await fetchContests();
-          setContestId(contests[0]?.id || null);
+          const validContest = contests.find((c) => isValidObjectId(c.id));
+          setContestId(validContest ? validContest.id : null);
           setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err) {
           console.error('Delete contest error:', err);
@@ -415,6 +483,10 @@ export const useContestManager = (setContestId) => {
 
   const handleSelectContest = useCallback(
     (contestId) => {
+      if (!isValidObjectId(contestId)) {
+        setErrors({ submission: 'Valid contestId is required' });
+        return;
+      }
       setContestId(contestId);
     },
     [setContestId]
@@ -429,6 +501,10 @@ export const useContestManager = (setContestId) => {
 
   const handleAddParticipant = useCallback(
     (contestId) => {
+      if (!contestId || !isValidObjectId(contestId)) {
+        setErrors({ submission: 'Valid contestId is required' });
+        return;
+      }
       console.log('handleAddParticipant called with contestId:', contestId);
       setSelectedContestId(contestId);
       setParticipantFormData({ fullName: '', email: '', about: '', photo: null });
@@ -443,6 +519,10 @@ export const useContestManager = (setContestId) => {
 
   const handleViewParticipants = useCallback(
     (contestId) => {
+      if (!contestId || !isValidObjectId(contestId)) {
+        setErrors({ submission: 'Valid contestId is required' });
+        return;
+      }
       console.log('handleViewParticipants called with contestId:', contestId);
       setSelectedContestId(contestId);
       setParticipants([]);
@@ -456,6 +536,14 @@ export const useContestManager = (setContestId) => {
   );
 
   const handleAddVotes = useCallback((contestId, participantCodeName) => {
+    if (!contestId || !isValidObjectId(contestId)) {
+      setErrors({ submission: 'Valid contestId is required' });
+      return;
+    }
+    if (!participantCodeName) {
+      setErrors({ submission: 'Participant codeName is required' });
+      return;
+    }
     console.log('handleAddVotes called with contestId:', contestId, 'participantCodeName:', participantCodeName);
     setSelectedContestId(contestId);
     setSelectedParticipantCodeName(participantCodeName);
@@ -506,6 +594,6 @@ export const useContestManager = (setContestId) => {
     handleViewParticipants,
     handleAddVotes,
     handleEvictParticipant,
-    handleDeleteParticipant, // Add new handler to return object
+    handleDeleteParticipant,
   };
 };

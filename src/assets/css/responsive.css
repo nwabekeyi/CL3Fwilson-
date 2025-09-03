@@ -56,6 +56,9 @@
 ************/
 
 @media only screen and (max-width: 1199px) {
+  .d-block{
+    height: 100vh !important;
+  }
   .main_slider {
     min-height: 475px;
     height: calc(100vw / 1.714);
@@ -121,6 +124,9 @@
   margin-right: 0;
  }
 
+ .navbar_user {
+  display: flex;
+ }
  .hamburger_container{
   margin: 0 15px;
  }
@@ -146,6 +152,12 @@
   }
   .main_slider_content h6 {
     margin-bottom: 23px;
+  }
+  .main_slider_content {
+    margin-top: 120px;
+  }
+  .main_slider_content h1 {
+    text-align: center;
   }
   .shop_now_button {
     margin-top: 0;
@@ -306,6 +318,8 @@
     margin-top: 0;
   }
 
+ 
+
   footer.footer{
     margin-top: 1%;
   }
@@ -352,6 +366,9 @@
 ************/
 
 @media only screen and (max-width: 768px) {
+  .product-con{
+    margin: 0;
+  }
 
 }
 
@@ -473,6 +490,9 @@
 ************/
 
 @media only screen and (max-width: 539px) {
+  .footer_nav_container, .cr{
+    font-size: 10px;
+  }
   .product_name {
     margin: 4px 0 0 0;
   }
@@ -493,6 +513,9 @@
 ************/
 
 @media only screen and (max-width: 479px) {
+  .product-con{
+    margin: 0;
+  }
   .logo_container a {
     font-size: 12px;
   }
@@ -760,6 +783,9 @@
 ************/
 
 @media only screen and (max-width: 400px) {
+  .footer_nav_container, .cr{
+    font-size: 8px;
+  }
 }
 
 

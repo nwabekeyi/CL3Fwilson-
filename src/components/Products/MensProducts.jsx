@@ -67,8 +67,6 @@ function MensProducts({ home = false }) {
               <div
                 key={product.id}
                 className="product-con col-lg-4 col-md-6 col-6"
-                data-aos="fade-up"
-                data-aos-delay={displayedProducts.indexOf(product) * 100}
               >
                 <SingleProduct
                   productItem={product}

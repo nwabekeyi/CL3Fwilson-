@@ -64,14 +64,17 @@ const Footer = () => {
         <div className="row">
           <div className="col-lg-12">
             <div className="footer_nav_container">
-              <div className="cr">
-                © {new Date().getFullYear()} All Rights Reserved.{" "}
-                <i className="fa fa-heart-o" aria-hidden="true"></i> by{" "}
-                <Link
-                  to="/"
+              <div className="cr text-center">
+                © {new Date().getFullYear()} All Rights Reserved by{" "}
+                <i className="fa fa-heart-o" aria-hidden="true"></i>{" "}
+                <Link to="/">CL3FWILSON</Link> |{" "}
+                <a
+                  href="https://www.beks.tech"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  CL3FWILSON
-                </Link>
+                  Developed by BeksTech
+                </a>
               </div>
             </div>
           </div>

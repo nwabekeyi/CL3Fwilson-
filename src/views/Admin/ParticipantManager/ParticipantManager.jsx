@@ -45,7 +45,7 @@ const ParticipantManager = ({ successMessage, setSuccessMessage, contestId: exte
   const fetchParticipants = async () => {
     try {
       const data = await request({
-        url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/participants/${contestId}`,
+        url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${contestId}/participants`,
         method: 'GET',
       });
       setParticipants(data);

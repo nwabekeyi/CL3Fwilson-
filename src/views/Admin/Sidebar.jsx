@@ -30,7 +30,7 @@ const Sidebar = ({ sidebarOpen, selectedComponent, handleNavigation }) => {
             className={`nav-link ${selectedComponent === 'contest' ? 'active' : ''}`}
             onClick={() => handleNavigation('contest')}
           >
-            <FiUsers /> Workshop
+            <FiUsers /> Bootcamp
           </button>
         </li>
         <li className="nav-item">

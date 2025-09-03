@@ -57,7 +57,7 @@ const ContestManager = ({ setContestId }) => {
     <div className="contest-manager">
       <div className="card">
         <div className="card-header">
-          <h5>{editContest ? 'Edit Workshop' : 'Create Workshop'}</h5>
+          <h5>{editContest ? 'Edit Bootcamp' : 'Create Bootcamp'}</h5>
         </div>
         <div className="card-body">
           {successMessage && <div className="alert-success">{successMessage}</div>}
@@ -73,7 +73,7 @@ const ContestManager = ({ setContestId }) => {
                 className="add-workshop-btn"
                 onClick={handleAddContest}
                 disabled={isSubmitting || loading}
-                aria-label="Add new workshop"
+                aria-label="Add new bootcamp"
               >
                 <svg
                   fill="none"
@@ -88,7 +88,7 @@ const ContestManager = ({ setContestId }) => {
                     d="M12 4v16m8-8H4"
                   />
                 </svg>
-                Add Workshop
+                Add Bootcamp
               </button>
             </div>
           )}

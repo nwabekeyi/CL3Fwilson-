@@ -3,12 +3,6 @@ import { useLocation } from "react-router-dom";
 import { Carousel } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-// Import background images for home (men's fashion)
-import BackgroundImage1 from "../../assets/images/heroImage.jpeg";
-import BackgroundImage2 from "../../assets/images/heroImage2.jpeg";
-import BackgroundImage3 from "../../assets/images/heroImage3.jpeg";
-
-// Placeholder images for wilster (women's fashion) and workshop
 import WilsterImage1 from "../../assets/images/wilster1.jpg";
 import WilsterImage2 from "../../assets/images/wilster2.jpg";
 import WilsterImage3 from "../../assets/images/wilster3.jpg";
@@ -16,27 +10,30 @@ import WorkshopImage1 from "../../assets/images/workshop1.jpg";
 import WorkshopImage2 from "../../assets/images/workshop2.jpg";
 import WorkshopImage3 from "../../assets/images/workshop3.jpg";
 
+
 const currentYear = new Date().getFullYear();
 
 function HomeBanner() {
-  const location = useLocation(); // Get the current path
+  const location = useLocation();
 
-  // Define content for each section
   const homeContent = [
     {
-      background: BackgroundImage1,
+      background:
+        "https://res.cloudinary.com/diym28aqy/image/upload/f_auto,q_auto/v1751880254/heroImage_l519fl.jpg",
       subtitle: `Men's Spring / Summer Collection ${currentYear}`,
       title: "Upgrade Your Wardrobe with Up to 30% Off",
       link: "/mensProduct",
     },
     {
-      background: BackgroundImage2,
+      background:
+        "https://res.cloudinary.com/diym28aqy/image/upload/f_auto,q_auto/v1751880197/heroImage2_sn4sxt.jpg",
       subtitle: `Latest Trends in Men's Fashion ${currentYear}`,
       title: "Stylish Fits for Every Occasion",
       link: "/mensProduct",
     },
     {
-      background: BackgroundImage3,
+      background:
+        "https://res.cloudinary.com/diym28aqy/image/upload/f_auto,q_auto/v1751880356/heroImage3_co6kny.jpg",
       subtitle: `Men's Premium Collection ${currentYear}`,
       title: "Discover Timeless Styles and Modern Comfort",
       link: "/mensProduct",
@@ -67,13 +64,13 @@ function HomeBanner() {
   const workshopContent = [
     {
       background: WorkshopImage1,
-      subtitle: `Fashion Workshop ${currentYear}`,
-      title: "Join Our Annual Fashion Design Workshop",
+      subtitle: `Fashion Bootcamp ${currentYear}`,
+      title: "Join Our Annual Fashion Design Bootcamp",
       link: "#registration-form",
     },
     {
       background: WorkshopImage2,
-      subtitle: `Workshop Registration Now Open`,
+      subtitle: `Bootcamp Registration Now Open`,
       title: "Learn from Other Fashion Designers",
       link: "#registration-form",
     },
@@ -85,7 +82,6 @@ function HomeBanner() {
     },
   ];
 
-  // Determine which content to display based on the path
   let contentToDisplay;
   switch (location.pathname) {
     case "/":
@@ -98,10 +94,9 @@ function HomeBanner() {
       contentToDisplay = workshopContent;
       break;
     default:
-      contentToDisplay = homeContent; // Fallback to home content
+      contentToDisplay = homeContent;
   }
 
-  // Handle smooth scrolling for registration form
   const handleScrollToForm = (e) => {
     e.preventDefault();
     const formElement = document.querySelector("#registration-form");
@@ -111,9 +106,8 @@ function HomeBanner() {
   };
 
   return (
-    <Carousel>
+    <Carousel fade controls={true} indicators={true} interval={4000}>
       {contentToDisplay.map((item, index) => {
-        // Determine link text based on pathname
         const linkText =
           location.pathname === "/wilster"
             ? "coming soon"
@@ -122,7 +116,13 @@ function HomeBanner() {
             : "shop now";
 
         return (
-          <Carousel.Item key={index}>
+          <Carousel.Item key={index} className="carousel-item">
+            <img
+              src={item.background}
+              alt={`slide-${index}`}
+              className="d-none"
+              loading="lazy"
+            />
             <div
               className="d-block w-100 main_slider"
               style={{

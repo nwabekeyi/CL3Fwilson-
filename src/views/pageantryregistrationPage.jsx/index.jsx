@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import Banner1 from "../../assets/images/workshop4.jpg";
 import HomeBanner from "../../components/HomeBanner";
+import useApi from "../../hooks/useApi"; // Import the useApi hook
 
 function PageantRegistrationPage() {
+  const { request, loading: isSubmitting, error: apiError } = useApi(); // Use the hook
   const [formData, setFormData] = useState({
     fullName: "",
     brandName: "",
@@ -20,7 +22,6 @@ function PageantRegistrationPage() {
 
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,35 +38,34 @@ function PageantRegistrationPage() {
       newErrors.age = "Age must be between 18 and 35";
     if (!formData.bio.trim() || formData.bio.length < 50)
       newErrors.bio = "Bio must be at least 50 characters";
+    if (!formData.gender) newErrors.gender = "Gender is required";
+    if (!formData.nationality.trim()) newErrors.nationality = "Nationality is required";
+    if (!formData.stateOfOrigin.trim()) newErrors.stateOfOrigin = "State of Origin is required";
+    if (!formData.location.trim()) newErrors.location = "Current Location is required";
+    if (!formData.phone.trim()) newErrors.phone = "Phone Number is required";
     return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setErrors({}); // Clear previous errors
 
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      setIsSubmitting(false);
       return;
     }
 
     try {
-      const formDataToSend = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        formDataToSend.append(key, value);
-      });
-
-      const response = await fetch("https://formspree.io/f/mdkzodwy", {
+      // Send form data to backend API using useApi hook
+      await request({
+        url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/send-registration-email`, // Replace with your backend URL
         method: "POST",
-        body: formDataToSend,
-        headers: {
-          Accept: "application/json",
+        data: {
+          ...formData,
+          age: parseInt(formData.age), // Ensure age is sent as a number
         },
       });
-
-      if (!response.ok) throw new Error("Form submission failed");
 
       setSubmitted(true);
       setFormData({
@@ -83,13 +83,11 @@ function PageantRegistrationPage() {
         bio: "",
       });
     } catch (error) {
-      console.error(error);
+      console.error("Submission error:", error);
       setErrors((prev) => ({
         ...prev,
-        submission: "Submission failed. Please try again later.",
+        submission: error.message || "Submission failed. Please try again later.",
       }));
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -113,7 +111,7 @@ function PageantRegistrationPage() {
               <h2>About Project Cl3fwilson</h2>
             </div>
             <p className="mt-3">
-              Project Cl3fwilson is a semi-annual fashion workshop and competition that
+              Project Cl3fwilson is a semi-annual fashion bootcamp and competition that
               creates a platform for fashion designers. It works to educate emerging
               fashion designers about sustainable theories, fashion business, branding,
               and marketing.

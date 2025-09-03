@@ -20,7 +20,7 @@ const ContestList = ({
 
   return (
     <div className="contest-list-container">
-      <h5>Workshop List</h5>
+      <h5>Bootcamp List</h5>
       {contests.length === 0 ? (
         <p>No contests available. Create one to start managing participants.</p>
       ) : (

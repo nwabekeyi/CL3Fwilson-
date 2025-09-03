@@ -64,7 +64,7 @@ const ContestForm = ({
           className="btn-primary"
           disabled={isSubmitting || loading}
         >
-          {isSubmitting || loading ? 'Saving...' : editContest ? 'Update Workshop' : 'Create Workshop'}
+          {isSubmitting || loading ? 'Saving...' : editContest ? 'Update Bootcamp' : 'Create Bootcamp'}
         </button>
         <button
           type="button"

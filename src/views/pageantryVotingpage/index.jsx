@@ -1,3 +1,4 @@
+// src/components/PageantVotingPage.jsx
 import React, { useEffect, useState } from 'react';
 import useApi from '../../hooks/useApi';
 import bgImage from '../../assets/images/voting.png';
@@ -40,7 +41,7 @@ function PageantVotingPage() {
     console.log('Starting fetchContestsAndParticipants');
     try {
       const response = await request({
-        url: import.meta.env.VITE_CONTEST_ENDPOINT, // e.g., http://localhost:3000/contests
+        url: `${import.meta.env.VITE_CONTEST_ENDPOINT}`, // Ensure correct endpoint
         method: 'GET',
       });
       console.log('Raw API response:', JSON.stringify(response, null, 2));
@@ -51,13 +52,14 @@ function PageantVotingPage() {
 
       const contestsWithParticipants = [];
       for (const contest of data) {
-        console.log(`Fetching participants for contest ${contest.id}`);
+        const contestId = contest._id; // Use _id directly
+        console.log(`Fetching participants for contest ${contestId}`);
         try {
           const participantsData = await request({
-            url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${contest.id}/participants`,
+            url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${contestId}/participants`,
             method: 'GET',
           });
-          console.log(`Participants for contest ${contest.id}:`, participantsData);
+          console.log(`Participants for contest ${contestId}:`, participantsData);
 
           // Filter participants to only include those with evicted: false
           const formattedParticipants = (Array.isArray(participantsData) ? participantsData : [])
@@ -72,14 +74,16 @@ function PageantVotingPage() {
 
           contestsWithParticipants.push({
             ...contest,
+            id: contest._id, // Ensure id is set for frontend use
             participants: formattedParticipants,
           });
         } catch (err) {
-          console.error(`Error fetching participants for contest ${contest.id}:`, err);
+          console.error(`Error fetching participants for contest ${contestId}:`, err);
           contestsWithParticipants.push({
             ...contest,
+            id: contest._id,
             participants: [],
-            error: 'participants cannot be fetched, something went wrong',
+            error: 'Failed to fetch participants.',
           });
         }
       }
@@ -97,7 +101,7 @@ function PageantVotingPage() {
       }
     } catch (err) {
       console.error('Error fetching contests:', err);
-      setMessage('participants cannot be fetched, something went wrong');
+      setMessage('Failed to fetch contests.');
     } finally {
       setIsLoading(false);
       console.log('Finished fetchContestsAndParticipants, isLoading:', false);
@@ -109,6 +113,7 @@ function PageantVotingPage() {
   }, [request]);
 
   const openVoteModal = (participant, contestId) => {
+    console.log('Opening vote modal:', { participant, contestId });
     setSelectedParticipant(participant);
     setSelectedContestId(contestId);
     setVoterDetails({ voterName: '', email: '', voteCount: 1 });
@@ -143,14 +148,7 @@ function PageantVotingPage() {
     return errors;
   };
 
-  const saveVote = async (
-    response,
-    voterName,
-    email,
-    voteCount,
-    participant,
-    contestId
-  ) => {
+  const saveVote = async (response, voterName, email, voteCount, participant, contestId) => {
     console.log('Saving vote:', { voterName, email, voteCount, participant, contestId });
     try {
       await request({
@@ -190,12 +188,14 @@ function PageantVotingPage() {
       setMessage('Thank you for voting!');
     } catch (error) {
       console.error('Error saving vote:', error);
-      setMessage('participants cannot be fetched, something went wrong');
+      setMessage('Failed to save vote.');
     }
   };
 
   const handleVote = async (e) => {
     e.preventDefault();
+    console.log('handleVote called:', { selectedParticipant, selectedContestId });
+
     const errors = validateVoterForm();
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -203,6 +203,7 @@ function PageantVotingPage() {
     }
 
     if (!selectedParticipant || !selectedContestId) {
+      console.error('Invalid selection:', { selectedParticipant, selectedContestId });
       setMessage('Invalid participant or contest selected.');
       return;
     }
@@ -255,7 +256,7 @@ function PageantVotingPage() {
       handler.openIframe();
     } catch (error) {
       console.error('Payment initiation error:', error);
-      setMessage('participants cannot be fetched, something went wrong');
+      setMessage('Failed to initiate payment.');
     }
   };
 
@@ -282,8 +283,6 @@ function PageantVotingPage() {
 
         {(isLoading || apiLoading) && <div className="loading">Loading contests...</div>}
         {message && <div className="vote-message">{message}</div>}
-        {/* Remove direct apiError display */}
-        {/* {apiError && <div className="vote-message">{apiError}</div>} */}
 
         {!isLoading && contests.length === 0 && (
           <p>No active contests found. Please check back later.</p>

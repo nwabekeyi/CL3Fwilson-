@@ -65,10 +65,10 @@ function AboutUsPage() {
               <h2>Project Cl3fwilson</h2>
             </div>
             <p>
-            Project Cl3fwilson is a semi-annual fashion workshop/competition that creates a platform for fashion designers. It works to educate fashion designers about sustainable theories.
+            Project Cl3fwilson is a semi-annual fashion bootcampcompetition that creates a platform for fashion designers. It works to educate fashion designers about sustainable theories.
             </p>
             <p>
-            Project cl3fwilson is a Workshop that educates emerging fashion designers on Fashion Business, Branding, and Marketing.
+            Project cl3fwilson is a Bootcamp that educates emerging fashion designers on Fashion Business, Branding, and Marketing.
             </p>
           </div>
         </div>
