@@ -1,4 +1,3 @@
-// src/hooks/useContestManager.js
 import { useState, useEffect, useCallback } from 'react';
 import useApi from './useApi';
 
@@ -38,10 +37,9 @@ export const useContestManager = (setContestId) => {
         url: `${import.meta.env.VITE_CONTEST_ENDPOINT}`,
         method: 'GET',
       });
-      // Transform _id to id for consistency in frontend
       const transformedContests = data.map((contest) => ({
         ...contest,
-        id: contest._id, // Map _id to id
+        id: contest._id,
       }));
       setContests(transformedContests);
 
@@ -60,7 +58,7 @@ export const useContestManager = (setContestId) => {
             ...participantData.map((p) => ({
               ...p,
               contestId: contest.id,
-              id: p._id, // Map participant's _id to id
+              id: p._id,
             }))
           );
         } catch (err) {
@@ -82,6 +80,12 @@ export const useContestManager = (setContestId) => {
           setErrors({ fetch: 'No valid contests found' });
         }
       }
+      // Clear fetch-related errors on success
+      setErrors((prev) => ({
+        ...prev,
+        fetch: undefined,
+        fetchParticipants: undefined,
+      }));
     } catch (err) {
       console.error('Fetch contests error:', err);
       setErrors({ fetch: err.message || 'Failed to fetch contests' });
@@ -100,6 +104,8 @@ export const useContestManager = (setContestId) => {
           method: 'GET',
         });
         setParticipants(data.map((p) => ({ ...p, contestId, id: p._id })));
+        // Clear fetchParticipants error on success
+        setErrors((prev) => ({ ...prev, fetchParticipants: undefined }));
       } catch (err) {
         console.error('Fetch participants error:', err);
         setErrors({ fetchParticipants: err.message || 'Failed to fetch participants' });
@@ -121,10 +127,19 @@ export const useContestManager = (setContestId) => {
 
   const validateParticipantForm = useCallback(() => {
     const newErrors = {};
-    if (!participantFormData.fullName.trim()) newErrors.fullName = 'Full name is required';
-    if (!participantFormData.email.trim()) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(participantFormData.email)) newErrors.email = 'Invalid email format';
-    if (!participantFormData.about.trim()) newErrors.about = 'About is required';
+    if (!participantFormData.fullName.trim()) {
+      newErrors.fullName = 'Full name is required';
+    }
+    if (!participantFormData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(participantFormData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+    if (!participantFormData.about.trim()) {
+      newErrors.about = 'About is required';
+    } else if (participantFormData.about.trim().length < 50) {
+      newErrors.about = 'About must be at least 50 characters long';
+    }
     return newErrors;
   }, [participantFormData]);
 
@@ -182,7 +197,7 @@ export const useContestManager = (setContestId) => {
 
         setFormData({ name: '', startDate: null, endDate: null });
         setEditContest(null);
-        setErrors({});
+        setErrors({}); // Already clears errors on success
         setShowForm(false);
         await fetchContests();
         setTimeout(() => setSuccessMessage(''), 3000);
@@ -230,6 +245,7 @@ export const useContestManager = (setContestId) => {
 
         setSuccessMessage('Participant added successfully!');
         setParticipantFormData({ fullName: '', email: '', about: '', photo: null });
+        setErrors({}); // Clear errors on success
         setShowAddParticipantModal(false);
         await fetchParticipants(selectedContestId);
         setTimeout(() => setSuccessMessage(''), 3000);
@@ -265,7 +281,6 @@ export const useContestManager = (setContestId) => {
 
       setIsSubmitting(true);
       try {
-        // Fetch participant to get participantId
         const participant = await request({
           url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${selectedContestId}/participants/${selectedParticipantCodeName}`,
           method: 'GET',
@@ -286,6 +301,7 @@ export const useContestManager = (setContestId) => {
 
         setSuccessMessage('Votes added successfully!');
         setVoteFormData({ voteCount: '', voterName: '' });
+        setErrors({}); // Clear errors on success
         setShowAddVotesModal(false);
         await fetchParticipants(selectedContestId);
         setTimeout(() => setSuccessMessage(''), 3000);
@@ -328,6 +344,7 @@ export const useContestManager = (setContestId) => {
             method: 'PATCH',
           });
           setSuccessMessage(`Participant ${codeName} evicted successfully!`);
+          setErrors({}); // Clear errors on success
           await fetchParticipants(contestId);
           setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err) {
@@ -368,6 +385,7 @@ export const useContestManager = (setContestId) => {
             method: 'DELETE',
           });
           setSuccessMessage(`Participant ${codeName} deleted successfully!`);
+          setErrors({}); // Clear errors on success
           await fetchParticipants(contestId);
           setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err) {
@@ -389,21 +407,21 @@ export const useContestManager = (setContestId) => {
 
   const handleResetContest = useCallback(() => {
     setFormData({ name: '', startDate: null, endDate: null });
-    setErrors({});
+    setErrors({}); // Already clears errors
     if (!editContest) setSuccessMessage('Form reset successfully!');
     setTimeout(() => setSuccessMessage(''), 3000);
   }, [editContest]);
 
   const handleResetParticipant = useCallback(() => {
     setParticipantFormData({ fullName: '', email: '', about: '', photo: null });
-    setErrors({});
+    setErrors({}); // Already clears errors
     setSuccessMessage('Participant form reset successfully!');
     setTimeout(() => setSuccessMessage(''), 3000);
   }, []);
 
   const handleResetVotes = useCallback(() => {
     setVoteFormData({ voteCount: '', voterName: '' });
-    setErrors({});
+    setErrors({}); // Already clears errors
     setSuccessMessage('Vote form reset successfully!');
     setTimeout(() => setSuccessMessage(''), 3000);
   }, []);
@@ -448,7 +466,7 @@ export const useContestManager = (setContestId) => {
       });
       setEditContest(contest);
       setContestId(contest.id);
-      setErrors({});
+      setErrors({}); // Clear errors when editing
       setShowForm(true);
     },
     [setContestId]
@@ -468,6 +486,7 @@ export const useContestManager = (setContestId) => {
             method: 'DELETE',
           });
           setSuccessMessage('Contest deleted successfully!');
+          setErrors({}); // Clear errors on success
           await fetchContests();
           const validContest = contests.find((c) => isValidObjectId(c.id));
           setContestId(validContest ? validContest.id : null);
@@ -488,6 +507,7 @@ export const useContestManager = (setContestId) => {
         return;
       }
       setContestId(contestId);
+      setErrors({}); // Clear errors when selecting a contest
     },
     [setContestId]
   );
@@ -496,7 +516,7 @@ export const useContestManager = (setContestId) => {
     setShowForm(true);
     setFormData({ name: '', startDate: null, endDate: null });
     setEditContest(null);
-    setErrors({});
+    setErrors({}); // Already clears errors
   }, []);
 
   const handleAddParticipant = useCallback(
@@ -508,7 +528,7 @@ export const useContestManager = (setContestId) => {
       console.log('handleAddParticipant called with contestId:', contestId);
       setSelectedContestId(contestId);
       setParticipantFormData({ fullName: '', email: '', about: '', photo: null });
-      setErrors({});
+      setErrors({}); // Already clears errors
       setShowAddParticipantModal(true);
       setShowViewParticipantsModal(false);
       setShowAddVotesModal(false);
@@ -527,6 +547,7 @@ export const useContestManager = (setContestId) => {
       setSelectedContestId(contestId);
       setParticipants([]);
       fetchParticipants(contestId);
+      setErrors({}); // Clear errors when viewing participants
       setShowViewParticipantsModal(true);
       setShowAddParticipantModal(false);
       setShowAddVotesModal(false);
@@ -535,23 +556,42 @@ export const useContestManager = (setContestId) => {
     [fetchParticipants, setContestId]
   );
 
-  const handleAddVotes = useCallback((contestId, participantCodeName) => {
-    if (!contestId || !isValidObjectId(contestId)) {
-      setErrors({ submission: 'Valid contestId is required' });
-      return;
-    }
-    if (!participantCodeName) {
-      setErrors({ submission: 'Participant codeName is required' });
-      return;
-    }
-    console.log('handleAddVotes called with contestId:', contestId, 'participantCodeName:', participantCodeName);
-    setSelectedContestId(contestId);
-    setSelectedParticipantCodeName(participantCodeName);
-    setVoteFormData({ voteCount: '', voterName: '' });
-    setErrors({});
-    setShowAddVotesModal(true);
+  const handleAddVotes = useCallback(
+    (contestId, participantCodeName) => {
+      if (!contestId || !isValidObjectId(contestId)) {
+        setErrors({ submission: 'Valid contestId is required' });
+        return;
+      }
+      if (!participantCodeName) {
+        setErrors({ submission: 'Participant codeName is required' });
+        return;
+      }
+      console.log('handleAddVotes called with contestId:', contestId, 'participantCodeName:', participantCodeName);
+      setSelectedContestId(contestId);
+      setSelectedParticipantCodeName(participantCodeName);
+      setVoteFormData({ voteCount: '', voterName: '' });
+      setErrors({}); // Already clears errors
+      setShowAddVotesModal(true);
+      setShowAddParticipantModal(false);
+      setShowViewParticipantsModal(false);
+    },
+    []
+  );
+
+  // Handlers for modal closure to clear errors
+  const handleCloseAddParticipantModal = useCallback(() => {
     setShowAddParticipantModal(false);
+    setErrors({});
+  }, []);
+
+  const handleCloseViewParticipantsModal = useCallback(() => {
     setShowViewParticipantsModal(false);
+    setErrors({});
+  }, []);
+
+  const handleCloseAddVotesModal = useCallback(() => {
+    setShowAddVotesModal(false);
+    setErrors({});
   }, []);
 
   return {
@@ -573,9 +613,9 @@ export const useContestManager = (setContestId) => {
     loading,
     apiError,
     setShowForm,
-    setShowAddParticipantModal,
-    setShowViewParticipantsModal,
-    setShowAddVotesModal,
+    setShowAddParticipantModal: handleCloseAddParticipantModal,
+    setShowViewParticipantsModal: handleCloseViewParticipantsModal,
+    setShowAddVotesModal: handleCloseAddVotesModal,
     handleChange,
     handleParticipantChange,
     handleVoteChange,

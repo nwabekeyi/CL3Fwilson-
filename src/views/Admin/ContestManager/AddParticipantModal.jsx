@@ -1,4 +1,3 @@
-// src/components/ContestManager/AddParticipantModal.jsx
 import React from 'react';
 import { FiX } from 'react-icons/fi';
 
@@ -82,7 +81,11 @@ const AddParticipantModal = ({
                   onChange={handleParticipantChange}
                   required
                   disabled={isSubmitting || loading}
+                  minLength={50}
                 />
+                <div className="character-count">
+                  {participantFormData.about.length}/50 characters
+                </div>
                 {errors.about && <div className="error-feedback">{errors.about}</div>}
               </div>
               <div className="form-group">
