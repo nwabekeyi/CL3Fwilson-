@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import TopNavBar from "../components/TopNavBar";
 import NavBarContainer from "../components/NavBar/NavBarContainer";
-import MobileMenu from "../components/MobileMenu";
 import Footer from "../components/Footer";
 
 const BaseLayout = ({ children }) => {
   const [topHeaderClass, setTopHeaderClass] = useState("show");
+
 
   const handleScroll = useCallback(() => {
     if (window.scrollY >= 50) {

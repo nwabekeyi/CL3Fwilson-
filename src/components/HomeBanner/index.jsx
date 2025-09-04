@@ -10,7 +10,6 @@ import WorkshopImage1 from "../../assets/images/workshop1.jpg";
 import WorkshopImage2 from "../../assets/images/workshop2.jpg";
 import WorkshopImage3 from "../../assets/images/workshop3.jpg";
 
-
 const currentYear = new Date().getFullYear();
 
 function HomeBanner() {
@@ -106,53 +105,55 @@ function HomeBanner() {
   };
 
   return (
-    <Carousel fade controls={true} indicators={true} interval={4000}>
-      {contentToDisplay.map((item, index) => {
-        const linkText =
-          location.pathname === "/wilster"
-            ? "coming soon"
-            : location.pathname === "/workshop"
-            ? "Register"
-            : "shop now";
+    <div style={{ backgroundColor: "black", width: "100%", height: "100%" }}>
+      <Carousel fade controls={true} indicators={true} interval={4000}>
+        {contentToDisplay.map((item, index) => {
+          const linkText =
+            location.pathname === "/wilster"
+              ? "coming soon"
+              : location.pathname === "/workshop"
+              ? "Register"
+              : "shop now";
 
-        return (
-          <Carousel.Item key={index} className="carousel-item">
-            <img
-              src={item.background}
-              alt={`slide-${index}`}
-              className="d-none"
-              loading="lazy"
-            />
-            <div
-              className="d-block w-100 main_slider"
-              style={{
-                backgroundImage: `url(${item.background})`,
-              }}
-            >
-              <div className="container fill_height">
-                <div className="row align-items-center fill_height">
-                  <div className="col">
-                    <div className="main_slider_content" data-aos="fade-right">
-                      <h6>{item.subtitle}</h6>
-                      <h1>{item.title}</h1>
-                      <div className="red_button shop_now_button">
-                        {linkText === "Register" ? (
-                          <a href="#registration-form" onClick={handleScrollToForm}>
-                            {linkText}
-                          </a>
-                        ) : (
-                          <Link to={item.link}>{linkText}</Link>
-                        )}
+          return (
+            <Carousel.Item key={index} className="carousel-item">
+              <img
+                src={item.background}
+                alt={`slide-${index}`}
+                className="d-none"
+                loading="lazy"
+              />
+              <div
+                className="d-block w-100 main_slider"
+                style={{
+                  backgroundImage: `url(${item.background})`,
+                }}
+              >
+                <div className="container fill_height">
+                  <div className="row align-items-center fill_height">
+                    <div className="col">
+                      <div className="main_slider_content" data-aos="fade-right">
+                        <h6>{item.subtitle}</h6>
+                        <h1>{item.title}</h1>
+                        <div className="red_button shop_now_button">
+                          {linkText === "Register" ? (
+                            <a href="#registration-form" onClick={handleScrollToForm}>
+                              {linkText}
+                            </a>
+                          ) : (
+                            <Link to={item.link}>{linkText}</Link>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </Carousel.Item>
-        );
-      })}
-    </Carousel>
+            </Carousel.Item>
+          );
+        })}
+      </Carousel>
+    </div>
   );
 }
 

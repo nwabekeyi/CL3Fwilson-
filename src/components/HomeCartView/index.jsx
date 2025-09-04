@@ -131,7 +131,7 @@ const HomeCartView = (props) => {
       <Modal {...props} className="right">
         <Modal.Header closeButton>
           <Modal.Title>Your Cart</Modal.Title>
-          {items.length > 0 && (
+          {/* {items.length > 0 && (
             <span
               className="checkout--btn"
               onClick={() => setShowDetailsModal(true)}
@@ -139,7 +139,7 @@ const HomeCartView = (props) => {
             >
               checkout
             </span>
-          )}
+          )} */}
         </Modal.Header>
 
         <Modal.Body className="modal-body-content">
