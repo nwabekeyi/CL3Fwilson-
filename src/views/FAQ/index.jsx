@@ -48,12 +48,12 @@ function FAQPage() {
         {
           question: "How can I vote for a contestant?",
           answer:
-            "Visit the 'Workshop' page under the Workshop menu  and cast your vote.",
+            "Visit the 'Bootcamp' page under the Bootcamp menu  and cast your vote.",
         },
         {
-          question: "Who is eligible to participate in the workshop?",
+          question: "Who is eligible to participate in the bootcamp?",
           answer:
-            "The workshop is open to individuals aged 18-35 who are registered on our platform. Contestants must submit a profile with photos and a bio. Registration is free and available on the 'Register' page under Workshop.",
+            "The bootcamp is open to individuals aged 18-35 who are registered on our platform. Contestants must submit a profile with photos and a bio. Registration is free and available on the 'Register' page under bootcamp.",
         },
         {
           question: "Can I vote multiple times for the same contestant?",

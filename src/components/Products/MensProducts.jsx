@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { setSelectedProduct } from "../../redux/slices/productSlice";
 import SingleProduct from "./SingleProduct";
 import useProductManager from "../../hooks/useProductManager";
@@ -10,6 +10,8 @@ function MensProducts({ home = false }) {
   const dispatch = useDispatch();
   const { products, loading, error } = useProductManager();
   const { conversionRates, loading: rateLoading, error: rateError } = useConversionRate();
+  const path = useLocation().pathname;
+  const isHomePage = path === "/";
 
   const addToBag = (id) => {
     console.log(`Added product ${id} to cart`);
@@ -20,7 +22,7 @@ function MensProducts({ home = false }) {
   };
 
   const mensProducts = products.filter((product) => product.department === "cl3fwilson");
-  const displayedProducts = home ? mensProducts.slice(0, 9) : mensProducts;
+  const displayedProducts = isHomePage ? mensProducts.slice(0, 12) : mensProducts;
 
   return (
     <div className="mens-products-page">
@@ -64,9 +66,7 @@ function MensProducts({ home = false }) {
             {displayedProducts.map((product) => (
               <div
                 key={product.id}
-                className="col-lg-4 col-md-6 col-6" // Changed to col-6 for 2 per row on mobile
-                data-aos="fade-up"
-                data-aos-delay={displayedProducts.indexOf(product) * 100}
+                className="product-con col-lg-4 col-md-6 col-6"
               >
                 <SingleProduct
                   productItem={product}
@@ -79,7 +79,7 @@ function MensProducts({ home = false }) {
           </div>
         )}
 
-        {home && mensProducts.length > 9 && (
+        {isHomePage && home && mensProducts.length > 12 && (
           <div className="view-more-link" style={{ marginTop: "2rem", textAlign: "center" }}>
             <Link
               to="/mensProduct"

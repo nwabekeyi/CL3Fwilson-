@@ -14,7 +14,7 @@ const MensSectionTwo = () => {
         heading={
           <>
             THE<br />
-            SATORIAL<br />
+            SARTORIAL<br />
             CODE
           </>
         }

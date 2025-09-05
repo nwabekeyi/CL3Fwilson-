@@ -115,7 +115,7 @@ const NavBar = () => {
                 </li>
                 <li className="dropdown">
                   <Link to="/workshop" className="dropdown_toggle">
-                    workshop <i className="fa fa-angle-down" aria-hidden="true"></i>
+                    bootcamp <i className="fa fa-angle-down" aria-hidden="true"></i>
                   </Link>
                   <ul className="dropdown_menu">
                     <li><Link to="/workshop">Project Cl3fwilson</Link></li>

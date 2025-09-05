@@ -11,7 +11,6 @@ const SingleProduct = ({ product, postCart }) => {
   });
   const [preferredCurrency, setPreferredCurrency] = useState("NGN");
 
-  // Retrieve preferredCurrency from sessionStorage
   useEffect(() => {
     const storedCurrency = sessionStorage.getItem("preferredCurrency");
     if (storedCurrency && ["NGN", "USD", "EUR"].includes(storedCurrency)) {
@@ -26,7 +25,6 @@ const SingleProduct = ({ product, postCart }) => {
   };
   const currencySymbol = currencySymbols[preferredCurrency] || "₦";
 
-  // Function to convert NGN price to selected currency
   const convertPrice = (ngnPrice, currency) => {
     if (!ngnPrice || isNaN(ngnPrice)) return 0;
     if (!conversionRates || !conversionRates[currency] || rateLoading) {
@@ -35,7 +33,6 @@ const SingleProduct = ({ product, postCart }) => {
     return Number((ngnPrice * conversionRates[currency]).toFixed(2));
   };
 
-  // Dummy product for when no product is provided
   const dummyProduct = {
     id: "dummy",
     name: "Product Not Available",
@@ -46,14 +43,11 @@ const SingleProduct = ({ product, postCart }) => {
     description: "This product is currently unavailable. Please check back later or browse other items.",
   };
 
-  // Use the product prop or dummyProduct
   const displayProduct = product || dummyProduct;
   const isDummy = displayProduct === dummyProduct;
 
-  // Convert prices for display
   const convertedPrice = convertPrice(displayProduct.price, preferredCurrency);
 
-  // Set default image when product changes
   useEffect(() => {
     if (displayProduct.images?.length > 0 && !state.pic) {
       setState((prev) => ({
@@ -86,7 +80,7 @@ const SingleProduct = ({ product, postCart }) => {
     if (!isDummy) {
       postCart({
         productId: displayProduct.id,
-        quantity: state.quantity, // Pass the selected quantity
+        quantity: state.quantity,
         variantDetails: {
           imagePath: state.pic || displayProduct.images[0],
           title: displayProduct.name,
@@ -94,9 +88,6 @@ const SingleProduct = ({ product, postCart }) => {
           price: displayProduct.price,
         },
       })
-        .then((res) => {
-          console.log("Cart updated:", res);
-        })
         .catch((err) => {
           console.error("Error updating cart:", err);
         });
@@ -112,9 +103,7 @@ const SingleProduct = ({ product, postCart }) => {
           <div className="col">
             <div className="breadcrumbs d-flex flex-row align-items-center">
               <ul>
-                <li>
-                  <a href="/">Home</a>
-                </li>
+                <li><a href="/">Home</a></li>
                 <li>
                   <a href="#">
                     <i className="fa fa-angle-right" aria-hidden="true"></i>
@@ -179,7 +168,11 @@ const SingleProduct = ({ product, postCart }) => {
                 <p>{displayProduct.description}</p>
               </div>
               <div className="product_price">
-                {currencySymbol}{convertedPrice.toFixed(2)}
+                {currencySymbol}
+                {convertedPrice.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </div>
               <ul className="star_rating">
                 <li><i className="fa fa-star" aria-hidden="true"></i></li>
@@ -208,7 +201,6 @@ const SingleProduct = ({ product, postCart }) => {
                 >
                   <a href="#">{isDummy ? "Unavailable" : "add to cart"}</a>
                 </div>
-      
               </div>
               <div className="delivery_info mt-3">
                 <h5>Delivery</h5>

@@ -1,13 +1,13 @@
-import { useState } from "react";
+// src/hooks/useParticipantForm.js
+import { useState } from 'react';
 
 export const useParticipantForm = () => {
   const [formData, setFormData] = useState({
-    fullName: "",
-    codeName: "",
-    email: "",
-    about: "",
-    photoURL: "",
-    votesToAdd: "0",
+    fullName: '',
+    email: '',
+    about: '',
+    photo: null,
+    votesToAdd: '0',
   });
 
   const [errors, setErrors] = useState({});
@@ -15,33 +15,36 @@ export const useParticipantForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    setErrors({ ...errors, [name]: "" });
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
-    if (!formData.codeName.trim()) newErrors.codeName = "Code name is required";
-    if (!formData.email || !formData.email.includes("@")) newErrors.email = "Valid email is required";
-    if (!formData.about || formData.about.length < 50) {
-      newErrors.about = "About must be at least 50 characters";
+    if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Invalid email address';
     }
-    const votesToAdd = parseInt(formData.votesToAdd);
-    if (isNaN(votesToAdd) || votesToAdd < 0) {
-      newErrors.votesToAdd = "Votes must be a non-negative number";
+    if (!formData.about.trim()) {
+      newErrors.about = 'About is required';
+    } else if (formData.about.length < 50) {
+      newErrors.about = 'About must be at least 50 characters';
+    }
+    if (formData.votesToAdd && isNaN(parseInt(formData.votesToAdd))) {
+      newErrors.votesToAdd = 'Votes to add must be a valid number';
     }
     return newErrors;
   };
 
   const resetForm = () => {
     setFormData({
-      fullName: "",
-      codeName: "",
-      email: "",
-      about: "",
-      photoURL: "",
-      votesToAdd: "0",
+      fullName: '',
+      email: '',
+      about: '',
+      photo: null,
+      votesToAdd: '0',
     });
     setErrors({});
   };
