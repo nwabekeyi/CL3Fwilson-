@@ -46,7 +46,7 @@ class Category extends Component {
     ) {
       let cart = this.props.postCart(params);
       cart.then(res => {
-        console.log(res);
+        return res;
       });
     } else {
       this.setState({ modalShow: true });
@@ -55,7 +55,6 @@ class Category extends Component {
 
   render() {
     const { products, applyFilters } = this.props;
-    console.log(this.props);
     return (
       <div className="container product_section_container">
         <div className="row">

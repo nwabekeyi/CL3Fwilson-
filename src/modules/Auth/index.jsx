@@ -8,7 +8,6 @@ class Auth {
     if (auth) {
       this.init();
     } else {
-      console.warn("Firebase auth not initialized. Ensure firebase/config.js is imported.");
     }
   }
 
@@ -19,12 +18,10 @@ class Auth {
       const parsed = JSON.parse(stored);
       // Handle string token from LoginForm
       if (typeof parsed === "string") {
-        console.warn("Auth: Converting string token to object");
         return { token: parsed };
       }
       return parsed;
     } catch (error) {
-      console.error("Auth: Error parsing auth token:", error);
       return {};
     }
   }
@@ -40,16 +37,13 @@ class Auth {
             email: user.email,
           };
           this.setUserToken(newToken);
-          console.log("Auth: User signed in:", { email: user.email, user_id: user.uid });
         }).catch((error) => {
-          console.error("Auth: Error getting token:", error);
         });
       } else {
         // Only clear if no backend token exists
         const currentToken = this.getToken();
         if (!currentToken) {
           this.logout();
-          console.log("Auth: No user signed in");
         }
       }
     });
@@ -74,11 +68,10 @@ class Auth {
 
   logout() {
     if (auth) {
-      signOut(auth).catch((error) => console.error("Auth: Sign out error:", error));
+      signOut(auth).catch((error) => {return "Auth: Sign out error:", error});
     }
     this.user_token = {};
     localStorage.removeItem("auth");
-    console.log("Auth: Logged out");
   }
 }
 

@@ -14,7 +14,7 @@ function MensProducts({ home = false }) {
   const isHomePage = path === "/";
 
   const addToBag = (id) => {
-    console.log(`Added product ${id} to cart`);
+    return `Added product ${id} to cart`;
   };
 
   const handleProductClick = (product) => {

@@ -46,7 +46,6 @@ export const useContestManager = (setContestId) => {
       const allParticipants = [];
       for (const contest of transformedContests) {
         if (!isValidObjectId(contest.id)) {
-          console.warn(`Invalid contestId: ${contest.id}`);
           continue;
         }
         try {
@@ -62,7 +61,6 @@ export const useContestManager = (setContestId) => {
             }))
           );
         } catch (err) {
-          console.warn(`Failed to fetch participants for contest ${contest.id}:`, err);
           setErrors((prev) => ({
             ...prev,
             [`fetchParticipants_${contest.id}`]: err.message || 'Failed to fetch participants',
@@ -87,7 +85,6 @@ export const useContestManager = (setContestId) => {
         fetchParticipants: undefined,
       }));
     } catch (err) {
-      console.error('Fetch contests error:', err);
       setErrors({ fetch: err.message || 'Failed to fetch contests' });
     }
   }, [request, editContest, setContestId]);
@@ -107,7 +104,6 @@ export const useContestManager = (setContestId) => {
         // Clear fetchParticipants error on success
         setErrors((prev) => ({ ...prev, fetchParticipants: undefined }));
       } catch (err) {
-        console.error('Fetch participants error:', err);
         setErrors({ fetchParticipants: err.message || 'Failed to fetch participants' });
       }
     },
@@ -202,7 +198,6 @@ export const useContestManager = (setContestId) => {
         await fetchContests();
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (err) {
-        console.error('Contest submit error:', err);
         setErrors({ submission: err.message || 'Failed to save contest' });
       } finally {
         setIsSubmitting(false);
@@ -250,7 +245,6 @@ export const useContestManager = (setContestId) => {
         await fetchParticipants(selectedContestId);
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (err) {
-        console.error('Participant submit error:', err);
         setErrors({ submission: err.message || 'Failed to add participant' });
       } finally {
         setIsSubmitting(false);
@@ -306,7 +300,6 @@ export const useContestManager = (setContestId) => {
         await fetchParticipants(selectedContestId);
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (err) {
-        console.error('Vote submit error:', err);
         setErrors({ submission: err.message || 'Failed to add votes' });
       } finally {
         setIsSubmitting(false);
@@ -338,7 +331,6 @@ export const useContestManager = (setContestId) => {
         setIsSubmitting(true);
         try {
           const evictionUrl = `${import.meta.env.VITE_CONTEST_ENDPOINT}/participants/evict/${codeName}`;
-          console.log(`Sending eviction request to: ${evictionUrl}`);
           await request({
             url: evictionUrl,
             method: 'PATCH',
@@ -348,11 +340,6 @@ export const useContestManager = (setContestId) => {
           await fetchParticipants(contestId);
           setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err) {
-          console.error('Eviction error:', {
-            message: err.message,
-            status: err.response?.status,
-            data: err.response?.data,
-          });
           setErrors({
             submission: err.response?.data?.error || err.message || 'Failed to evict participant. Please try again.',
           });
@@ -379,7 +366,6 @@ export const useContestManager = (setContestId) => {
         setIsSubmitting(true);
         try {
           const deleteUrl = `${import.meta.env.VITE_CONTEST_ENDPOINT}/participants/${codeName}`;
-          console.log(`Sending delete request to: ${deleteUrl}`);
           await request({
             url: deleteUrl,
             method: 'DELETE',
@@ -389,11 +375,6 @@ export const useContestManager = (setContestId) => {
           await fetchParticipants(contestId);
           setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err) {
-          console.error('Delete participant error:', {
-            message: err.message,
-            status: err.response?.status,
-            data: err.response?.data,
-          });
           setErrors({
             submission: err.response?.data?.error || err.message || 'Failed to delete participant. Please try again.',
           });
@@ -492,7 +473,6 @@ export const useContestManager = (setContestId) => {
           setContestId(validContest ? validContest.id : null);
           setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err) {
-          console.error('Delete contest error:', err);
           setErrors({ submission: err.message || 'Failed to delete contest' });
         }
       }
@@ -525,7 +505,6 @@ export const useContestManager = (setContestId) => {
         setErrors({ submission: 'Valid contestId is required' });
         return;
       }
-      console.log('handleAddParticipant called with contestId:', contestId);
       setSelectedContestId(contestId);
       setParticipantFormData({ fullName: '', email: '', about: '', photo: null });
       setErrors({}); // Already clears errors
@@ -543,7 +522,6 @@ export const useContestManager = (setContestId) => {
         setErrors({ submission: 'Valid contestId is required' });
         return;
       }
-      console.log('handleViewParticipants called with contestId:', contestId);
       setSelectedContestId(contestId);
       setParticipants([]);
       fetchParticipants(contestId);
@@ -566,7 +544,6 @@ export const useContestManager = (setContestId) => {
         setErrors({ submission: 'Participant codeName is required' });
         return;
       }
-      console.log('handleAddVotes called with contestId:', contestId, 'participantCodeName:', participantCodeName);
       setSelectedContestId(contestId);
       setSelectedParticipantCodeName(participantCodeName);
       setVoteFormData({ voteCount: '', voterName: '' });

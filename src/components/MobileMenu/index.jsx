@@ -32,14 +32,11 @@ const MobileMenu = ({ activeClass, onClose }) => {
   };
 
   const handleLogout = async () => {
-    console.log("handleLogout: Initiating logout...");
     try {
       await Auth.logout();
       window.dispatchEvent(new Event("storage"));
-      console.log("handleLogout: Logout successful");
       onClose(); // Close mobile menu
     } catch (error) {
-      console.error("handleLogout: Logout error:", error);
     }
   };
 

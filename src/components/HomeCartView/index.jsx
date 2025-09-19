@@ -103,14 +103,12 @@ const HomeCartView = (props) => {
               paymentReference: response.reference,
               createdAt: new Date().toISOString(),
             });
-            console.log("Sanitized order data:", JSON.stringify(orderData, null, 2));
             await addDoc(collection(db, "orders"), orderData);
             alert("Payment successful and order saved!");
             dispatch(clearCart());
             setShowDetailsModal(false);
             props.onHide();
           } catch (err) {
-            console.error("Error saving order to Firestore:", err);
             alert("Payment succeeded but order saving failed.");
           } finally {
             setIsPaystackLoading(false);

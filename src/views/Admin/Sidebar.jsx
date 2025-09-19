@@ -11,7 +11,6 @@ const Sidebar = ({ sidebarOpen, selectedComponent, handleNavigation }) => {
     const auth = getAuth();
     auth.signOut();
     navigate('/admin/login');
-    console.log('Logout clicked');
   };
 
   return (

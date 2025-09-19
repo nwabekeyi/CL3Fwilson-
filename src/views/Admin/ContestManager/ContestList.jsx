@@ -11,12 +11,6 @@ const ContestList = ({
   handleAddParticipant,
   handleViewParticipants,
 }) => {
-  console.log('ContestList render:', {
-    isSubmitting,
-    loading,
-    contests,
-    handlers: { handleEdit, handleDelete, handleAddParticipant, handleViewParticipants },
-  });
 
   return (
     <div className="contest-list-container">
@@ -36,9 +30,8 @@ const ContestList = ({
                     className="action-icon edit-icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log('Edit clicked for contest:', contest.id);
                       if (handleEdit) handleEdit(contest);
-                      else console.error('handleEdit is undefined');
+                      else{return 'handleEdit is undefined'};
                     }}
                     disabled={isSubmitting || loading}
                     aria-label="Edit contest"
@@ -50,9 +43,8 @@ const ContestList = ({
                     className="action-icon delete-icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log('Delete clicked for contest:', contest.id);
                       if (handleDelete) handleDelete(contest.id);
-                      else console.error('handleDelete is undefined');
+                      else {return 'handleDelete is undefined'};
                     }}
                     disabled={isSubmitting || loading}
                     aria-label="Delete contest"
@@ -64,9 +56,8 @@ const ContestList = ({
                     className="action-icon add-participant-icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log('Add Participant clicked for contest:', contest.id);
                       if (handleAddParticipant) handleAddParticipant(contest.id);
-                      else console.error('handleAddParticipant is undefined');
+                      else {return 'handleAddParticipant is undefined'};
                     }}
                     disabled={isSubmitting || loading}
                     aria-label="Add participant"
@@ -78,9 +69,7 @@ const ContestList = ({
                     className="action-icon view-participants-icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log('View Participants clicked for contest:', contest.id);
                       if (handleViewParticipants) handleViewParticipants(contest.id);
-                      else console.error('handleViewParticipants is undefined');
                     }}
                     disabled={isSubmitting || loading}
                     aria-label="View participants"

@@ -87,7 +87,6 @@ const ProductManager = () => {
       setSearchQuery(""); // Reset search query after adding product
     } catch (err) {
       alert(`Failed to add product: ${err.message}`);
-      console.error("Add product error:", err);
     }
   };
 
@@ -99,7 +98,6 @@ const ProductManager = () => {
         alert("Product deleted successfully!");
       } catch (err) {
         alert(`Failed to delete product: ${err.message}`);
-        console.error("Delete product error:", err);
       }
     }
   };
@@ -118,7 +116,6 @@ const ProductManager = () => {
       alert("Conversion rates updated successfully!");
     } catch (err) {
       alert(`Failed to update conversion rates: ${err.message}`);
-      console.error("Update rates error:", err);
     }
   };
 
@@ -194,7 +191,6 @@ const ProductManager = () => {
       setSearchQuery(""); // Reset search query after updating product
     } catch (err) {
       alert(`Failed to update product: ${err.message}`);
-      console.error("Update product error:", err);
     }
   };
 

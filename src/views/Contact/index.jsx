@@ -39,7 +39,6 @@ const ContactForm = () => {
         setStatus("Oops! Something went wrong. Please try again.");
       }
     } catch (error) {
-      console.error("Formspree submission error:", error);
       setStatus("Oops! Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
