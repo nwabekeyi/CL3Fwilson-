@@ -32,7 +32,7 @@ const WomensSectionOne = () => {
       <SectionContent
         heading="Chateau by Dusk(Wilster)"
         linkTo="/wilster"
-        buttonText="Coming soon"
+        buttonText="Shop Now"
       />
     </FixedBackgroundLayout>
   );
@@ -45,7 +45,7 @@ const WomensSectionTwo = () => {
       <SectionContent
         heading="Discover Timeless Beauty(By Wilster)"
         linkTo="/wilster"
-        buttonText="Coming soon"
+        buttonText="Shop Now"
       />
     </FixedBackgroundLayout>
   );

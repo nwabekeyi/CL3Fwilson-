@@ -3002,6 +3002,17 @@
   position: relative;
 }
 
+.women-products-banner {
+  height: 300px;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
 .products-banner-overlay {
   background-color: rgba(0, 0, 0, 0.5);
   color: white;

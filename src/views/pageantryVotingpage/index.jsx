@@ -304,7 +304,7 @@ function PageantVotingPage() {
                       {contest.participants.map((participant, index) => (
                         <div
                           key={participant.codeName}
-                          className="col-md-4 contestant-card"
+                          className="col-sm-12 col-md-4 col-lg-4 contestant-card"
                           data-aos="fade-up"
                           data-aos-delay={index * 100}
                           style={{ marginBottom: '20px' }}

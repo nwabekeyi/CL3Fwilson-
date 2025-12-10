@@ -132,18 +132,29 @@ function HomeBanner() {
                 <div className="container fill_height">
                   <div className="row align-items-center fill_height">
                     <div className="col">
-                      <div className="main_slider_content" data-aos="fade-right">
+                      <div
+                        className="main_slider_content"
+                        data-aos="fade-right"
+                      >
                         <h6>{item.subtitle}</h6>
                         <h1>{item.title}</h1>
-                        <div className="red_button shop_now_button">
-                          {linkText === "Register" ? (
-                            <a href="#registration-form" onClick={handleScrollToForm}>
-                              {linkText}
-                            </a>
-                          ) : (
-                            <Link to={item.link}>{linkText}</Link>
-                          )}
-                        </div>
+
+                        {/* HIDE BUTTON IF PAGE IS /wilster */}
+                        {location.pathname !== "/wilster" && (
+                          <div className="red_button shop_now_button">
+                            {linkText === "Register" ? (
+                              <a
+                                href="#registration-form"
+                                onClick={handleScrollToForm}
+                              >
+                                {linkText}
+                              </a>
+                            ) : (
+                              <Link to={item.link}>{linkText}</Link>
+                            )}
+                          </div>
+                        )}
+                        {/* END CONDITION */}
                       </div>
                     </div>
                   </div>

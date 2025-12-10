@@ -7,15 +7,6 @@ const Wilster = () => {
     <div>
       {/* Banner */}
       <HomeBanner />
-
-      {/* Coming Soon Content */}
-      <section className="wilster-content container">
-        <h2 className="wilster-heading">Wilster is Coming Soon</h2>
-        <p className="wilster-description">
-          A new era of fashion is on its way. Wilster will soon launch with a carefully curated selection of apparel and accessories designed for elegance and comfort.
-        </p>
-      </section>
-
       <WomensProducts wilster/>
     </div>
   );

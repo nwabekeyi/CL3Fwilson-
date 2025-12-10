@@ -27,7 +27,7 @@ function WomensProducts({ wilster = false }) {
   return (
     <div className="mens-products-page">
       <div
-        className="products-banner"
+        className="women-products-banner"
         style={{
           backgroundImage: `url(https://images.unsplash.com/photo-1507680432347-45e84e0436c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80)`,
         }}
@@ -55,10 +55,7 @@ function WomensProducts({ wilster = false }) {
           <div className="row">
             {displayedProducts.map((product) => (
               <div
-                key={product.id} // Use id from Firestore instead of _id
-                className="col-lg-4 col-md-6 col-sm-12"
-                data-aos="fade-up"
-                data-aos-delay={displayedProducts.indexOf(product) * 100}
+              className="product-con col-lg-4 col-md-6 col-6"
               >
                 <SingleProduct
                   productItem={product}

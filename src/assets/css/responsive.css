@@ -513,9 +513,6 @@
 ************/
 
 @media only screen and (max-width: 479px) {
-  .product-con{
-    margin: 0;
-  }
   .logo_container a {
     font-size: 12px;
   }
@@ -890,6 +887,7 @@
 @media (max-width: 767px) {
   .products-banner {
     height: 200px;
+    margin-top: 100px;
   }
 
   .container-fluid, .contest-manager, .card-body{
@@ -911,7 +909,7 @@
     padding: 20px 40px;
   }
   .product_image{
-    height: 220px;
+    height: 210px;
   }
   .product_name div{
     font-size: 0.7em;
