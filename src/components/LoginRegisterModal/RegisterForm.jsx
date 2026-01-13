@@ -30,27 +30,22 @@ class RegisterForm extends Component {
   handleSubmit = () => {
     const { name, email, password } = this.state;
     if (!Validator(name, DEFAULT_RULE)) {
-      console.log("Name Error");
       return;
     }
     if (!Validator(email, EMAIL_RULE)) {
-      console.log("email Error");
       return;
     }
     if (!Validator(password, DEFAULT_RULE)) {
-      console.log("Password Error");
       return;
     }
     this.setState({ loading: true });
     this.props
       .userRegister(name, email, password, password)
       .then(res => {
-        console.log(res);
         this.props.loginClicked();
         this.setState({ loading: false });
       })
       .catch(error => {
-        console.log(error.response);
         this.setState({ loading: false });
       });
   };

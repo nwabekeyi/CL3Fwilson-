@@ -12,7 +12,6 @@ const AddParticipantModal = ({
   handleResetParticipant,
   setShowAddParticipantModal,
 }) => {
-  console.log('AddParticipantModal rendered:', { showAddParticipantModal });
 
   return (
     <div
@@ -32,7 +31,6 @@ const AddParticipantModal = ({
               type="button"
               className="close-icon"
               onClick={() => {
-                console.log('Close AddParticipantModal clicked');
                 setShowAddParticipantModal(false);
               }}
               disabled={isSubmitting || loading}

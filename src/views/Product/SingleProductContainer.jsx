@@ -8,7 +8,6 @@ const SingleProductContainer = () => {
 
   // Retrieve product from sessionStorage
   const selectedProduct = JSON.parse(sessionStorage.getItem("selectedProduct") || "{}");
-console.log(selectedProduct)
   // Pass postCart as a prop, dispatching the action when called
   const handlePostCart = (cartData) => {
     dispatch(postCart(cartData));

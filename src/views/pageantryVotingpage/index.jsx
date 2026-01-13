@@ -26,7 +26,6 @@ function PageantVotingPage() {
     const checkPaystack = () => {
       if (window.PaystackPop) {
         setPaystackLoaded(true);
-        console.log('Paystack loaded');
       } else {
         setTimeout(checkPaystack, 100);
       }
@@ -37,29 +36,23 @@ function PageantVotingPage() {
   // Fetch contests and participants
   const fetchContestsAndParticipants = async () => {
     setIsLoading(true);
-    console.log('VITE_CONTEST_ENDPOINT:', import.meta.env.VITE_CONTEST_ENDPOINT);
-    console.log('Starting fetchContestsAndParticipants');
     try {
       const response = await request({
         url: `${import.meta.env.VITE_CONTEST_ENDPOINT}`, // Ensure correct endpoint
         method: 'GET',
       });
-      console.log('Raw API response:', JSON.stringify(response, null, 2));
 
       // Handle unexpected response structure
       const data = Array.isArray(response) ? response : response?.contests || [];
-      console.log('Processed contests:', JSON.stringify(data, null, 2));
 
       const contestsWithParticipants = [];
       for (const contest of data) {
         const contestId = contest._id; // Use _id directly
-        console.log(`Fetching participants for contest ${contestId}`);
         try {
           const participantsData = await request({
             url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${contestId}/participants`,
             method: 'GET',
           });
-          console.log(`Participants for contest ${contestId}:`, participantsData);
 
           // Filter participants to only include those with evicted: false
           const formattedParticipants = (Array.isArray(participantsData) ? participantsData : [])
@@ -78,7 +71,6 @@ function PageantVotingPage() {
             participants: formattedParticipants,
           });
         } catch (err) {
-          console.error(`Error fetching participants for contest ${contestId}:`, err);
           contestsWithParticipants.push({
             ...contest,
             id: contest._id,
@@ -93,18 +85,15 @@ function PageantVotingPage() {
       const activeContests = contestsWithParticipants.filter(
         (contest) => new Date(contest.endDate) >= currentDate
       );
-      console.log('Active contests:', JSON.stringify(activeContests, null, 2));
 
       setContests(activeContests);
       if (activeContests.length === 0) {
         setMessage('No active contests found.');
       }
     } catch (err) {
-      console.error('Error fetching contests:', err);
       setMessage('Failed to fetch contests.');
     } finally {
       setIsLoading(false);
-      console.log('Finished fetchContestsAndParticipants, isLoading:', false);
     }
   };
 
@@ -113,7 +102,6 @@ function PageantVotingPage() {
   }, [request]);
 
   const openVoteModal = (participant, contestId) => {
-    console.log('Opening vote modal:', { participant, contestId });
     setSelectedParticipant(participant);
     setSelectedContestId(contestId);
     setVoterDetails({ voterName: '', email: '', voteCount: 1 });
@@ -149,7 +137,6 @@ function PageantVotingPage() {
   };
 
   const saveVote = async (response, voterName, email, voteCount, participant, contestId) => {
-    console.log('Saving vote:', { voterName, email, voteCount, participant, contestId });
     try {
       await request({
         url: `${import.meta.env.VITE_CONTEST_ENDPOINT}/${contestId}/votes`,
@@ -162,7 +149,6 @@ function PageantVotingPage() {
           paymentReference: response.reference,
         },
       });
-      console.log('Vote saved successfully');
 
       setContests((prev) =>
         prev.map((contest) =>
@@ -187,14 +173,12 @@ function PageantVotingPage() {
       setUserVotes((prev) => ({ ...prev, [participant.codeName]: true }));
       setMessage('Thank you for voting!');
     } catch (error) {
-      console.error('Error saving vote:', error);
       setMessage('Failed to save vote.');
     }
   };
 
   const handleVote = async (e) => {
     e.preventDefault();
-    console.log('handleVote called:', { selectedParticipant, selectedContestId });
 
     const errors = validateVoterForm();
     if (Object.keys(errors).length > 0) {
@@ -203,7 +187,6 @@ function PageantVotingPage() {
     }
 
     if (!selectedParticipant || !selectedContestId) {
-      console.error('Invalid selection:', { selectedParticipant, selectedContestId });
       setMessage('Invalid participant or contest selected.');
       return;
     }
@@ -218,13 +201,11 @@ function PageantVotingPage() {
     }
 
     if (!paystackLoaded || !window.PaystackPop) {
-      console.error('PaystackPop is not loaded.');
       setMessage('Paystack failed to load. Please refresh the page.');
       return;
     }
 
     const reference = `VOTE_${uuidv4()}`;
-    console.log('Initiating Paystack payment:', { reference, email, amount: voteCount * 50 * 100 });
 
     try {
       const handler = window.PaystackPop.setup({
@@ -240,13 +221,11 @@ function PageantVotingPage() {
           voterName,
         },
         callback: (response) => {
-          console.log('Paystack callback:', response);
           saveVote(response, voterName, email, voteCount, participant, contestId);
           setShowModal(false);
           setTimeout(() => setMessage(null), 3000);
         },
         onClose: () => {
-          console.log('Paystack payment canceled');
           setMessage('Payment was canceled.');
           setShowModal(false);
           setTimeout(() => setMessage(null), 3000);
@@ -255,7 +234,6 @@ function PageantVotingPage() {
 
       handler.openIframe();
     } catch (error) {
-      console.error('Payment initiation error:', error);
       setMessage('Failed to initiate payment.');
     }
   };

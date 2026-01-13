@@ -51,7 +51,6 @@ const ContestManager = ({ setContestId }) => {
     handleEvictParticipant, // Add this
   } = useContestManager(setContestId);
 
-  console.log('ContestManager modals:', { showAddParticipantModal, showAddVotesModal, showViewParticipantsModal });
 
   return (
     <div className="contest-manager">

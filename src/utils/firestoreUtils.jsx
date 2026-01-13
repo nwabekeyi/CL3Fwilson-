@@ -17,7 +17,6 @@ export const addParticipant = async (db, data) => {
     const docRef = await addDoc(participantsCollection, participantData);
     return docRef.id;
   } catch (error) {
-    console.error("Error adding participant:", error);
     throw new Error(`Failed to add participant: ${error.message}`);
   }
 };
@@ -41,7 +40,6 @@ export const updateParticipant = async (db, docId, formData) => {
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error("Error updating participant:", error);
     throw new Error(`Failed to update participant: ${error.message}`);
   }
 };
@@ -51,7 +49,6 @@ export const deleteParticipant = async (db, docId, setErrors) => {
     const participantRef = doc(db, "participants", docId);
     await deleteDoc(participantRef);
   } catch (error) {
-    console.error("Error deleting participant:", error);
     setErrors((prev) => ({
       ...prev,
       submission: `Failed to delete participant: ${error.message}`,

@@ -26,7 +26,6 @@ const getPublicIdFromUrl = (url) => {
     const publicId = fileName.split(".")[0]; // Remove file extension
     return publicId;
   } catch (error) {
-    console.error("Error extracting public ID from URL:", error);
     return null;
   }
 };
@@ -55,7 +54,6 @@ const deleteImage = async (imageUrl) => {
     }
     return true;
   } catch (error) {
-    console.error("Error deleting image from Cloudinary:", error);
     return false;
   }
 };
@@ -79,16 +77,13 @@ const useProductManager = () => {
           }))
         : [];
       setProducts(productsData);
-      console.log(productsData);
     } catch (err) {
       // Handle critical Firestore errors (e.g., permissions or network issues)
       if (err.code === "permission-denied" || err.code === "unavailable") {
         setError("Failed to fetch products due to permissions or network issues");
-        console.error("Error fetching products:", err);
       } else {
         // Non-existent collection: return empty array, no error state
         setProducts([]);
-        console.warn("Products collection does not exist:", err);
       }
     } finally {
       setLoading(false);
@@ -123,7 +118,6 @@ const useProductManager = () => {
       return newProduct;
     } catch (error) {
       setError("Failed to add product");
-      console.error("Error adding product:", error);
       throw error;
     } finally {
       setLoading(false);
@@ -154,7 +148,6 @@ const useProductManager = () => {
           imagesToDelete.map(async (imageUrl) => {
             const deleted = await deleteImage(imageUrl);
             if (!deleted) {
-              console.warn(`Failed to delete image: ${imageUrl}`);
             }
           })
         );
@@ -189,7 +182,6 @@ const useProductManager = () => {
       return updatedProduct;
     } catch (error) {
       setError(`Failed to update product: ${error.message}`);
-      console.error("Error updating product:", error);
       throw error;
     } finally {
       setLoading(false);
@@ -224,7 +216,6 @@ const useProductManager = () => {
       return { success: true, id: productId };
     } catch (error) {
       setError("Failed to delete product or images");
-      console.error("Error deleting product:", error);
       throw error;
     } finally {
       setLoading(false);

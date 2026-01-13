@@ -13,7 +13,6 @@ const AddVotesModal = ({
   handleResetVotes = () => {},
   setShowAddVotesModal = () => {},
 }) => {
-  console.log('AddVotesModal rendered:', { showAddVotesModal });
 
   return (
     <div
@@ -33,7 +32,6 @@ const AddVotesModal = ({
               type="button"
               className="close-icon"
               onClick={() => {
-                console.log('Close AddVotesModal clicked');
                 setShowAddVotesModal(false);
               }}
               disabled={isSubmitting || loading}

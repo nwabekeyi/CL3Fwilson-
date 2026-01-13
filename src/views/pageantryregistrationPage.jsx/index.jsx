@@ -83,7 +83,6 @@ function PageantRegistrationPage() {
         bio: "",
       });
     } catch (error) {
-      console.error("Submission error:", error);
       setErrors((prev) => ({
         ...prev,
         submission: error.message || "Submission failed. Please try again later.",

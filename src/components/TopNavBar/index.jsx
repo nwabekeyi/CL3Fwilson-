@@ -22,21 +22,15 @@ const TopNavBar = ({ className }) => {
       ? onAuthStateChanged(auth, (firebaseUser) => {
           const authUser = Auth.getUserDetails();
           const authToken = Auth.getToken();
-          console.log("TopNavBar Auth State:", {
-            firebaseUser: firebaseUser ? firebaseUser.email : null,
-            authUser,
-            authToken,
-          });
           setUser(authUser);
           setToken(authToken);
         })
-      : () => console.warn("Firebase auth not initialized in TopNavBar");
+      : () =>{ return "Firebase auth not initialized in TopNavBar"};
 
     const handleStorageChange = (event) => {
       if (event.key === "auth" || !event.key) {
         const authUser = Auth.getUserDetails();
         const authToken = Auth.getToken();
-        console.log("TopNavBar Storage Change:", { authUser, authToken });
         setUser(authUser);
         setToken(authToken);
       }
@@ -53,7 +47,6 @@ const TopNavBar = ({ className }) => {
 
   // Handle currency selection and reload page
   const handleCurrencyChange = (currency) => {
-    console.log("Selected Currency:", currency);
     sessionStorage.setItem("preferredCurrency", currency);
     setSelectedCurrency(currency);
     setIsCurrencyOpen(false);
@@ -63,7 +56,6 @@ const TopNavBar = ({ className }) => {
   // Toggle currency dropdown
   const toggleCurrencyDropdown = (e) => {
     e.preventDefault();
-    console.log("Toggling dropdown, isCurrencyOpen:", !isCurrencyOpen);
     setIsCurrencyOpen((prev) => !prev);
   };
 
@@ -78,13 +70,11 @@ const TopNavBar = ({ className }) => {
   };
 
   const logout = async () => {
-    console.log("TopNavBar: Logging out...");
     try {
       await Auth.logout();
       setUser(null);
       setToken(null);
     } catch (error) {
-      console.error("TopNavBar: Logout error:", error);
     }
   };
 

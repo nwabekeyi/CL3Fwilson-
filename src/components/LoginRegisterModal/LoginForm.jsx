@@ -20,7 +20,6 @@ const LoginForm = ({ forgotPasswordClicked, registerClicked }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name}=${value}`);
     setFormState((prevState) => ({
       ...prevState,
       [name]: value,
@@ -29,7 +28,6 @@ const LoginForm = ({ forgotPasswordClicked, registerClicked }) => {
 
   const handleSubmit = async () => {
     const { email, password } = formState;
-    console.log("Submitting:", { email, password });
 
     if (!Validator(email, EMAIL_RULE)) {
       setError("Invalid email format");
@@ -55,7 +53,6 @@ const LoginForm = ({ forgotPasswordClicked, registerClicked }) => {
         user_name: user.displayName || email,
         email,
       });
-      console.log("Login success:", { email, user_id: user.uid });
 
       window.dispatchEvent(new Event("storage"));
       localStorage.setItem(
@@ -71,7 +68,6 @@ const LoginForm = ({ forgotPasswordClicked, registerClicked }) => {
       setLoading(false);
       navigate("/admin");
     } catch (error) {
-      console.error("Login error:", error);
       setError(error.message || "Failed to log in. Check your email or password.");
       setShowErrorModal(true);
       setLoading(false);

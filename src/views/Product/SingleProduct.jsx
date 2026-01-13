@@ -89,7 +89,7 @@ const SingleProduct = ({ product, postCart }) => {
         },
       })
         .catch((err) => {
-          console.error("Error updating cart:", err);
+          return "Error updating cart:", err;
         });
     }
   };

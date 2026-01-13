@@ -33,7 +33,6 @@ const AdminPage = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
-    console.log('Sidebar toggled, new state:', !sidebarOpen);
   };
 
   const handleNavigation = (component) => {
@@ -41,7 +40,6 @@ const AdminPage = () => {
     if (window.innerWidth <= 768) {
       setSidebarOpen(false);
     }
-    console.log('Navigated to component:', component);
   };
 
   // Fetch contests and aggregate participants
@@ -70,7 +68,6 @@ const AdminPage = () => {
 
 
   useEffect(() => {
-    console.log('AdminPage auth state:', { authLoading, user: user ? 'logged_in' : 'not_logged_in' });
   }, [authLoading, user]);
 
   if (authLoading || !user) {

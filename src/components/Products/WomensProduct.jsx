@@ -10,9 +10,8 @@ function WomensProducts({ wilster = false }) {
   const { products, loading, error } = useProductManager(); // Use the hook
 
   const addToBag = (id) => {
-    console.log(`Added product ${id} to cart`);
+    return `Added product ${id} to cart`;
   };
-  console.log(products)
 
   const handleProductClick = (product) => {
     dispatch(setSelectedProduct(product));
@@ -20,7 +19,6 @@ function WomensProducts({ wilster = false }) {
 
   // Filter products for Men's department
   const womensProducts = products.filter((product) => product.department === "wilster");
-  console.log(womensProducts)
   // Decide which products to display based on home prop
   const displayedProducts = wilster ? womensProducts.slice(0, 12) : womensProducts;
 

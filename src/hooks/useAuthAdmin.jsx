@@ -10,13 +10,10 @@ export const useAuthAdmin = (adminEmail = ["nwabekeyiprecious@gmail.com", "cl3fw
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      console.log("Auth State Changed:", currentUser ? currentUser.email : "No user logged in");
       if (currentUser && adminEmail.includes(currentUser.email)) {
-        console.log("Admin authenticated:", currentUser.email);
         setUser(currentUser);
         setLoading(false);
       } else {
-        console.log("Unauthorized or no user, redirecting to /admin/login");
         setUser(null);
         setLoading(false);
         // Only redirect if not already on /admin/login to prevent loops
@@ -25,7 +22,6 @@ export const useAuthAdmin = (adminEmail = ["nwabekeyiprecious@gmail.com", "cl3fw
         }
       }
     }, (error) => {
-      console.error("Auth state error:", error);
       setLoading(false);
       navigate("/admin/login", { state: { from: "/admin" } });
     });

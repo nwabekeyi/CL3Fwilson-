@@ -89,6 +89,5 @@ export default state => {
     }
     result += department;
   }
-  // console.log(result);
   return result;
 };
